@@ -196,9 +196,9 @@ namespace SURFMethond
             //This matrix indicates which row is valid for the matches.
             Matrix<byte> mask;
             //Number of nearest neighbors to search for
-            int k = 8;
-            //The distance different ratio which a match is consider unique, a good number will be 0.8
-            double uniquenessThreshold = 0.3;  //default 0.8
+            int k = 2;
+            //The distance different ratio which a match is consider unique, a good number will be 0.8 , NNDR match
+            double uniquenessThreshold = 0.5;  //default 0.8
 
             //The resulting n*k matrix of descriptor index from the training descriptors
             Matrix<int> trainIdx;
@@ -218,18 +218,21 @@ namespace SURFMethond
                 {
                     matcher.KnnMatch(observedScene.GetDescriptors(), trainIdx, distance, k, null);
                     mask = new Matrix<byte>(distance.Rows, 1);
-                    mask.SetValue(255);
+                    mask.SetValue(255); //Mask is 拉式信號匹配 
+                    //http://stackoverflow.com/questions/21932861/how-does-features2dtoolbox-voteforuniqueness-work
+                    //how the VoteForUniqueness work...
                     Features2DToolbox.VoteForUniqueness(distance, uniquenessThreshold, mask);
                     
                 }
 
                 Image<Bgr, byte> result = null;
 
-                int nonZeroCount = CvInvoke.cvCountNonZero(mask);
+                int nonZeroCount = CvInvoke.cvCountNonZero(mask); //means good match
                 Console.WriteLine("\nVoteForUniqueness nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForUniqueness nonZeroCount=======");
                 if (nonZeroCount >= 10)
                 {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 1.2, 50);  //default 1.5,10
+                    //50 is model and mathing image rotation similarity ex: m1 = 60 m2 = 50 => 60 - 50 <=50 so is similar
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 1.2, 30);  //default 1.5,10
                     Console.WriteLine("\nVoteForSizeAndOrientation nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForSizeAndOrientation nonZeroCount=======");
                     if (nonZeroCount >= 15) //default 4
                         homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 5);
@@ -238,7 +241,7 @@ namespace SURFMethond
 
                     //Draw the matched keypoints
                     result = Features2DToolbox.DrawMatches(template.GetImg(), template.GetKeyPoints(), observedScene.GetImg(), observedScene.GetKeyPoints(),
-                        trainIdx, new Bgr(255, 255, 255), new Bgr(255, 255, 255), mask, Features2DToolbox.KeypointDrawType.DEFAULT);
+                        trainIdx, new Bgr(255, 255, 255), new Bgr(255, 255, 255), mask, Features2DToolbox.KeypointDrawType.NOT_DRAW_SINGLE_POINTS);
                     if (matchPts != null)
                     {
                         result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);

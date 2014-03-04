@@ -16,6 +16,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.Features2D;
 
 using SURFMethond;
+using PedestrianDetection;
 namespace EnvironmentalAnalysisSystemForBlind
 {
     public partial class Form1 : Form
@@ -40,7 +41,9 @@ namespace EnvironmentalAnalysisSystemForBlind
         Image<Bgr, byte> senceImage;
         SURFFeatureData trainingExtractSurfData;
         SURFFeatureData matchingModelSurfData;
-        ImageViewer matchViewer;
+        ImageViewer matchViewer,pedestrianViewer;
+        int oneSecFrameIndex;
+        bool[ ] systempowerCheckBox;
         public Form1()
         {
             InitializeComponent();
@@ -53,8 +56,16 @@ namespace EnvironmentalAnalysisSystemForBlind
             isPressed = false;
             matchViewer = new ImageViewer();
             matchViewer.FormClosing += matchViewer_FormClosing;
+            pedestrianViewer = new ImageViewer();
+            pedestrianViewer.FormClosing += pedestrianViewer_FormClosing;
+            systempowerCheckBox = new bool[] { false , false};
         }
 
+        void pedestrianViewer_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true; //關閉視窗時取消
+            pedestrianViewer.Hide(); //隱藏式窗,下次再show出
+        }
         void matchViewer_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true; //關閉視窗時取消
@@ -91,7 +102,6 @@ namespace EnvironmentalAnalysisSystemForBlind
                     //擷取想要的區塊 做SURF
                     g = trainingVideoPictureBox.CreateGraphics();
                     
-
                 }
                 else if(isStop){
                     //關閉，回到一開始畫面
@@ -131,7 +141,7 @@ namespace EnvironmentalAnalysisSystemForBlind
             dlg.Title = "Open Video File";
 
             // Set filter for file extension and default file extension
-            dlg.Filter = "AVI Video|*.avi";
+            dlg.Filter = "AVI Video(*.avi)|*.avi|MP4(*.mp4)|*.mp4|All Files(*.*)|*.*";
 
             // Display OpenFileDialog by calling ShowDialog method ->ShowDialog()
             // Get the selected file name and display in a TextBox
@@ -330,14 +340,20 @@ namespace EnvironmentalAnalysisSystemForBlind
 
         private void stopMatchingVideoButton_Click(object sender, EventArgs e)
         {
-            isPlay = false;
+            isSuspend = isPlay = false;
             isStop = true;
         }
 
         private void playMatchingVideoButton_Click(object sender, EventArgs e)
         {
             isPlay = true;
-            isStop = false;
+            isSuspend = isStop = false;
+        }
+
+        private void matchingSuspendButton_Click(object sender, EventArgs e)
+        {
+            isSuspend = true;
+            isPlay = isStop = false;
         }
 
         private void loadMatchingVideoButton_Click(object sender, EventArgs e)
@@ -352,11 +368,8 @@ namespace EnvironmentalAnalysisSystemForBlind
                 senceImage = videoCapture.QueryFrame();
                 mathcingVideoPictureBox.Image = senceImage.Copy().ToBitmap();
 
-                //設定刻度
-                matchingVideoTrackBar.TickStyle = TickStyle.Both;
-                matchingVideoTrackBar.Minimum = 0;
-                matchingVideoTrackBar.TickFrequency = 1;
-                matchingVideoTrackBar.Maximum = trainingVideoTotalFrame;
+                //設定每三十秒拿一張Frame,
+                oneSecFrameIndex = 15;
 
                 matchingVideoTimer.Tick += matchingVideoTimer_Tick;
                 matchingVideoTimer.Interval = 1000 / FPS;
@@ -364,8 +377,10 @@ namespace EnvironmentalAnalysisSystemForBlind
             }
         }
 
+
         void matchingVideoTimer_Tick(object sender, EventArgs e)
         {
+
             //如果有影片
             if (videoCapture != null)
             {
@@ -373,27 +388,36 @@ namespace EnvironmentalAnalysisSystemForBlind
                 {
                     lock (this)
                     {
-                        if (isScroll)
-                        {
-                            //設定要移動到的frame
-                            //http://stackoverflow.com/questions/20902323/get-specific-frames-using-emgucv
-                            videoCapture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES, matchSrollValue);
-                            isScroll = false;
-                        }
+                      
                         //如果Frame的index沒有差過影片的最大index
-                        if (videoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES) < matchingVideoTotalFrame)
+                        if (oneSecFrameIndex < matchingVideoTotalFrame &&  videoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES) < matchingVideoTotalFrame)
                         {
+                            videoCapture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES, oneSecFrameIndex);
+                            oneSecFrameIndex += 15;
                             //顯示
                             senceImage = videoCapture.QueryFrame();
-                            //Match                        
-                            MatchImage(senceImage, ReadSURFFeature(dir.Parent.Parent.FullName + "\\SurfFeatureData\\000-0.xml"));
-
+                            if (systempowerCheckBox[0])
+                            {
+                                //Match                        
+                                MatchImage(senceImage, ReadSURFFeature(dir.Parent.Parent.FullName + "\\SurfFeatureData\\000-0.xml"));
+                            }
+                            if (systempowerCheckBox[1]) { 
+                                //行人偵測
+                                long processingTime;
+                                Image<Bgr, Byte> result = FindPedestrian.Find(senceImage, out processingTime);
+                                if (result != null)
+                                {
+                                    pedestrianViewer.Image = result;
+                                    pedestrianViewer.Show();
+                                }
+                            }
                             mathcingVideoPictureBox.Image = senceImage.ToBitmap();
                         }
                     }
-                   
-
-                   
+                }
+                else if (isSuspend)
+                {
+                    //Nothing to do..
                 }
                 else if (isStop)
                 {
@@ -455,10 +479,18 @@ namespace EnvironmentalAnalysisSystemForBlind
             }
         }
 
-        private void matchingVideoTrackBar_ValueChanged(object sender, EventArgs e)
+        private void runAnalysisButton_Click(object sender, EventArgs e)
         {
-            matchSrollValue = matchingVideoTrackBar.Value;
-            isScroll = true;
+            if (surfOpenCheckBox.Checked) {
+                systempowerCheckBox[0] = true;
+            }
+            if (pedestrianCheckBox.Checked) {
+                systempowerCheckBox[1] = true;
+            }
         }
+
+      
+
+       
     }
 }
