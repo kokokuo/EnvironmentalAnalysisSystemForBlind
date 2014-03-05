@@ -34,6 +34,9 @@ namespace SURFMethond
                 descriptors = surfCPU.ComputeDescriptorsRaw(grayImg, null, keyPoints);
 
             }
+            
+            //抽取出的特徵點數量
+            Console.WriteLine("keypoint size" + keyPoints.Size); 
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
         public static SURFFeatureData CalSURFFeature(Image<Bgr, Byte> srcImage)
@@ -196,7 +199,7 @@ namespace SURFMethond
             //This matrix indicates which row is valid for the matches.
             Matrix<byte> mask;
             //Number of nearest neighbors to search for
-            int k = 2;
+            int k = 5;
             //The distance different ratio which a match is consider unique, a good number will be 0.8 , NNDR match
             double uniquenessThreshold = 0.5;  //default 0.8
 
@@ -229,12 +232,12 @@ namespace SURFMethond
 
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask); //means good match
                 Console.WriteLine("\nVoteForUniqueness nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForUniqueness nonZeroCount=======");
-                if (nonZeroCount >= 10)
+                if (nonZeroCount >= (template.GetKeyPoints().Size * 0.2)) //set 10
                 {
                     //50 is model and mathing image rotation similarity ex: m1 = 60 m2 = 50 => 60 - 50 <=50 so is similar
                     nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 1.2, 30);  //default 1.5,10
                     Console.WriteLine("\nVoteForSizeAndOrientation nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForSizeAndOrientation nonZeroCount=======");
-                    if (nonZeroCount >= 15) //default 4
+                    if (nonZeroCount >= (template.GetKeyPoints().Size * 0.5)) //default 4 ,set 15
                         homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 5);
                    
                     PointF[] matchPts = GetMatchBoundingBox(homography, template);

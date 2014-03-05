@@ -93,6 +93,7 @@ namespace EnvironmentalAnalysisSystemForBlind
                         {
                             //顯示
                             queryFrame = videoCapture.QueryFrame();
+                            queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
                             trainingVideoPictureBox.Image = queryFrame.ToBitmap();
                         }
                     }
@@ -119,6 +120,7 @@ namespace EnvironmentalAnalysisSystemForBlind
                 
                 //第一張做影片的封面
                 queryFrame = videoCapture.QueryFrame();
+                queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
                 trainingVideoPictureBox.Image = queryFrame.Copy().ToBitmap();
                 //設定刻度
                 trainingVideoTrackBar.TickStyle = TickStyle.Both;
@@ -241,7 +243,7 @@ namespace EnvironmentalAnalysisSystemForBlind
             //繪製特徵
             Image<Bgr, byte> result = Features2DToolbox.DrawKeypoints(trainingExtractSurfData.GetImg(), trainingExtractSurfData.GetKeyPoints(), new Bgr(255, 255, 255), Features2DToolbox.KeypointDrawType.DEFAULT);
             //顯示
-            ImageViewer viewer = new ImageViewer(result);
+            ImageViewer viewer = new ImageViewer(result, "Extracted Feature");
             viewer.Show();
         }
 
@@ -366,6 +368,7 @@ namespace EnvironmentalAnalysisSystemForBlind
 
                 //第一張做影片的封面
                 senceImage = videoCapture.QueryFrame();
+                senceImage = senceImage.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
                 mathcingVideoPictureBox.Image = senceImage.Copy().ToBitmap();
 
                 //設定每三十秒拿一張Frame,
@@ -396,6 +399,7 @@ namespace EnvironmentalAnalysisSystemForBlind
                             oneSecFrameIndex += 15;
                             //顯示
                             senceImage = videoCapture.QueryFrame();
+                            senceImage = senceImage.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
                             if (systempowerCheckBox[0])
                             {
                                 //Match                        
@@ -404,7 +408,13 @@ namespace EnvironmentalAnalysisSystemForBlind
                             if (systempowerCheckBox[1]) { 
                                 //行人偵測
                                 long processingTime;
+                                //Rectangle roi = new Rectangle(  (senceImage.Width / 3) ,0, (senceImage.Width / 3),senceImage.Height);
+                                ////切割區塊，只抓路中央
+                                //Image<Bgr,byte> roadROI = senceImage.Copy();
+                                //roadROI.ROI = roi;
+                                //Image<Bgr, Byte> result = FindPedestrian.Find(roadROI, out processingTime);
                                 Image<Bgr, Byte> result = FindPedestrian.Find(senceImage, out processingTime);
+                                Console.WriteLine("Pedesrian process time = " + processingTime);
                                 if (result != null)
                                 {
                                     pedestrianViewer.Image = result;
