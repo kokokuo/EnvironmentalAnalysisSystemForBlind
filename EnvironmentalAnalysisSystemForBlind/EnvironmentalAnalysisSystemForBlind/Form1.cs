@@ -32,7 +32,7 @@ namespace EnvironmentalAnalysisSystemForBlind
         bool isPlay, isSuspend, isStop,isScroll;
         Image<Bgr, byte> queryFrame;
         
-        int trainingScrollValue,matchSrollValue;
+        int trainingScrollValue;
         Graphics g; //draw rectangle
         Point pressedToDrawPoint;
         bool isPressed;
@@ -43,7 +43,9 @@ namespace EnvironmentalAnalysisSystemForBlind
         SURFFeatureData matchingModelSurfData;
         ImageViewer matchViewer,pedestrianViewer;
         int oneSecFrameIndex;
-        bool[ ] systempowerCheckBox;
+
+        System.Threading.Thread pedesrianWorker;
+
         public Form1()
         {
             InitializeComponent();
@@ -58,7 +60,8 @@ namespace EnvironmentalAnalysisSystemForBlind
             matchViewer.FormClosing += matchViewer_FormClosing;
             pedestrianViewer = new ImageViewer();
             pedestrianViewer.FormClosing += pedestrianViewer_FormClosing;
-            systempowerCheckBox = new bool[] { false , false};
+
+            //pedesrianWorker = new System.Threading.Thread(System.Threading.ThreadStart());
         }
 
         void pedestrianViewer_FormClosing(object sender, FormClosingEventArgs e)
@@ -72,6 +75,7 @@ namespace EnvironmentalAnalysisSystemForBlind
             matchViewer.Hide(); //隱藏式窗,下次再show出
         }
 
+#region Train Video
         void trainingVideoTimer_Tick(object sender, EventArgs e)
         {
             //如果有影片
@@ -97,14 +101,16 @@ namespace EnvironmentalAnalysisSystemForBlind
                             trainingVideoPictureBox.Image = queryFrame.ToBitmap();
                         }
                     }
-                   
+
                 }
-                else if (isSuspend) {
+                else if (isSuspend)
+                {
                     //擷取想要的區塊 做SURF
                     g = trainingVideoPictureBox.CreateGraphics();
-                    
+
                 }
-                else if(isStop){
+                else if (isStop)
+                {
                     //關閉，回到一開始畫面
                     videoCapture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_AVI_RATIO, 0);
                 }
@@ -114,10 +120,11 @@ namespace EnvironmentalAnalysisSystemForBlind
         private void trainingLoadVideoButton_Click(object sender, EventArgs e)
         {
             string videoFilename = OpenVideo();
-            if (videoFilename != string.Empty) {
+            if (videoFilename != string.Empty)
+            {
                 videoCapture = new Capture(videoFilename);
                 trainingVideoTotalFrame = (int)videoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_COUNT); //Get total frame number
-                
+
                 //第一張做影片的封面
                 queryFrame = videoCapture.QueryFrame();
                 queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
@@ -127,35 +134,11 @@ namespace EnvironmentalAnalysisSystemForBlind
                 trainingVideoTrackBar.Minimum = 0;
                 trainingVideoTrackBar.TickFrequency = 1;
                 trainingVideoTrackBar.Maximum = trainingVideoTotalFrame;
-                
+
                 //設定播放用的Timer
                 trainingVideoTimer.Tick += trainingVideoTimer_Tick;
                 trainingVideoTimer.Interval = 1000 / FPS;
                 trainingVideoTimer.Start();
-            }
-        }
-
-        private string OpenVideo() {
-            OpenFileDialog dlg = new OpenFileDialog();
-            //移動上層在指定下層路徑
-            dlg.RestoreDirectory = true;
-            dlg.InitialDirectory = dir.Parent.Parent.FullName + @"\TrainingVideo";
-            dlg.Title = "Open Video File";
-
-            // Set filter for file extension and default file extension
-            dlg.Filter = "AVI Video(*.avi)|*.avi|MP4(*.mp4)|*.mp4|All Files(*.*)|*.*";
-
-            // Display OpenFileDialog by calling ShowDialog method ->ShowDialog()
-            // Get the selected file name and display in a TextBox
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && dlg.FileName != null)
-            {
-                // Open document
-                string filename = dlg.FileName;
-                return filename;
-            }
-            else
-            {
-                return null;
             }
         }
 
@@ -221,7 +204,7 @@ namespace EnvironmentalAnalysisSystemForBlind
                     {
                         Console.WriteLine("Error:" + ex.Message);
                     }
-                    
+
                 }
             }
         }
@@ -340,6 +323,34 @@ namespace EnvironmentalAnalysisSystemForBlind
             return false;
         }
 
+#endregion
+        
+
+        private string OpenVideo() {
+            OpenFileDialog dlg = new OpenFileDialog();
+            //移動上層在指定下層路徑
+            dlg.RestoreDirectory = true;
+            dlg.InitialDirectory = dir.Parent.Parent.FullName + @"\TrainingVideo";
+            dlg.Title = "Open Video File";
+
+            // Set filter for file extension and default file extension
+            dlg.Filter = "AVI Video(*.avi)|*.avi|MP4(*.mp4)|*.mp4|All Files(*.*)|*.*";
+
+            // Display OpenFileDialog by calling ShowDialog method ->ShowDialog()
+            // Get the selected file name and display in a TextBox
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && dlg.FileName != null)
+            {
+                // Open document
+                string filename = dlg.FileName;
+                return filename;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+       
         private void stopMatchingVideoButton_Click(object sender, EventArgs e)
         {
             isSuspend = isPlay = false;
@@ -383,7 +394,6 @@ namespace EnvironmentalAnalysisSystemForBlind
 
         void matchingVideoTimer_Tick(object sender, EventArgs e)
         {
-
             //如果有影片
             if (videoCapture != null)
             {
@@ -400,12 +410,13 @@ namespace EnvironmentalAnalysisSystemForBlind
                             //顯示
                             senceImage = videoCapture.QueryFrame();
                             senceImage = senceImage.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
-                            if (systempowerCheckBox[0])
+                            if (surfOpenCheckBox.Checked)
                             {
                                 //Match                        
                                 MatchImage(senceImage, ReadSURFFeature(dir.Parent.Parent.FullName + "\\SurfFeatureData\\000-0.xml"));
                             }
-                            if (systempowerCheckBox[1]) { 
+                            if (pedestrianCheckBox.Checked)
+                            { 
                                 //行人偵測
                                 long processingTime;
                                 //Rectangle roi = new Rectangle(  (senceImage.Width / 3) ,0, (senceImage.Width / 3),senceImage.Height);
@@ -414,7 +425,7 @@ namespace EnvironmentalAnalysisSystemForBlind
                                 //roadROI.ROI = roi;
                                 //Image<Bgr, Byte> result = FindPedestrian.Find(roadROI, out processingTime);
                                 Image<Bgr, Byte> result = FindPedestrian.Find(senceImage, out processingTime);
-                                Console.WriteLine("Pedesrian process time = " + processingTime);
+                                Console.WriteLine("Pedesrian process time = " + processingTime + "ms\n");
                                 if (result != null)
                                 {
                                     pedestrianViewer.Image = result;
@@ -440,8 +451,11 @@ namespace EnvironmentalAnalysisSystemForBlind
         private void MatchImage(Image<Bgr, byte> senceImg, SURFFeatureData modelSurfData) {
             if (modelSurfData != null)
             {
+                long matchTime;
+                int pairCount;
                 SURFFeatureData senceSurfData =  SURFMatch.CalSURFFeature(senceImage);
-                Image<Bgr,byte> result = SURFMatch.MatchSURFFeatureByBF(modelSurfData, senceSurfData);
+                Image<Bgr, byte> result = SURFMatch.MatchSURFFeatureByBF(modelSurfData, senceSurfData, out matchTime, out pairCount);
+                Console.WriteLine("match time = " + matchTime.ToString() + "ms ,PairCount = " + pairCount.ToString());
                 if (result != null)
                 {
                     matchViewer.Image = result;
@@ -451,12 +465,12 @@ namespace EnvironmentalAnalysisSystemForBlind
         
         }
 
+#region Read SURF FILE DATA
         public SURFFeatureData ReadSURFFeature(string fileName)
         {
             matchingModelSurfData = ReadSURFFeatureDataFromBinaryXml(fileName);
             Console.WriteLine("Read Descriptor Data........\n");
             // ConsoleOutputMethod.ShowDescriptorDataOnConsole(descriptor);
-            Console.WriteLine("\n");
             return matchingModelSurfData;
         }
 
@@ -488,19 +502,8 @@ namespace EnvironmentalAnalysisSystemForBlind
                 throw new InvalidOperationException(ex.Message);
             }
         }
-
-        private void runAnalysisButton_Click(object sender, EventArgs e)
-        {
-            if (surfOpenCheckBox.Checked) {
-                systempowerCheckBox[0] = true;
-            }
-            if (pedestrianCheckBox.Checked) {
-                systempowerCheckBox[1] = true;
-            }
-        }
-
-      
-
+#endregion
        
+
     }
 }

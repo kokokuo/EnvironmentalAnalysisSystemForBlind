@@ -27,14 +27,17 @@ namespace SURFMethond
             SURFDetector surfCPU = new SURFDetector(surfParam);
             VectorOfKeyPoint keyPoints;
             Matrix<float> descriptors = null;
-           
+            Stopwatch watch;
+            watch = Stopwatch.StartNew();
             using (Image<Gray, Byte> grayImg = srcImage.Convert<Gray, Byte>())
             {
                 keyPoints = surfCPU.DetectKeyPointsRaw(grayImg, null);
                 descriptors = surfCPU.ComputeDescriptorsRaw(grayImg, null, keyPoints);
 
             }
-            
+            watch.Stop();
+            Console.WriteLine("\nExtract SURF time=> " + watch.ElapsedMilliseconds.ToString() + "ms");
+
             //抽取出的特徵點數量
             Console.WriteLine("keypoint size" + keyPoints.Size); 
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
@@ -44,157 +47,22 @@ namespace SURFMethond
             SURFDetector surfCPU = new SURFDetector(new MCvSURFParams(1200, false)); //越高,特徵點越少
             VectorOfKeyPoint keyPoints;
             Matrix<float> descriptors = null;
+            Stopwatch watch;
+            watch = Stopwatch.StartNew();
             using (Image<Gray, Byte> grayImg = srcImage.Convert<Gray, Byte>())
             {
                 keyPoints = surfCPU.DetectKeyPointsRaw(grayImg, null);
                 descriptors = surfCPU.ComputeDescriptorsRaw(grayImg, null, keyPoints);
             }
+            watch.Stop();
+            Console.WriteLine("\nExtract SURF time=> " + watch.ElapsedMilliseconds.ToString() + "ms");
+
+            //抽取出的特徵點數量
+            Console.WriteLine("keypoint size" + keyPoints.Size); 
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
-        #region Features2DTracker use but have some problem
-        
-        public static int MatchSURFFeatureByFLANN2(SURFFeatureData template, SURFFeatureData observedScene, bool isDraw)
-        {
-            List<KeyValuePair<int, int>> ptPairs = new List<KeyValuePair<int, int>>();
-            ImageFeature<float>[] modelFeature =  ImageFeature<float>.ConvertFromRaw(template.GetKeyPoints(), template.GetDescriptors());
-            ImageFeature<float>[] observedFeature = ImageFeature<float>.ConvertFromRaw(observedScene.GetKeyPoints(), observedScene.GetDescriptors());
-            int goodMatchCount = 0;
-            Stopwatch watch;
-            watch = Stopwatch.StartNew();
-            goodMatchCount = FlannFindPairs(modelFeature, observedFeature,ref ptPairs);
-            watch.Stop();
-            Console.WriteLine("\nCal SURF Match time=======\n=> " + watch.ElapsedMilliseconds.ToString() + "ms\nCal SURF Match time=======");
-            return goodMatchCount;
-        }
-        
-        #endregion
 
-        static int FlannFindPairs(ImageFeature<float>[] modelDescriptors, ImageFeature<float>[] imageDescriptors, ref List<KeyValuePair<int, int>> ptPairs)
-        {
-            //Check if we have some valid model descriptors
-            if (modelDescriptors.Length == 0)
-                return -1;
-
-            int length = modelDescriptors[0].Descriptor.Length;
-
-            //Create matrix object and matrix image
-            var matrixModel = new Matrix<float>(modelDescriptors.Length, length);
-            var matrixImage = new Matrix<float>(imageDescriptors.Length, length);
-            
-            //copy model descriptors into matrixModel
-            int row = 0;
-            foreach (var modelDescriptor in modelDescriptors)
-            {
-                for (int i = 0; i < modelDescriptor.Descriptor.Length; i++)
-                {
-                    matrixModel[row, i] = modelDescriptor.Descriptor[i];
-                }
-
-                row++;
-            }
-
-            //copy image descriptors into matrixImage
-            row = 0;
-            foreach (var imageDescriptor in imageDescriptors)
-            {
-                for (int i = 0; i < imageDescriptor.Descriptor.Length; i++)
-                {
-                    matrixImage[row, i] = imageDescriptor.Descriptor[i];
-                }
-
-                row++;
-            }
-
-            //create return matrices for KnnSearch
-            var indices = new Matrix<int>(modelDescriptors.Length, 2);
-            var dists = new Matrix<float>(modelDescriptors.Length, 2);
-
-            //create our flannIndex
-            var flannIndex = new Index(matrixImage);
-            
-            //do the search
-            flannIndex.KnnSearch(matrixModel, indices, dists, 2, 2);
-
-            //filter out all unnecessary pairs based on distance between pairs
-            int pairCount = 0;
-            for (int i = 0; i < indices.Rows; i++)
-            {
-                if (dists.Data[i, 0] < 0.6 * dists.Data[i, 1])
-                {
-                    ptPairs.Add(new KeyValuePair<int, int>(i, indices.Data[i, 0]));
-                    pairCount++;
-                }
-            }
-            //return the pair count
-            return pairCount;
-        }
-        
-        public static int MatchSURFFeatureByFLANN(SURFFeatureData template, SURFFeatureData observedScene, bool isDraw)
-        {
-            Matrix<byte> mask;
-            int k = 2;
-            double uniquenessThreshold = 0.5; //default :0.8
-            Matrix<int> indices;
-            HomographyMatrix homography = null;
-            Stopwatch watch;
-            Matrix<float> dists;
-            int pairCount = 0;
-            Matrix<int> compareDists ;
-            
-            try
-            {
-                watch = Stopwatch.StartNew();
-                #region Surf for CPU
-                //match 
-                Index flann = new Index(template.GetDescriptors(),4);
-                
-                indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
-                using (dists = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
-                {
-                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 2);
-                    mask = new Matrix<byte>(dists.Rows, 1);
-                    mask.SetValue(255); //Mask is 拉式信號匹配
-                    Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
-                    Console.WriteLine("\n==============\nVoteForUniqueness Mask:");
-                    //SystemToolKits.ShowMaskDataOnConsole(mask);
-                    Console.WriteLine("==============\n");
-                }
-                int nonZeroCount = CvInvoke.cvCountNonZero(mask);
-                Console.WriteLine("\nVoteForUniqueness nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForUniqueness nonZeroCount=======");
-                if (nonZeroCount >= 10) //原先是4
-                {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
-                    Console.WriteLine("\nVoteForSizeAndOrientation nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForSizeAndOrientation nonZeroCount=======");
-                    if (nonZeroCount >=25) //原先是4
-                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5);
-                        
-                }
-                #endregion
-                watch.Stop();
-                Console.WriteLine("\nCal SURF Match time=======\n=> " + watch.ElapsedMilliseconds.ToString() + "ms\nCal SURF Match time=======");
-                PointF[] matchPts = GetMatchBoundingBox(homography, template);
-                if (isDraw)
-                {
-                    //Draw the matched keypoints
-                    Image<Bgr, byte>  result = Features2DToolbox.DrawMatches(template.GetImg(), template.GetKeyPoints(), observedScene.GetImg(), observedScene.GetKeyPoints(),
-                       indices, new Bgr(255, 255, 255), new Bgr(255, 255, 255), mask, Features2DToolbox.KeypointDrawType.DEFAULT);
-                    if (matchPts != null)
-                    {
-                        result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);
-                    }
-                    new ImageViewer(result, "顯示匹配圖像").Show();
-                }
-
-                return nonZeroCount;
-            }
-            catch (CvException ex)
-            {
-                System.Windows.Forms.MessageBox.Show(ex.ErrorMessage);
-                return 0;
-            }
-        }
-
-        public static Image<Bgr, byte> MatchSURFFeatureByBF(SURFFeatureData template, SURFFeatureData observedScene)
+        public static Image<Bgr, byte> MatchSURFFeatureByBF(SURFFeatureData template, SURFFeatureData observedScene,out long processingTime,out int pairCount)
         {
             //This matrix indicates which row is valid for the matches.
             Matrix<byte> mask;
@@ -207,6 +75,7 @@ namespace SURFMethond
             Matrix<int> trainIdx;
             HomographyMatrix homography = null;
             Stopwatch watch;
+           
             try
             {
                 watch = Stopwatch.StartNew();
@@ -231,12 +100,12 @@ namespace SURFMethond
                 Image<Bgr, byte> result = null;
 
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask); //means good match
-                Console.WriteLine("\nVoteForUniqueness nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForUniqueness nonZeroCount=======");
+                Console.WriteLine("VoteForUniqueness nonZeroCount=> " + nonZeroCount.ToString());
                 if (nonZeroCount >= (template.GetKeyPoints().Size * 0.2)) //set 10
                 {
                     //50 is model and mathing image rotation similarity ex: m1 = 60 m2 = 50 => 60 - 50 <=50 so is similar
                     nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 1.2, 30);  //default 1.5,10
-                    Console.WriteLine("\nVoteForSizeAndOrientation nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForSizeAndOrientation nonZeroCount=======");
+                    Console.WriteLine("VoteForSizeAndOrientation nonZeroCount=> " + nonZeroCount.ToString());
                     if (nonZeroCount >= (template.GetKeyPoints().Size * 0.5)) //default 4 ,set 15
                         homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 5);
                    
@@ -252,17 +121,20 @@ namespace SURFMethond
                 }
                 #endregion
                 watch.Stop();
-                Console.WriteLine("\nCal SURF Match time=======\n=> " + watch.ElapsedMilliseconds.ToString() + "\nCal SURF Match time=======");
-                
+                //Console.WriteLine("\nCal SURF Match time=======\n=> " + watch.ElapsedTicks.ToString() + "ms\nCal SURF Match time=======");
+                processingTime = watch.ElapsedMilliseconds;
+                pairCount = nonZeroCount;
+
                 return result;
             }
             catch (CvException ex)
             {
                 System.Windows.Forms.MessageBox.Show(ex.ErrorMessage);
+               processingTime = -1L;
+               pairCount = -1;
                 return null;
             }
         }
-
 
 
         public static int MatchSURFFeatureByBF(SURFFeatureData template, SURFFeatureData observedScene,bool isDraw)
