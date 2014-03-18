@@ -136,66 +136,6 @@ namespace SURFMethond
             }
         }
 
-
-        public static int MatchSURFFeatureByBF(SURFFeatureData template, SURFFeatureData observedScene,bool isDraw)
-        {
-            Matrix<byte> mask;
-            int k = 2;
-            double uniquenessThreshold = 0.5;  //default 0.8
-            Matrix<int> indices;
-            HomographyMatrix homography = null;
-            Stopwatch watch;
-            try
-            {
-                watch = Stopwatch.StartNew();
-                #region Surf for CPU
-                //match 
-                BruteForceMatcher<float> matcher = new BruteForceMatcher<float>(DistanceType.L2Sqr);
-                matcher.Add(template.GetDescriptors());
-                
-                indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
-                using (Matrix<float> dist = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
-                {
-                    matcher.KnnMatch(observedScene.GetDescriptors(), indices, dist, k, null);
-                    mask = new Matrix<byte>(dist.Rows, 1);
-                    mask.SetValue(255);
-                    Features2DToolbox.VoteForUniqueness(dist, uniquenessThreshold, mask);
-                }
-
-                int nonZeroCount = CvInvoke.cvCountNonZero(mask);
-                Console.WriteLine("\nVoteForUniqueness nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForUniqueness nonZeroCount=======");
-                if (nonZeroCount >= 4)
-                {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);  //default 1.5,10
-                    Console.WriteLine("\nVoteForSizeAndOrientation nonZeroCount=======\n=> " + nonZeroCount.ToString() + "\nVoteForSizeAndOrientation nonZeroCount=======");
-                    if (nonZeroCount >= 15) //default 4
-                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5);
-                }
-                #endregion
-                watch.Stop();
-                Console.WriteLine("\nCal SURF Match time=======\n=> " + watch.ElapsedMilliseconds.ToString() + "\nCal SURF Match time=======");
-                PointF[] matchPts = GetMatchBoundingBox(homography, template);
-                if (isDraw)
-                {
-                    //Draw the matched keypoints
-                    Image<Bgr, byte>  result = Features2DToolbox.DrawMatches(template.GetImg(), template.GetKeyPoints(), observedScene.GetImg(), observedScene.GetKeyPoints(),
-                       indices, new Bgr(255, 255, 255), new Bgr(255, 255, 255), mask, Features2DToolbox.KeypointDrawType.DEFAULT);
-                    if (matchPts != null)
-                    {
-                        result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);
-                    }
-                    new ImageViewer(result, "顯示匹配圖像");
-                }
-                    
-                return nonZeroCount;
-            }
-            catch (CvException ex)
-            {
-               System.Windows.Forms.MessageBox.Show(ex.ErrorMessage);
-               return 0;
-            }
-        }
-
         public static PointF[] GetMatchBoundingBox(HomographyMatrix homography,SURFFeatureData template) 
         {
             if (homography != null) //Get RoI box

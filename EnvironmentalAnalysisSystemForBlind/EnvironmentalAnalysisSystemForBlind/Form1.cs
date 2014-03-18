@@ -21,6 +21,8 @@ namespace EnvironmentalAnalysisSystemForBlind
 {
     public partial class Form1 : Form
     {
+        private delegate void DelegateViewer(Image<Bgr,byte> result);
+
         //取得專案執行黨所在的目錄=>System.Windows.Forms.Application.StartupPath
         //使用DirectoryInfo移動至上層
         DirectoryInfo dir;
@@ -412,8 +414,10 @@ namespace EnvironmentalAnalysisSystemForBlind
                             senceImage = senceImage.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
                             if (surfOpenCheckBox.Checked)
                             {
+                                pedesrianWorker = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(MatchImage));
+                                pedesrianWorker.Start(senceImage);
                                 //Match                        
-                                MatchImage(senceImage, ReadSURFFeature(dir.Parent.Parent.FullName + "\\SurfFeatureData\\000-0.xml"));
+                                //MatchImage(senceImage, ReadSURFFeature(dir.Parent.Parent.FullName + "\\SurfFeatureData\\000-0.xml"));
                             }
                             if (pedestrianCheckBox.Checked)
                             { 
@@ -448,7 +452,9 @@ namespace EnvironmentalAnalysisSystemForBlind
             }
         }
 
-        private void MatchImage(Image<Bgr, byte> senceImg, SURFFeatureData modelSurfData) {
+        private void MatchImage(object obj) {
+            Image<Bgr, byte> senceImg = (Image<Bgr, byte>)obj;
+            SURFFeatureData modelSurfData = ReadSURFFeature(dir.Parent.Parent.FullName + "\\SurfFeatureData\\000-0.xml");
             if (modelSurfData != null)
             {
                 long matchTime;
@@ -458,12 +464,20 @@ namespace EnvironmentalAnalysisSystemForBlind
                 Console.WriteLine("match time = " + matchTime.ToString() + "ms ,PairCount = " + pairCount.ToString());
                 if (result != null)
                 {
-                    matchViewer.Image = result;
-                    matchViewer.Show();
+                    DelegateViewer del_MatchViewer = new DelegateViewer(UpdateSURFMatchViewer);
+                    this.Invoke(del_MatchViewer, result);
+                   // matchViewer.Image = result;
+                    //matchViewer.Show();
+                    //跨執行緒UI存取，使用委派處理...
                 }
             }
-        
         }
+
+        private void UpdateSURFMatchViewer(Image<Bgr, byte> result) {
+            matchViewer.Image = result;
+            matchViewer.Show();
+        }
+
 
 #region Read SURF FILE DATA
         public SURFFeatureData ReadSURFFeature(string fileName)
