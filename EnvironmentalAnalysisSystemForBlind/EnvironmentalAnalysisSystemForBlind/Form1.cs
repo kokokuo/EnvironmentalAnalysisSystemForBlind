@@ -14,6 +14,7 @@ using Emgu.Util;
 using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.Features2D;
+using Emgu.CV.CvEnum;
 
 using SURFMethond;
 using PedestrianDetection;
@@ -47,7 +48,7 @@ namespace EnvironmentalAnalysisSystemForBlind
         int oneSecFrameIndex;
 
         System.Threading.Thread pedesrianWorker;
-
+        private HaarCascade haar;
         public Form1()
         {
             InitializeComponent();
@@ -62,7 +63,8 @@ namespace EnvironmentalAnalysisSystemForBlind
             matchViewer.FormClosing += matchViewer_FormClosing;
             pedestrianViewer = new ImageViewer();
             pedestrianViewer.FormClosing += pedestrianViewer_FormClosing;
-
+            haar = new HaarCascade(
+                "haarcascade_frontalface_default.xml");
             //pedesrianWorker = new System.Threading.Thread(System.Threading.ThreadStart());
         }
 
@@ -428,6 +430,21 @@ namespace EnvironmentalAnalysisSystemForBlind
                                 //Image<Bgr,byte> roadROI = senceImage.Copy();
                                 //roadROI.ROI = roi;
                                 //Image<Bgr, Byte> result = FindPedestrian.Find(roadROI, out processingTime);
+                                
+                                ////抓人臉
+                                //Image<Gray, byte> graySence = senceImage.Convert<Gray, byte>();
+                                //var faces = graySence.DetectHaarCascade(
+                                //               haar, 1.4, 4,
+                                //               HAAR_DETECTION_TYPE.DO_CANNY_PRUNING,
+                                //               new Size(senceImage.Width / 8, senceImage.Height / 8)
+                                //               )[0];
+
+                                //Image<Bgr, Byte> result = senceImage.Copy();
+                                //foreach (var face in faces)
+                                //{
+                                //    result.Draw(face.rect, new Bgr(0, double.MaxValue, 0), 3);
+                                //}
+
                                 Image<Bgr, Byte> result = FindPedestrian.Find(senceImage, out processingTime);
                                 Console.WriteLine("Pedesrian process time = " + processingTime + "ms\n");
                                 if (result != null)
@@ -466,9 +483,7 @@ namespace EnvironmentalAnalysisSystemForBlind
                 {
                     DelegateViewer del_MatchViewer = new DelegateViewer(UpdateSURFMatchViewer);
                     this.Invoke(del_MatchViewer, result);
-                   // matchViewer.Image = result;
-                    //matchViewer.Show();
-                    //跨執行緒UI存取，使用委派處理...
+                    //跨執行緒UI存取，使用委派處理
                 }
             }
         }
