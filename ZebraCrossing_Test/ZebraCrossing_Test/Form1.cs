@@ -158,7 +158,8 @@ namespace ZebraCrossing_Test
                     foreach (var line in lines[0])
                     {
                         //如何限制角度http://yy-programer.blogspot.tw/2013/02/emgucv-image-process-extracting-lines_28.html
-                        //vector是向量，代表的是這個線的方向。線的點是在LineSegment2D這個結構裡的：P1與P2才是。﻿
+                        //vector是向量，代表的是這個線的方向。HoughLine是採用亟座標的方式
+                        //線的點是在LineSegment2D這個結構裡的：P1與P2才是。﻿
                         PointF vector = line.Direction;
                         double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
                         if ((angle > 160 && angle < 190) || (angle > -190 && angle < -160))
