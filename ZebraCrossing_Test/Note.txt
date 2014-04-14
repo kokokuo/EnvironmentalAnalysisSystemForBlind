@@ -1,0 +1,6 @@
+要推算出一條與偵測的直線垂直的線段方程式
+使用斜率不適合
+
+
+是某偵測出直線後，對直線做映射把圖像轉成正的?
+http://docs.opencv.org/doc/tutorials/imgproc/imgtrans/warp_affine/warp_affine.html#warp-affine

@@ -151,9 +151,12 @@ namespace ZebraCrossing_Test
                         new Gray(260),  //Canny algorithm high threshold
                         1,              //rho parameter
                         Math.PI / 180.0,  //theta parameter 
-                        130,            //threshold
+                        80,            //threshold
                         1,             //min length for a line
-                        30);            //max allowed gap along the line
+                        50);            //max allowed gap along the line
+                    
+                    double average_slope = 0;
+                    
                     //draw lines on image
                     foreach (var line in lines[0])
                     {
@@ -161,6 +164,9 @@ namespace ZebraCrossing_Test
                         //vector是向量，代表的是這個線的方向。HoughLine是採用亟座標的方式
                         //線的點是在LineSegment2D這個結構裡的：P1與P2才是。﻿
                         PointF vector = line.Direction;
+                        
+                        
+                        
                         double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
                         if ((angle > 160 && angle < 190) || (angle > -190 && angle < -160))
                         {
@@ -168,7 +174,10 @@ namespace ZebraCrossing_Test
                         }
                         Console.WriteLine("Angle = " + angle + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
                         showLineImg.Draw(line, new Bgr(255, 0, 0), 1);
+                        
                     }
+                    average_slope /= lines[0].Length;
+                    Console.WriteLine("total detect lines = " + lines[0].Length + ",Aver Slope = " + average_slope);
 
                     houghLineViewer.Image = showLineImg;
                     houghLineViewer.Text = "HoughLine 偵測畫面";
