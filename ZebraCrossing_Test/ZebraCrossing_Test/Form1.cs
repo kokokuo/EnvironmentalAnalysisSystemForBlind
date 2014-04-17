@@ -25,12 +25,15 @@ namespace ZebraCrossing_Test
         Image<Gray, byte> grayImg;
         Image<Gray, byte> maskWhiteImg;
         ImageViewer houghLineViewer;
+        List<Rectangle> candidateZebraCrossings;
+        Image<Bgr, byte> showScanlineImg;
         public Form1()
         {
             InitializeComponent();
             dir = new DirectoryInfo(System.Windows.Forms.Application.StartupPath);
             houghLineViewer = new ImageViewer();
             houghLineViewer.FormClosing += houghLineViewer_FormClosing;
+            candidateZebraCrossings = new List<Rectangle>();
         }
 
         void houghLineViewer_FormClosing(object sender, FormClosingEventArgs e)
@@ -189,6 +192,9 @@ namespace ZebraCrossing_Test
         {
             if (maskWhiteImg != null)
             {
+                //清空之前的資料
+                candidateZebraCrossings.Clear();
+
                 Contour<Point> contours = DoContours(maskWhiteImg);
                 using (Image<Bgr, byte> showContoursImg = oriImg.Copy()) {
                     //繪製所有輪廓
@@ -196,11 +202,21 @@ namespace ZebraCrossing_Test
                     {
                         //繪製輪廓BoundingBox
                         showContoursImg.Draw(contours.BoundingRectangle, new Bgr(Color.Red), 2);
+                        double ratio = Convert.ToDouble(contours.BoundingRectangle.Height) / contours.BoundingRectangle.Width;
+                        if (contours.BoundingRectangle.Width > 100 && ratio < 0.15)
+                        {
+                            showContoursImg.Draw(contours.BoundingRectangle, new Bgr(Color.Yellow), 1);
+                            //加入候選斑馬線
+                            candidateZebraCrossings.Add(contours.BoundingRectangle);
+                            
+                        }
+                        
+                        Console.WriteLine("Width = " + contours.BoundingRectangle.Width + ",Height = " + contours.BoundingRectangle.Height + ",h/w = " + ratio);
                         //繪製輪廓
                         //showContoursImg.Draw(contours, new Bgr(Color.Yellow), new Bgr(Color.GreenYellow), 1, 2);
                         contours = contours.HNext;
                     }
-
+                    showScanlineImg = showContoursImg.Copy();
                     contourImageBox.Image = showContoursImg;
                 }
             }
@@ -310,6 +326,93 @@ namespace ZebraCrossing_Test
             {
                 MessageBox.Show("尚未Mask");
             }
+        }
+
+        private void findScanLineButton_Click(object sender, EventArgs e)
+        {
+            Point prePoint = new Point();
+            Point currentPoint = new Point();
+            List<LineSegment2DF> lines = new List<LineSegment2DF>();
+            //依照y軸座標排序
+            var zebras = from boundingBox in candidateZebraCrossings orderby boundingBox.Y select boundingBox;
+            foreach (Rectangle rec in zebras) {
+                if(!currentPoint.IsEmpty)
+                    prePoint = currentPoint;
+                currentPoint = new Point((rec.X + rec.Width / 2), (rec.Y + rec.Height / 2));
+
+                //兩點 =>存放線條,並繪製
+                if (!currentPoint.IsEmpty && !prePoint.IsEmpty){
+                    LineSegment2DF line = new LineSegment2DF(prePoint, currentPoint);
+                    lines.Add(line);
+                    Console.WriteLine("draw Line:direction ,x = " + line.Direction.X + "y =" + line.Direction.Y + ",point p1.x =" + prePoint.X + ",p1.y = " + prePoint.Y + ", p2.x =" + currentPoint.X + ",p2.y = " + currentPoint.Y);
+                    showScanlineImg.Draw(new LineSegment2DF(prePoint, currentPoint),new Bgr(Color.Azure),2);
+                }
+                Console.WriteLine("center x =" + currentPoint.X + ",y = " + currentPoint.Y);
+                showScanlineImg.Draw(new CircleF(currentPoint, 1), new Bgr(Color.Blue), 3);
+
+            }
+            //show center point
+            contourImageBox.Image = showScanlineImg;
+
+            DoBlackWhiteStatistics(lines);
+        }
+
+        private void DoBlackWhiteStatistics(List<LineSegment2DF> lines) {
+            //寬480是圖片高(等於垂直走訪的話,最多的pixel),高255是Intensity
+            Image<Bgr, byte> showBlackWhiteCurve = new Image<Bgr, byte>(480,255,new Bgr(Color.White));
+            int x = 0; // 要尋訪的起點
+
+            //計算線段通過pixel
+            foreach (LineSegment2DF line in lines)
+            {
+                float nextX = line.P1.X;
+                float nextY = line.P1.Y;
+                
+                //如果尋訪小於線段結束點的y軸，則不斷尋訪
+                while (nextY < line.P2.Y)
+                {
+                    ////如果X座標差距離大於Y軸座標差 =>表示 線段呈水平 
+                    //if (Math.Abs(line.P1.X - line.P2.X) > Math.Abs(line.P1.Y - line.P2.Y))
+                    //{
+                    //    //走的方向 看x座標差的值 > 0 表示 ,x' = x - 1 (x'是下一個移動座標)
+                    //    if (line.P1.X - line.P2.X > 0)
+                    //    {
+                    //        nextX -= 1;
+                    //    }
+                    //    else
+                    //    { //x' = x + 1
+                    //        nextX += 1;
+                    //    }
+                        
+                    //}
+                    ////否則表示線段是接近垂直的樣子 => x' = x + x/y 移動 在去求y
+                    //else
+                    //{
+                        if (line.P1.X - line.P2.X > 0)
+                        {
+                            nextX -= (line.P1.X / line.P2.Y);
+                        }
+                        else
+                        { //x' = x + 1
+                            nextX += (line.P1.X / line.P2.Y);
+                        }         
+                    //}
+                    nextY = (line.YByX(nextX)); //有問題,自己求
+
+                    //抓灰階做測試
+                    Gray pixel = grayImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
+                    Console.WriteLine("next x =" + nextX + ",y = " + nextY + ",intensity = " + pixel.Intensity);
+
+
+                    showBlackWhiteCurve.Data[x, Convert.ToInt32(pixel.Intensity), 0] = 255;
+                    showBlackWhiteCurve.Data[x, Convert.ToInt32(pixel.Intensity), 1] = 0;
+                    showBlackWhiteCurve.Data[x, Convert.ToInt32(pixel.Intensity), 2] = 0;
+                    x++; //怪怪
+
+                }
+            }
+            ImageViewer curve = new ImageViewer(showBlackWhiteCurve);
+            curve.Show();
         }
 
     }

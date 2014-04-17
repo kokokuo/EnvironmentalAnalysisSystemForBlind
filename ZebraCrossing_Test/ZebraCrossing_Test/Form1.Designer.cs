@@ -43,6 +43,7 @@
             this.dilateButton = new System.Windows.Forms.Button();
             this.filterImageBox = new Emgu.CV.UI.ImageBox();
             this.filterPepperButton = new System.Windows.Forms.Button();
+            this.findScanLineButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.oriImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maskImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.grayImgBox)).BeginInit();
@@ -135,7 +136,7 @@
             // contourButton
             // 
             this.contourButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.contourButton.Location = new System.Drawing.Point(938, 393);
+            this.contourButton.Location = new System.Drawing.Point(744, 393);
             this.contourButton.Name = "contourButton";
             this.contourButton.Size = new System.Drawing.Size(126, 35);
             this.contourButton.TabIndex = 11;
@@ -174,10 +175,10 @@
             this.dilateButton.UseVisualStyleBackColor = true;
             this.dilateButton.Click += new System.EventHandler(this.dilateButton_Click);
             // 
-            // dilateImageBox
+            // filterImageBox
             // 
             this.filterImageBox.Location = new System.Drawing.Point(374, 445);
-            this.filterImageBox.Name = "dilateImageBox";
+            this.filterImageBox.Name = "filterImageBox";
             this.filterImageBox.Size = new System.Drawing.Size(320, 240);
             this.filterImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.filterImageBox.TabIndex = 15;
@@ -194,11 +195,23 @@
             this.filterPepperButton.UseVisualStyleBackColor = true;
             this.filterPepperButton.Click += new System.EventHandler(this.filterPepperButton_Click);
             // 
+            // findScanLineButton
+            // 
+            this.findScanLineButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.findScanLineButton.Location = new System.Drawing.Point(876, 393);
+            this.findScanLineButton.Name = "findScanLineButton";
+            this.findScanLineButton.Size = new System.Drawing.Size(188, 35);
+            this.findScanLineButton.TabIndex = 17;
+            this.findScanLineButton.Text = "6.連出Scan Line";
+            this.findScanLineButton.UseVisualStyleBackColor = true;
+            this.findScanLineButton.Click += new System.EventHandler(this.findScanLineButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1131, 706);
+            this.ClientSize = new System.Drawing.Size(1649, 706);
+            this.Controls.Add(this.findScanLineButton);
             this.Controls.Add(this.filterPepperButton);
             this.Controls.Add(this.filterImageBox);
             this.Controls.Add(this.dilateButton);
@@ -240,6 +253,7 @@
         private System.Windows.Forms.Button dilateButton;
         private Emgu.CV.UI.ImageBox filterImageBox;
         private System.Windows.Forms.Button filterPepperButton;
+        private System.Windows.Forms.Button findScanLineButton;
     }
 }
 
