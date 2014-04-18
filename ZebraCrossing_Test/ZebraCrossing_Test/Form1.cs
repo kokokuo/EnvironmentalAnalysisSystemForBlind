@@ -203,6 +203,7 @@ namespace ZebraCrossing_Test
                         //繪製輪廓BoundingBox
                         showContoursImg.Draw(contours.BoundingRectangle, new Bgr(Color.Red), 2);
                         double ratio = Convert.ToDouble(contours.BoundingRectangle.Height) / contours.BoundingRectangle.Width;
+                        //斑馬線的boundingBox寬要大於100,寬高比值 < 0.15
                         if (contours.BoundingRectangle.Width > 100 && ratio < 0.15)
                         {
                             showContoursImg.Draw(contours.BoundingRectangle, new Bgr(Color.Yellow), 1);
@@ -358,62 +359,108 @@ namespace ZebraCrossing_Test
         }
 
         private void DoBlackWhiteStatistics(List<LineSegment2DF> lines) {
-            //寬480是圖片高(等於垂直走訪的話,最多的pixel),高255是Intensity
-            Image<Bgr, byte> showBlackWhiteCurve = new Image<Bgr, byte>(480,255,new Bgr(Color.White));
+            //寬480是圖片高(等於垂直走訪的話,最多的pixel),高Intensity是255,但拉高到300好方便觀看
+            Image<Bgr, byte> showBlackWhiteCurve = new Image<Bgr, byte>(480,300,new Bgr(Color.White));
             int x = 0; // 要尋訪的起點
+            IntensityPoint current, previous;
+            current = new IntensityPoint();
+            previous = new IntensityPoint();
 
+            //統計每一條線的黑色與白色的pixel數量
+            List<Dictionary<int,int>> blackWhiteHistograms = new List<Dictionary<int,int>>();
+
+            int index = 0;
             //計算線段通過pixel
             foreach (LineSegment2DF line in lines)
             {
-                float nextX = line.P1.X;
+                float nextX;
                 float nextY = line.P1.Y;
                 
+                //新增一條線
+                blackWhiteHistograms.Add(new Dictionary<int, int>());
+                blackWhiteHistograms[index][0] = 0;
+                blackWhiteHistograms[index][255] = 0;
+
                 //如果尋訪小於線段結束點的y軸，則不斷尋訪
                 while (nextY < line.P2.Y)
                 {
-                    ////如果X座標差距離大於Y軸座標差 =>表示 線段呈水平 
-                    //if (Math.Abs(line.P1.X - line.P2.X) > Math.Abs(line.P1.Y - line.P2.Y))
-                    //{
-                    //    //走的方向 看x座標差的值 > 0 表示 ,x' = x - 1 (x'是下一個移動座標)
-                    //    if (line.P1.X - line.P2.X > 0)
-                    //    {
-                    //        nextX -= 1;
-                    //    }
-                    //    else
-                    //    { //x' = x + 1
-                    //        nextX += 1;
-                    //    }
-                        
-                    //}
-                    ////否則表示線段是接近垂直的樣子 => x' = x + x/y 移動 在去求y
-                    //else
-                    //{
-                        if (line.P1.X - line.P2.X > 0)
-                        {
-                            nextX -= (line.P1.X / line.P2.Y);
-                        }
-                        else
-                        { //x' = x + 1
-                            nextX += (line.P1.X / line.P2.Y);
-                        }         
-                    //}
-                    nextY = (line.YByX(nextX)); //有問題,自己求
 
-                    //抓灰階做測試
-                    Gray pixel = grayImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
-                    Console.WriteLine("next x =" + nextX + ",y = " + nextY + ",intensity = " + pixel.Intensity);
+                    nextX = GetXPositionFromLineEquations(line.P1, line.P2, nextY);
+
+                    //抓灰階 or 二值化做測試
+                    Gray pixel = maskWhiteImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
+                    //Console.WriteLine("next x =" + nextX + ",y = " + nextY + ",intensity = " + pixel.Intensity);
 
 
-                    showBlackWhiteCurve.Data[x, Convert.ToInt32(pixel.Intensity), 0] = 255;
-                    showBlackWhiteCurve.Data[x, Convert.ToInt32(pixel.Intensity), 1] = 0;
-                    showBlackWhiteCurve.Data[x, Convert.ToInt32(pixel.Intensity), 2] = 0;
-                    x++; //怪怪
 
+                    current.SetData(new PointF(nextX, nextY), pixel.Intensity);
+                    nextY++;
+
+                    //統計目前這條線的像素量
+                    blackWhiteHistograms[index][(int)pixel.Intensity]++;
+
+
+                    //繪製呈現用，斑馬線黑白像素經過的圖形
+                    int projectY = Math.Abs((int)current.GetIntensity() - 300); 
+                    if (!current.IsEmpty() && !previous.IsEmpty()){
+                        float prevPorjectY = Math.Abs((float)previous.GetIntensity() - 300);
+                        showBlackWhiteCurve.Draw(new LineSegment2DF(new PointF(x - 2, projectY), new PointF(x, prevPorjectY )), new Bgr(Color.Red), 1);
+                    }
+                    else {
+                        showBlackWhiteCurve.Draw(new LineSegment2DF(new PointF(0, 300), new PointF(x, projectY )), new Bgr(Color.Red), 1);
+                    }
+                    showBlackWhiteCurve.Draw(new CircleF(new PointF(x, projectY ), 1), new Bgr(Color.Blue), 1);
+                   
+                    x+=2; //跳2去看
+                    //設定前一筆
+                    previous.SetData(current.GetLocation(), current.GetIntensity());
+                    
                 }
+                index++; //記錄下一條線
+               
             }
+
+            //顯示每條線段的統計量
+            for (int i = 0; i < blackWhiteHistograms.Count;i++ ){
+                Console.WriteLine("Line[" + i + "] ,statistic : black = " + blackWhiteHistograms[i][0] + ", white = " + blackWhiteHistograms[i][255] + ",ratio = " + (blackWhiteHistograms[i][0] / (float)blackWhiteHistograms[i][255]));
+
+            }
+           
             ImageViewer curve = new ImageViewer(showBlackWhiteCurve);
             curve.Show();
         }
+        //計算直線方程式，並求x座標來取出圖片像素
+        private float GetXPositionFromLineEquations(PointF p1, PointF p2, float y)
+        { 
+            float m = (p2.Y - p1.Y) / (float)(p2.X - p1.X);
+            // y - y0 = m(x - x0)
+            float x = ((y - p2.Y) / m) + p2.X;
+            //Console.WriteLine("y =" + y + "and find x=" + x);
+            return x;
+        }
 
+    }
+
+
+    public class IntensityPoint {
+        private PointF location;
+        private double intensity;
+
+        public IntensityPoint() {
+            location = new PointF();
+            intensity = -1;
+        }
+
+        public bool IsEmpty() {
+            if (location.IsEmpty && intensity == -1)
+                return true;
+            return false;
+        }
+        public void SetData(PointF p,double value){
+            location = p;
+            intensity = value;
+        }
+        public PointF GetLocation(){  return location; }
+        public double GetIntensity() { return intensity; }
     }
 }
