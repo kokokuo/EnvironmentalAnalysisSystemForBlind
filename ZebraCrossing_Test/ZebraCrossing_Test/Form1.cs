@@ -27,6 +27,11 @@ namespace ZebraCrossing_Test
         ImageViewer houghLineViewer;
         List<Rectangle> candidateZebraCrossings;
         Image<Bgr, byte> showScanlineImg;
+
+        //黑白像素是否交叉呈現
+        bool isBlackWhiteCrossing;
+        //黑色像素是否增加
+        bool isBlackPixelIncreased;
         public Form1()
         {
             InitializeComponent();
@@ -34,6 +39,9 @@ namespace ZebraCrossing_Test
             houghLineViewer = new ImageViewer();
             houghLineViewer.FormClosing += houghLineViewer_FormClosing;
             candidateZebraCrossings = new List<Rectangle>();
+
+            //預設是假設都為True
+            isBlackWhiteCrossing = isBlackPixelIncreased = true;
         }
 
         void houghLineViewer_FormClosing(object sender, FormClosingEventArgs e)
@@ -369,6 +377,9 @@ namespace ZebraCrossing_Test
             //統計每一條線的黑色與白色的pixel數量
             List<Dictionary<int,int>> blackWhiteHistograms = new List<Dictionary<int,int>>();
 
+            //一條線段會是白黑白的經過
+            bool[] peakValleyCheckPoint = new bool[] { false, false, false };
+
             int index = 0;
             //計算線段通過pixel
             foreach (LineSegment2DF line in lines)
@@ -391,10 +402,22 @@ namespace ZebraCrossing_Test
                     Gray pixel = maskWhiteImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
                     //Console.WriteLine("next x =" + nextX + ",y = " + nextY + ",intensity = " + pixel.Intensity);
 
-
-
+                    //取得目前掃描線步進的素值
                     current.SetData(new PointF(nextX, nextY), pixel.Intensity);
-                    nextY++;
+
+                    if (peakValleyCheckPoint[0] == false) {
+                        if (pixel.Intensity == 255)
+                            peakValleyCheckPoint[0] = true;
+                    }
+                    else if (peakValleyCheckPoint[0] == true && peakValleyCheckPoint[1] == false) {
+                        if (pixel.Intensity == 0)
+                            peakValleyCheckPoint[1] = true;
+                    }
+                    else if (peakValleyCheckPoint[0] == true && peakValleyCheckPoint[1] == true && peakValleyCheckPoint[2] == false)
+                    {
+                        if (pixel.Intensity == 255)
+                            peakValleyCheckPoint[2] = true;
+                    }
 
                     //統計目前這條線的像素量
                     blackWhiteHistograms[index][(int)pixel.Intensity]++;
@@ -411,11 +434,24 @@ namespace ZebraCrossing_Test
                     }
                     showBlackWhiteCurve.Draw(new CircleF(new PointF(x, projectY ), 1), new Bgr(Color.Blue), 1);
                    
-                    x+=2; //跳2去看
+                    x+=2; //跳2,用來方便顯示圖形時可以比較清晰
                     //設定前一筆
                     previous.SetData(current.GetLocation(), current.GetIntensity());
+
+                    //步進Y
+                    nextY++;
                     
                 }
+                //如果有一個不是true,則代表不是peak valley的形狀
+                if (peakValleyCheckPoint[0] == false || peakValleyCheckPoint[1] == false || peakValleyCheckPoint[2] == false)
+                {
+                    isBlackWhiteCrossing = false;
+                    
+                }
+                Console.WriteLine("Peak Valley State [0] =" + peakValleyCheckPoint[0] + ",[1] = " + peakValleyCheckPoint[1] + ",[2] = " + peakValleyCheckPoint[2]);
+                //初始化回來再看新的線段
+                peakValleyCheckPoint[0] = peakValleyCheckPoint[1] = peakValleyCheckPoint[2] = false;
+
                 index++; //記錄下一條線
                
             }
