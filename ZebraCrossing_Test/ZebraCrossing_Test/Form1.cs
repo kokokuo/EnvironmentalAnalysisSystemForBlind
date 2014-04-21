@@ -380,7 +380,12 @@ namespace ZebraCrossing_Test
             //一條線段會是白黑白的經過
             bool[] peakValleyCheckPoint = new bool[] { false, false, false };
 
+            //記錄每一條線段的像素統計用的索引
             int index = 0;
+
+            //紀錄前一個線段的黑色像素統計值
+            int previousBlackPixels = -1;
+
             //計算線段通過pixel
             foreach (LineSegment2DF line in lines)
             {
@@ -460,8 +465,19 @@ namespace ZebraCrossing_Test
             for (int i = 0; i < blackWhiteHistograms.Count;i++ ){
                 Console.WriteLine("Line[" + i + "] ,statistic : black = " + blackWhiteHistograms[i][0] + ", white = " + blackWhiteHistograms[i][255] + ",ratio = " + (blackWhiteHistograms[i][0] / (float)blackWhiteHistograms[i][255]));
 
+                //計算Black像素是否越來越多
+                if (previousBlackPixels != -1){
+                    if (previousBlackPixels > blackWhiteHistograms[i][0]) {
+                        isBlackWhiteCrossing = false;
+                    }
+                    previousBlackPixels = blackWhiteHistograms[i][0];
+                }
+                else {
+                    previousBlackPixels = blackWhiteHistograms[i][0];
+                }
             }
-           
+            Console.WriteLine("Black pixel increased? =>" + isBlackWhiteCrossing);
+
             ImageViewer curve = new ImageViewer(showBlackWhiteCurve);
             curve.Show();
         }
