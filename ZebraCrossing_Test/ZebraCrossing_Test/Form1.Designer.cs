@@ -44,6 +44,7 @@
             this.filterImageBox = new Emgu.CV.UI.ImageBox();
             this.filterPepperButton = new System.Windows.Forms.Button();
             this.findScanLineButton = new System.Windows.Forms.Button();
+            this.detectZebraCrossingButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.oriImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maskImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.grayImgBox)).BeginInit();
@@ -206,11 +207,23 @@
             this.findScanLineButton.UseVisualStyleBackColor = true;
             this.findScanLineButton.Click += new System.EventHandler(this.findScanLineButton_Click);
             // 
+            // detectZebraCrossingButton
+            // 
+            this.detectZebraCrossingButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.detectZebraCrossingButton.Location = new System.Drawing.Point(723, 95);
+            this.detectZebraCrossingButton.Name = "detectZebraCrossingButton";
+            this.detectZebraCrossingButton.Size = new System.Drawing.Size(220, 31);
+            this.detectZebraCrossingButton.TabIndex = 18;
+            this.detectZebraCrossingButton.Text = "7.判斷是否為斑馬線";
+            this.detectZebraCrossingButton.UseVisualStyleBackColor = true;
+            this.detectZebraCrossingButton.Click += new System.EventHandler(this.detectZebraCrossingButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1649, 706);
+            this.Controls.Add(this.detectZebraCrossingButton);
             this.Controls.Add(this.findScanLineButton);
             this.Controls.Add(this.filterPepperButton);
             this.Controls.Add(this.filterImageBox);
@@ -254,6 +267,7 @@
         private Emgu.CV.UI.ImageBox filterImageBox;
         private System.Windows.Forms.Button filterPepperButton;
         private System.Windows.Forms.Button findScanLineButton;
+        private System.Windows.Forms.Button detectZebraCrossingButton;
     }
 }
 
