@@ -25,6 +25,7 @@ namespace ZebraCrossing_Test
         Image<Gray, byte> grayImg;
         Image<Gray, byte> maskWhiteImg;
         ImageViewer houghLineViewer;
+        ImageViewer ContoursAndScanLineViewer;
         List<LineSegment2D> candidateZebraCrossingsByHoughLine;
         //候選的斑馬線(BoundingBox的寬有大於100且高/寬是0.15)
         List<Rectangle> candidateZebraCrossingsByContour;
@@ -47,6 +48,9 @@ namespace ZebraCrossing_Test
             houghLineViewer = new ImageViewer();
             houghLineViewer.FormClosing += houghLineViewer_FormClosing;
 
+            ContoursAndScanLineViewer = new ImageViewer();
+            ContoursAndScanLineViewer.FormClosing += ContoursAndScanLineViewer_FormClosing;
+
             candidateZebraCrossingsByContour = new List<Rectangle>();
             //ScanLine的各線段
             crossingConnectionlines = new List<LineSegment2DF>();
@@ -54,6 +58,12 @@ namespace ZebraCrossing_Test
 
             //預設是假設都為True
             isBlackWhiteCrossing = isBlackPixelIncreased = true;
+        }
+
+        void ContoursAndScanLineViewer_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true; //關閉視窗時取消
+            ContoursAndScanLineViewer.Hide(); //隱藏式窗,下次再show出
         }
 
         void houghLineViewer_FormClosing(object sender, FormClosingEventArgs e)
@@ -173,50 +183,100 @@ namespace ZebraCrossing_Test
 
         private void houghLineButton_Click(object sender, EventArgs e)
         {
-           
-            if (maskWhiteImg != null)
+            if (candidateZebraCrossingsByContour.Count > 0 && maskWhiteImg!= null)
             {
-                using (Image<Bgr, byte> showLineImg = oriImg.Copy()) {
-                    //Hough transform for line detection
-                    LineSegment2D[][] lines = maskWhiteImg.HoughLines(
-                        new Gray(125),  //Canny algorithm low threshold
-                        new Gray(260),  //Canny algorithm high threshold
-                        1,              //rho parameter
-                        Math.PI / 180.0,  //theta parameter 
-                        80,            //threshold
-                        1,             //min length for a line
-                        50);            //max allowed gap along the line
+                Console.WriteLine("Total Candidate Contours = " + candidateZebraCrossingsByContour.Count);
+               //Y軸排序
+
+                foreach (Rectangle rec in candidateZebraCrossingsByContour)
+               {
+                   using (Image<Gray, byte> roiWhiteMask = maskWhiteImg.Copy())
+                   {
+                       roiWhiteMask.ROI = rec; //取得ROI
+                       Image<Bgr, byte> showLineImg = roiWhiteMask.Convert<Bgr, byte>().Copy();
+                       //Hough transform for line detection
+                       LineSegment2D[][] lines = roiWhiteMask.HoughLines(
+                           new Gray(125),  //Canny algorithm low threshold
+                           new Gray(260),  //Canny algorithm high threshold
+                           1,              //rho parameter
+                           Math.PI / 180.0,  //theta parameter 
+                           100,            //threshold
+                           1,             //min length for a line
+                           30);            //max allowed gap along the line
+
+
+                       //draw lines on image
+                       foreach (var line in lines[0])
+                       {
+                           //如何限制角度http://yy-programer.blogspot.tw/2013/02/emgucv-image-process-extracting-lines_28.html
+                           //vector是向量，代表的是這個線的方向。HoughLine是採用亟座標的方式
+                           //線的點是在LineSegment2D這個結構裡的：P1與P2才是。﻿
+                           PointF vector = line.Direction;
+
+                           double slope = (line.P2.Y - line.P1.Y) / Convert.ToDouble(line.P2.X - line.P1.X);
+                           double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
+                           if ((angle > 160 && angle < 190) || (angle > -190 && angle < -160))
+                           {
+                               showLineImg.Draw(line, new Bgr(0, 0, 255), 2);
+                           }
+                           Console.WriteLine("Angle = " + angle + ", slope = " + slope + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
+                           showLineImg.Draw(line, new Bgr(255, 0, 0), 1);
+
+                       }
+
+                       Console.WriteLine("total detect lines = " + lines[0].Length);
+
+                       new ImageViewer(showLineImg).Show();
+                   }
+               }
+            }
+
+            #region 偵測整張Mask White圖片
+            //if (maskWhiteImg != null)
+            //{
+            //    using (Image<Bgr, byte> showLineImg = oriImg.Copy()) {
+            //        //Hough transform for line detection
+            //        LineSegment2D[][] lines = maskWhiteImg.HoughLines(
+            //            new Gray(125),  //Canny algorithm low threshold
+            //            new Gray(260),  //Canny algorithm high threshold
+            //            1,              //rho parameter
+            //            Math.PI / 180.0,  //theta parameter 
+            //            110,            //threshold
+            //            1,             //min length for a line
+            //            30);            //max allowed gap along the line
                     
 
-                    //draw lines on image
-                    foreach (var line in lines[0])
-                    {
-                        //如何限制角度http://yy-programer.blogspot.tw/2013/02/emgucv-image-process-extracting-lines_28.html
-                        //vector是向量，代表的是這個線的方向。HoughLine是採用亟座標的方式
-                        //線的點是在LineSegment2D這個結構裡的：P1與P2才是。﻿
-                        PointF vector = line.Direction;
+            //        //draw lines on image
+            //        foreach (var line in lines[0])
+            //        {
+            //            //如何限制角度http://yy-programer.blogspot.tw/2013/02/emgucv-image-process-extracting-lines_28.html
+            //            //vector是向量，代表的是這個線的方向。HoughLine是採用亟座標的方式
+            //            //線的點是在LineSegment2D這個結構裡的：P1與P2才是。﻿
+            //            PointF vector = line.Direction;
 
-                        double slope = (line.P2.Y - line.P1.Y) / Convert.ToDouble(line.P2.X - line.P1.X);
-                        double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
-                        if ((angle > 160 && angle < 190) || (angle > -190 && angle < -160))
-                        {
-                            showLineImg.Draw(line, new Bgr(0, 0, 255), 2);
-                            //加入候選線
-                            candidateZebraCrossingsByHoughLine.Add(line);
-                        }
-                        Console.WriteLine("Angle = " + angle + ", slope = " + slope + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
-                        showLineImg.Draw(line, new Bgr(255, 0, 0), 1);
+            //            double slope = (line.P2.Y - line.P1.Y) / Convert.ToDouble(line.P2.X - line.P1.X);
+            //            double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
+            //            if ((angle > 160 && angle < 190) || (angle > -190 && angle < -160) && lines[0].Length >= 100)
+            //            {
+            //                showLineImg.Draw(line, new Bgr(0, 0, 255), 2);
+            //                //加入候選線
+            //                candidateZebraCrossingsByHoughLine.Add(line);
+            //            }
+            //            Console.WriteLine("Angle = " + angle + ", slope = " + slope + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
+            //            showLineImg.Draw(line, new Bgr(255, 0, 0), 1);
                         
-                    }
+            //        }
 
-                    Console.WriteLine("total detect lines = " + lines[0].Length);
+            //        Console.WriteLine("total detect lines = " + lines[0].Length);
 
-                    houghLineViewer.Image = showLineImg;
-                    houghLineViewer.Text = "HoughLine 偵測畫面";
-                    houghLineViewer.Show();
-                }
+            //        houghLineViewer.Image = showLineImg;
+            //        houghLineViewer.Text = "HoughLine 偵測畫面";
+            //        houghLineViewer.Show();
+            //    }
                 
-            }
+            //}
+            #endregion
+            
         }
 
         private void contourButton_Click(object sender, EventArgs e)
@@ -247,6 +307,7 @@ namespace ZebraCrossing_Test
                         //showContoursImg.Draw(contours, new Bgr(Color.Yellow), new Bgr(Color.GreenYellow), 1, 2);
                         contours = contours.HNext;
                     }
+                    Console.WriteLine("Total Candidate Contours = " + candidateZebraCrossingsByContour.Count);
                     showScanlineImg = showContoursImg.Copy();
                     contourImageBox.Image = showContoursImg;
                 }
@@ -386,6 +447,9 @@ namespace ZebraCrossing_Test
             }
             //show center point
             contourImageBox.Image = showScanlineImg;
+            //ImageViewer
+            ContoursAndScanLineViewer.Image = showScanlineImg;
+            ContoursAndScanLineViewer.Show();
 
             //統計黑白像素與判斷是否每條線段為白黑白的特徵
             DoBlackWhiteStatistics(crossingConnectionlines);
