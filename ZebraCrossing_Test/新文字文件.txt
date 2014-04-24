@@ -1,0 +1,638 @@
+'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\Microsoft.Net\assembly\GAC_32\mscorlib\v4.0_4.0.0.0__b77a5c561934e089\mscorlib.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
+'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\assembly\GAC_MSIL\Microsoft.VisualStudio.HostingProcess.Utilities\11.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.HostingProcess.Utilities.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
+'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.Windows.Forms\v4.0_4.0.0.0__b77a5c561934e089\System.Windows.Forms.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
+'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.Drawing\v4.0_4.0.0.0__b03f5f7f11d50a3a\System.Drawing.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
+'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System\v4.0_4.0.0.0__b77a5c561934e089\System.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
+'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\assembly\GAC_MSIL\Microsoft.VisualStudio.HostingProcess.Utilities.Sync\11.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.HostingProcess.Utilities.Sync.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
+
+a =0.01226994,b = -221,c = -217.3436
+index =0Angle = -179.29701955075, slope = 0.0122699386503067, P1 = {X=135,Y=219}, P2 = {X=298,Y=221}, length = 163.012269476871
+a =0.015625,b = -114,c = -105.7344
+index =1Angle = -179.104826289789, slope = 0.015625, P1 = {X=337,Y=111}, P2 = {X=529,Y=114}, length = 192.023436069663
+a =0,b = -25,c = -25
+index =2Angle = 180, slope = 0, P1 = {X=197,Y=25}, P2 = {X=496,Y=25}, length = 299
+a =0.01724138,b = -187,c = -178.2414
+index =3Angle = -179.012239556206, slope = 0.0172413793103448, P1 = {X=218,Y=182}, P2 = {X=508,Y=187}, length = 290.043100245464
+a =0.01650165,b = -135,c = -126.0561
+index =4Angle = -179.054610884971, slope = 0.0165016501650165, P1 = {X=239,Y=130}, P2 = {X=542,Y=135}, length = 303.041251317374
+a =0,b = -182,c = -182
+index =5Angle = 180, slope = 0, P1 = {X=165,Y=182}, P2 = {X=217,Y=182}, length = 52
+a =0,b = -39,c = -39
+index =6Angle = 180, slope = 0, P1 = {X=237,Y=39}, P2 = {X=371,Y=39}, length = 134
+a =0,b = -19,c = -19
+index =7Angle = 180, slope = 0, P1 = {X=281,Y=19}, P2 = {X=432,Y=19}, length = 151
+a =0,b = -67,c = -67
+index =8Angle = 180, slope = 0, P1 = {X=188,Y=67}, P2 = {X=350,Y=67}, length = 162
+index =9Angle = -143.077149257173, slope = 0.751445086705202, P1 = {X=466,Y=2}, P2 = {X=639,Y=132}, length = 216.400092421422
+a =0,b = -48,c = -48
+index =10Angle = 180, slope = 0, P1 = {X=322,Y=48}, P2 = {X=526,Y=48}, length = 204
+a =0.01520913,b = -83,c = -74.28517
+index =11Angle = -179.128648471164, slope = 0.0152091254752852, P1 = {X=310,Y=79}, P2 = {X=573,Y=83}, length = 263.030416492086
+a =0,b = -47,c = -47
+index =12Angle = 180, slope = 0, P1 = {X=170,Y=47}, P2 = {X=321,Y=47}, length = 151
+index =13Angle = -141.809050000673, slope = 0.786666666666667, P1 = {X=457,Y=2}, P2 = {X=607,Y=120}, length = 190.850727009357
+a =0.03125,b = -229,c = -209.0313
+index =14Angle = -178.210089391754, slope = 0.03125, P1 = {X=511,Y=225}, P2 = {X=639,Y=229}, length = 128.062484748657
+a =0.01290323,b = -11,c = -4.845161
+index =15Angle = -179.260740674541, slope = 0.0129032258064516, P1 = {X=322,Y=9}, P2 = {X=477,Y=11}, length = 155.012902688776
+a =0.01840491,b = -190,c = -178.2393
+index =16Angle = -178.945595443454, slope = 0.0184049079754601, P1 = {X=476,Y=187}, P2 = {X=639,Y=190}, length = 163.027605024425
+a =-0.02803738,b = -78,c = -84.6729
+index =17Angle = 178.393997005733, slope = -0.0280373831775701, P1 = {X=131,Y=81}, P2 = {X=238,Y=78}, length = 107.042047812997
+a =0,b = -68,c = -68
+index =18Angle = 180, slope = 0, P1 = {X=351,Y=68}, P2 = {X=444,Y=68}, length = 93
+a =0.03070175,b = -229,c = -209.8421
+index =19Angle = -178.241471387161, slope = 0.0307017543859649, P1 = {X=396,Y=222}, P2 = {X=624,Y=229}, length = 228.1074308303
+a =0,b = -4,c = -4
+index =20Angle = 180, slope = 0, P1 = {X=220,Y=4}, P2 = {X=348,Y=4}, length = 128
+a =-0.01265823,b = -110,c = -113.1899
+index =21Angle = 179.274775702967, slope = -0.0126582278481013, P1 = {X=94,Y=112}, P2 = {X=252,Y=110}, length = 158.012657720829
+a =0,b = -131,c = -131
+index =22Angle = 180, slope = 0, P1 = {X=71,Y=131}, P2 = {X=119,Y=131}, length = 48
+a =0,b = -40,c = -40
+index =23Angle = 180, slope = 0, P1 = {X=372,Y=40}, P2 = {X=516,Y=40}, length = 144
+total detect lines = 24
+v = 2.054352
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=337,Y=111},Line2 P2 = {X=529,Y=114}, length = 192.023436069663
+v = -0.3067484
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=197,Y=25},Line2 P2 = {X=496,Y=25}, length = 299
+v = 1.515866
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=218,Y=182},Line2 P2 = {X=508,Y=187}, length = 290.043100245464
+v = 1.990423
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=239,Y=130},Line2 P2 = {X=542,Y=135}, length = 303.041251317374
+v = -2.233129
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=165,Y=182},Line2 P2 = {X=217,Y=182}, length = 52
+v = -0.4785276
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=237,Y=39},Line2 P2 = {X=371,Y=39}, length = 134
+v = -0.2331288
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=281,Y=19},Line2 P2 = {X=432,Y=19}, length = 151
+v = -0.8220859
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=188,Y=67},Line2 P2 = {X=350,Y=67}, length = 162
+v = -0.5889571
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=322,Y=48},Line2 P2 = {X=526,Y=48}, length = 204
+v = 2.342812
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = -0.5766871
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=170,Y=47},Line2 P2 = {X=321,Y=47}, length = 151
+v = 4.096434
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 2.716644
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 1.736197
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -7.153316
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = -0.8343558
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = 3.975272
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = -0.04907975
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -4.147161
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -1.607362
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -0.4907975
+Interset:True,Line1 P1 = {X=135,Y=219},Line1 P2 = {X=298,Y=221}, length = 163.012269476871
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = -0.390625
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=197,Y=25},Line2 P2 = {X=496,Y=25}, length = 299
+v = -0.9563578
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=218,Y=182},Line2 P2 = {X=508,Y=187}, length = 290.043100245464
+v = -0.2281869
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=239,Y=130},Line2 P2 = {X=542,Y=135}, length = 303.041251317374
+v = -2.84375
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=165,Y=182},Line2 P2 = {X=217,Y=182}, length = 52
+v = -0.609375
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=237,Y=39},Line2 P2 = {X=371,Y=39}, length = 134
+v = -0.296875
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=281,Y=19},Line2 P2 = {X=432,Y=19}, length = 151
+v = -1.046875
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=188,Y=67},Line2 P2 = {X=350,Y=67}, length = 162
+v = -0.75
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=322,Y=48},Line2 P2 = {X=526,Y=48}, length = 204
+v = 0.4369653
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = -0.734375
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=170,Y=47},Line2 P2 = {X=321,Y=47}, length = 151
+v = -0.015625
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 1.299093
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = -0.8705904
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -4.415011
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = -1.0625
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = -0.07812497
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = -0.0625
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -3.161788
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -2.046875
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -0.625
+Interset:True,Line1 P1 = {X=337,Y=111},Line1 P2 = {X=529,Y=114}, length = 192.023436069663
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = 0.4310345
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=218,Y=182},Line2 P2 = {X=508,Y=187}, length = 290.043100245464
+v = 0.4125413
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=239,Y=130},Line2 P2 = {X=542,Y=135}, length = 303.041251317374
+v = 0
+v = 0
+v = 0
+v = 0
+v = 0
+v = 0.3802281
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = 0
+v = 0.78125
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 0.3225806
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 0.4601227
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -0.7009345
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = 0
+v = 0.7675439
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0
+v = -0.3164557
+Interset:True,Line1 P1 = {X=197,Y=25},Line1 P2 = {X=496,Y=25}, length = 299
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = 0.7582224
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=239,Y=130},Line2 P2 = {X=542,Y=135}, length = 303.041251317374
+v = -3.137931
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=165,Y=182},Line2 P2 = {X=217,Y=182}, length = 52
+v = -0.6724138
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=237,Y=39},Line2 P2 = {X=371,Y=39}, length = 134
+v = -0.3275862
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=281,Y=19},Line2 P2 = {X=432,Y=19}, length = 151
+v = -1.155172
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=188,Y=67},Line2 P2 = {X=350,Y=67}, length = 162
+v = -0.8275862
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=322,Y=48},Line2 P2 = {X=526,Y=48}, length = 204
+v = 1.413072
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = -0.8103448
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=170,Y=47},Line2 P2 = {X=321,Y=47}, length = 151
+v = 1.895474
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 2.223248
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 0.1658558
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -6.587818
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = -1.172414
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = 1.792952
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = -0.06896552
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -4.26364
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -2.258621
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -0.6896552
+Interset:True,Line1 P1 = {X=218,Y=182},Line1 P2 = {X=508,Y=187}, length = 290.043100245464
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = -3.0033
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=165,Y=182},Line2 P2 = {X=217,Y=182}, length = 52
+v = -0.6435643
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=237,Y=39},Line2 P2 = {X=371,Y=39}, length = 134
+v = -0.3135313
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=281,Y=19},Line2 P2 = {X=432,Y=19}, length = 151
+v = -1.105611
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=188,Y=67},Line2 P2 = {X=350,Y=67}, length = 162
+v = -0.7920792
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=322,Y=48},Line2 P2 = {X=526,Y=48}, length = 204
+v = 0.6835949
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = -0.7755775
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=170,Y=47},Line2 P2 = {X=321,Y=47}, length = 151
+v = 0.4398721
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 1.560417
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = -0.6506509
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -5.072176
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = -1.122112
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = 0.365859
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = -0.0660066
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -3.524042
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -2.161716
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -0.660066
+Interset:True,Line1 P1 = {X=239,Y=130},Line1 P2 = {X=542,Y=135}, length = 303.041251317374
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = 0
+v = 0
+v = 0
+v = 0
+v = 2.768061
+Interset:True,Line1 P1 = {X=165,Y=182},Line1 P2 = {X=217,Y=182}, length = 52
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = 0
+v = 5.6875
+Interset:True,Line1 P1 = {X=165,Y=182},Line1 P2 = {X=217,Y=182}, length = 52
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 2.348387
+Interset:True,Line1 P1 = {X=165,Y=182},Line1 P2 = {X=217,Y=182}, length = 52
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 3.349693
+Interset:True,Line1 P1 = {X=165,Y=182},Line1 P2 = {X=217,Y=182}, length = 52
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -5.102804
+Interset:True,Line1 P1 = {X=165,Y=182},Line1 P2 = {X=217,Y=182}, length = 52
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = 0
+v = 5.587719
+Interset:True,Line1 P1 = {X=165,Y=182},Line1 P2 = {X=217,Y=182}, length = 52
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0
+v = -2.303797
+Interset:True,Line1 P1 = {X=165,Y=182},Line1 P2 = {X=217,Y=182}, length = 52
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = 0
+v = 0
+v = 0
+v = 0.5931559
+Interset:True,Line1 P1 = {X=237,Y=39},Line1 P2 = {X=371,Y=39}, length = 134
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = 0
+v = 1.21875
+Interset:True,Line1 P1 = {X=237,Y=39},Line1 P2 = {X=371,Y=39}, length = 134
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 0.5032258
+Interset:True,Line1 P1 = {X=237,Y=39},Line1 P2 = {X=371,Y=39}, length = 134
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 0.7177914
+Interset:True,Line1 P1 = {X=237,Y=39},Line1 P2 = {X=371,Y=39}, length = 134
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -1.093458
+Interset:True,Line1 P1 = {X=237,Y=39},Line1 P2 = {X=371,Y=39}, length = 134
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = 0
+v = 1.197368
+Interset:True,Line1 P1 = {X=237,Y=39},Line1 P2 = {X=371,Y=39}, length = 134
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0
+v = -0.4936709
+Interset:True,Line1 P1 = {X=237,Y=39},Line1 P2 = {X=371,Y=39}, length = 134
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = 0
+v = 0
+v = 0.2889734
+Interset:True,Line1 P1 = {X=281,Y=19},Line1 P2 = {X=432,Y=19}, length = 151
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = 0
+v = 0.59375
+Interset:True,Line1 P1 = {X=281,Y=19},Line1 P2 = {X=432,Y=19}, length = 151
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 0.2451613
+Interset:True,Line1 P1 = {X=281,Y=19},Line1 P2 = {X=432,Y=19}, length = 151
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 0.3496933
+Interset:True,Line1 P1 = {X=281,Y=19},Line1 P2 = {X=432,Y=19}, length = 151
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -0.5327103
+Interset:True,Line1 P1 = {X=281,Y=19},Line1 P2 = {X=432,Y=19}, length = 151
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = 0
+v = 0.5833333
+Interset:True,Line1 P1 = {X=281,Y=19},Line1 P2 = {X=432,Y=19}, length = 151
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0
+v = -0.2405063
+Interset:True,Line1 P1 = {X=281,Y=19},Line1 P2 = {X=432,Y=19}, length = 151
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = 0
+v = 1.019011
+Interset:True,Line1 P1 = {X=188,Y=67},Line1 P2 = {X=350,Y=67}, length = 162
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = 0
+v = 2.09375
+Interset:True,Line1 P1 = {X=188,Y=67},Line1 P2 = {X=350,Y=67}, length = 162
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 0.8645161
+Interset:True,Line1 P1 = {X=188,Y=67},Line1 P2 = {X=350,Y=67}, length = 162
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 1.233129
+Interset:True,Line1 P1 = {X=188,Y=67},Line1 P2 = {X=350,Y=67}, length = 162
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -1.878505
+Interset:True,Line1 P1 = {X=188,Y=67},Line1 P2 = {X=350,Y=67}, length = 162
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = 0
+v = 2.057018
+Interset:True,Line1 P1 = {X=188,Y=67},Line1 P2 = {X=350,Y=67}, length = 162
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0
+v = -0.8481013
+Interset:True,Line1 P1 = {X=188,Y=67},Line1 P2 = {X=350,Y=67}, length = 162
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = 0.730038
+Interset:True,Line1 P1 = {X=322,Y=48},Line1 P2 = {X=526,Y=48}, length = 204
+Line2 P1 = {X=310,Y=79},Line2 P2 = {X=573,Y=83}, length = 263.030416492086
+v = 0
+v = 1.5
+Interset:True,Line1 P1 = {X=322,Y=48},Line1 P2 = {X=526,Y=48}, length = 204
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 0.6193548
+Interset:True,Line1 P1 = {X=322,Y=48},Line1 P2 = {X=526,Y=48}, length = 204
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 0.8834356
+Interset:True,Line1 P1 = {X=322,Y=48},Line1 P2 = {X=526,Y=48}, length = 204
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -1.345794
+Interset:True,Line1 P1 = {X=322,Y=48},Line1 P2 = {X=526,Y=48}, length = 204
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = 0
+v = 1.473684
+Interset:True,Line1 P1 = {X=322,Y=48},Line1 P2 = {X=526,Y=48}, length = 204
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0
+v = -0.607595
+Interset:True,Line1 P1 = {X=322,Y=48},Line1 P2 = {X=526,Y=48}, length = 204
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = -0.7148289
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=170,Y=47},Line2 P2 = {X=321,Y=47}, length = 151
+v = -0.8891397
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 0.9036673
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = -1.362126
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -3.513415
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = -1.034221
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = -0.9346441
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = -0.0608365
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -2.723637
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -1.992395
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -0.608365
+Interset:True,Line1 P1 = {X=310,Y=79},Line1 P2 = {X=573,Y=83}, length = 263.030416492086
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = 1.46875
+Interset:True,Line1 P1 = {X=170,Y=47},Line1 P2 = {X=321,Y=47}, length = 151
+Line2 P1 = {X=511,Y=225},Line2 P2 = {X=639,Y=229}, length = 128.062484748657
+v = 0.6064516
+Interset:True,Line1 P1 = {X=170,Y=47},Line1 P2 = {X=321,Y=47}, length = 151
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = 0.8650307
+Interset:True,Line1 P1 = {X=170,Y=47},Line1 P2 = {X=321,Y=47}, length = 151
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -1.317757
+Interset:True,Line1 P1 = {X=170,Y=47},Line1 P2 = {X=321,Y=47}, length = 151
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = 0
+v = 1.442982
+Interset:True,Line1 P1 = {X=170,Y=47},Line1 P2 = {X=321,Y=47}, length = 151
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0
+v = -0.5949367
+Interset:True,Line1 P1 = {X=170,Y=47},Line1 P2 = {X=321,Y=47}, length = 151
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = 2.611089
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=322,Y=9},Line2 P2 = {X=477,Y=11}, length = 155.012902688776
+v = -1.722776
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -8.858061
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = -2.125
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = -0.1255482
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = -0.125
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -6.336234
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -4.09375
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -1.25
+Interset:True,Line1 P1 = {X=511,Y=225},Line1 P2 = {X=639,Y=229}, length = 128.062484748657
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = -2.249159
+Interset:True,Line1 P1 = {X=322,Y=9},Line1 P2 = {X=477,Y=11}, length = 155.012902688776
+Line2 P1 = {X=476,Y=187},Line2 P2 = {X=639,Y=190}, length = 163.027605024425
+v = -1.314863
+Interset:True,Line1 P1 = {X=322,Y=9},Line1 P2 = {X=477,Y=11}, length = 155.012902688776
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = -0.8774194
+Interset:True,Line1 P1 = {X=322,Y=9},Line1 P2 = {X=477,Y=11}, length = 155.012902688776
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = -2.617119
+Interset:True,Line1 P1 = {X=322,Y=9},Line1 P2 = {X=477,Y=11}, length = 155.012902688776
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = -0.0516129
+Interset:True,Line1 P1 = {X=322,Y=9},Line1 P2 = {X=477,Y=11}, length = 155.012902688776
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -1.558595
+Interset:True,Line1 P1 = {X=322,Y=9},Line1 P2 = {X=477,Y=11}, length = 155.012902688776
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -1.690323
+Interset:True,Line1 P1 = {X=322,Y=9},Line1 P2 = {X=477,Y=11}, length = 155.012902688776
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -0.516129
+Interset:True,Line1 P1 = {X=322,Y=9},Line1 P2 = {X=477,Y=11}, length = 155.012902688776
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = -6.762685
+Interset:True,Line1 P1 = {X=476,Y=187},Line1 P2 = {X=639,Y=190}, length = 163.027605024425
+Line2 P1 = {X=131,Y=81},Line2 P2 = {X=238,Y=78}, length = 107.042047812997
+v = -1.251534
+Interset:True,Line1 P1 = {X=476,Y=187},Line1 P2 = {X=639,Y=190}, length = 163.027605024425
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = 1.618609
+Interset:True,Line1 P1 = {X=476,Y=187},Line1 P2 = {X=639,Y=190}, length = 163.027605024425
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = -0.07361963
+Interset:True,Line1 P1 = {X=476,Y=187},Line1 P2 = {X=639,Y=190}, length = 163.027605024425
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -4.429603
+Interset:True,Line1 P1 = {X=476,Y=187},Line1 P2 = {X=639,Y=190}, length = 163.027605024425
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -2.411043
+Interset:True,Line1 P1 = {X=476,Y=187},Line1 P2 = {X=639,Y=190}, length = 163.027605024425
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -0.7361963
+Interset:True,Line1 P1 = {X=476,Y=187},Line1 P2 = {X=639,Y=190}, length = 163.027605024425
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = 1.906542
+Interset:True,Line1 P1 = {X=131,Y=81},Line1 P2 = {X=238,Y=78}, length = 107.042047812997
+Line2 P1 = {X=351,Y=68},Line2 P2 = {X=444,Y=68}, length = 93
+v = 8.815297
+Interset:True,Line1 P1 = {X=131,Y=81},Line1 P2 = {X=238,Y=78}, length = 107.042047812997
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0.1121495
+Interset:True,Line1 P1 = {X=131,Y=81},Line1 P2 = {X=238,Y=78}, length = 107.042047812997
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = 2.09677
+Interset:True,Line1 P1 = {X=131,Y=81},Line1 P2 = {X=238,Y=78}, length = 107.042047812997
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 3.672897
+Interset:True,Line1 P1 = {X=131,Y=81},Line1 P2 = {X=238,Y=78}, length = 107.042047812997
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = 1.121495
+Interset:True,Line1 P1 = {X=131,Y=81},Line1 P2 = {X=238,Y=78}, length = 107.042047812997
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = 2.087719
+Interset:True,Line1 P1 = {X=351,Y=68},Line1 P2 = {X=444,Y=68}, length = 93
+Line2 P1 = {X=396,Y=222},Line2 P2 = {X=624,Y=229}, length = 228.1074308303
+v = 0
+v = -0.8607595
+Interset:True,Line1 P1 = {X=351,Y=68},Line1 P2 = {X=444,Y=68}, length = 93
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = -0.122807
+Interset:True,Line1 P1 = {X=396,Y=222},Line1 P2 = {X=624,Y=229}, length = 228.1074308303
+Line2 P1 = {X=220,Y=4},Line2 P2 = {X=348,Y=4}, length = 128
+v = -6.275927
+Interset:True,Line1 P1 = {X=396,Y=222},Line1 P2 = {X=624,Y=229}, length = 228.1074308303
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = -4.02193
+Interset:True,Line1 P1 = {X=396,Y=222},Line1 P2 = {X=624,Y=229}, length = 228.1074308303
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = -1.22807
+Interset:True,Line1 P1 = {X=396,Y=222},Line1 P2 = {X=624,Y=229}, length = 228.1074308303
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = -0.05063291
+Interset:True,Line1 P1 = {X=220,Y=4},Line1 P2 = {X=348,Y=4}, length = 128
+Line2 P1 = {X=94,Y=112},Line2 P2 = {X=252,Y=110}, length = 158.012657720829
+v = 0
+v = 0
+v = 1.658228
+Interset:True,Line1 P1 = {X=94,Y=112},Line1 P2 = {X=252,Y=110}, length = 158.012657720829
+Line2 P1 = {X=71,Y=131},Line2 P2 = {X=119,Y=131}, length = 48
+v = 0.5063291
+Interset:True,Line1 P1 = {X=94,Y=112},Line1 P2 = {X=252,Y=110}, length = 158.012657720829
+Line2 P1 = {X=372,Y=40},Line2 P2 = {X=516,Y=40}, length = 144
+v = 0
+'<沒有名稱>' (0x1fe0) 執行緒以返回碼 0 (0x0) 結束。
