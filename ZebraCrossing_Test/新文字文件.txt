@@ -1,9 +1,4 @@
-'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\Microsoft.Net\assembly\GAC_32\mscorlib\v4.0_4.0.0.0__b77a5c561934e089\mscorlib.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
-'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\assembly\GAC_MSIL\Microsoft.VisualStudio.HostingProcess.Utilities\11.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.HostingProcess.Utilities.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
-'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.Windows.Forms\v4.0_4.0.0.0__b77a5c561934e089\System.Windows.Forms.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
-'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.Drawing\v4.0_4.0.0.0__b03f5f7f11d50a3a\System.Drawing.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
-'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System\v4.0_4.0.0.0__b77a5c561934e089\System.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
-'ZebraCrossing_Test.vshost.exe' (Managed (v4.0.30319)): 已載入 'C:\Windows\assembly\GAC_MSIL\Microsoft.VisualStudio.HostingProcess.Utilities.Sync\11.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.HostingProcess.Utilities.Sync.dll'，並略過載入符號。模組已最佳化，並已啟用 [Just My Code] 偵錯工具選項。
+
 
 a =0.01226994,b = -221,c = -217.3436
 index =0Angle = -179.29701955075, slope = 0.0122699386503067, P1 = {X=135,Y=219}, P2 = {X=298,Y=221}, length = 163.012269476871

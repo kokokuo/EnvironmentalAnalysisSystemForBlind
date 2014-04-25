@@ -258,10 +258,12 @@ namespace ZebraCrossing_Test
                         bool interset = false;
                         for (int j = i + 1; j < candidateHoughLineEquations.Count; j++)
                         {
-                            interset = Intersect(candidateHoughLineEquations[i], candidateHoughLineEquations[j]);
+                            int x = 0, y = 0;
+                            interset = Intersect(candidateHoughLineEquations[i], candidateHoughLineEquations[j],out x,out y);//= Intersect(candidateHoughLineEquations[i], candidateHoughLineEquations[j],out x, out y);
                             if (interset)
                             {
-                                Console.WriteLine("Interset:" + interset + ",Line1 P1 = " + candidateHoughLineEquations[i].Line.P1 + ",Line1 P2 = " + candidateHoughLineEquations[i].Line.P2 + ", length = " + candidateHoughLineEquations[i].Line.Length +
+                                showLineImg.Draw(new CircleF(new PointF(x, y), 1), new Bgr(255, 255, 255), 3);
+                                Console.WriteLine("Interset:" + interset + "\nLine1 P1 = " + candidateHoughLineEquations[i].Line.P1 + ",Line1 P2 = " + candidateHoughLineEquations[i].Line.P2 + ", length = " + candidateHoughLineEquations[i].Line.Length +
                                     "\nLine2 P1 = " + candidateHoughLineEquations[j].Line.P1 + ",Line2 P2 = " + candidateHoughLineEquations[j].Line.P2 + ", length = " + candidateHoughLineEquations[j].Line.Length);
                             }
                         }
@@ -272,7 +274,9 @@ namespace ZebraCrossing_Test
             #endregion
             
         }
-     
+        
+
+
         private LineEquation GetLineEquation(LineSegment2D line) {
             float m = (line.P2.Y - line.P1.Y) / (float)(line.P2.X - line.P1.X);
             // y2 - y1 = m(x2 - x1)
@@ -286,15 +290,49 @@ namespace ZebraCrossing_Test
             return new LineEquation() { A = a, B = b,C = c,Line = line};
         }
 
-        private bool Intersect(LineEquation line1,LineEquation line2)
-        {
-            float v = (line1.A * line2.B) - line2.A * line1.B;
-            Console.WriteLine("v = " + v );
-            if (v != 0)
-                return true;
-            return false;
-        }
+        //private bool Intersect(LineEquation line1, LineEquation line2, out int x, out int y)
+        //{
+        //    float v = (line1.A * line2.B) - line2.A * line1.B;
+        //    Console.WriteLine("v = " + v);
+        //    if (v != 0)
+        //    {
+        //        float delta_x = (line1.C * line2.B) - line2.C * line1.B;
+        //        float delta_y = (line1.A * line2.C) - line2.A * line1.C;
 
+        //        x = Convert.ToInt32(delta_x / v);
+        //        y = Convert.ToInt32(delta_y / v);
+        //        Console.WriteLine("intersect x = " + x + ",intersect y = " + y);
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        x = -1;
+        //        y = -1;
+        //        return false;
+        //    }
+
+        //}
+
+        private bool Intersect(LineSegment2D line1, LineSegment2D line2) {
+
+            /*
+                a1 = (y2-y1)/(x2-x1)
+                b1 = y1 - a1*x1 
+                a2 = (y4-y3)/(x4-x3)
+                b2 = y3 - a2*x3
+             */
+            float a1 = (line1.P2.Y - line1.P1.Y) / (line1.P2.X - line1.P1.X);
+            float b1 = line1.P1.Y - a1 * line1.P1.X;
+            float a2 = (line2.P2.Y - line2.P1.Y) / (line2.P2.X - line2.P1.X);
+            float b2 = line2.P1.Y - a2 * line2.P1.X;
+            Console.WriteLine("line 1 slope = " + a1 + ", line 2 slope = " + a2);
+            if ((line1.P2.Y - line1.P1.Y) * (line2.P2.X - line2.P1.X) == (line1.P2.X - line1.P1.X) *line2.P2.Y - line2.P1.Y) )
+            {
+                if (Math.Abs(b1 - b2) == 0) { 
+                
+                }    
+            }
+        }
 
         private void contourButton_Click(object sender, EventArgs e)
         {
