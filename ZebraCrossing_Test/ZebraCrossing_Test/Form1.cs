@@ -43,8 +43,10 @@ namespace ZebraCrossing_Test
         bool isBlackPixelIncreased;
 
         private static Bgr[] drawLineColos;
-        
 
+        Image<Bgr, byte> showRepairedHoughLineImg;
+        int candiateLineEquation_i, candiateLineEquation_j;
+        ImageViewer repairHoughLineViewer;
         public Form1()
         {
             InitializeComponent();
@@ -70,9 +72,27 @@ namespace ZebraCrossing_Test
                 new Bgr(0,255,255),
                 new Bgr(0,0,255),
                 new Bgr(255,0,255),
+                new Bgr(255,0,128),
+                new Bgr(128,0,128),
+                new Bgr(128,0,255),
+                new Bgr(128,255,255),
+                new Bgr(128,128,255),
+                new Bgr(255,128,128),
+                new Bgr(255,128,0),
+                new Bgr(255,128,0),
             };
 
             candidateHoughLineEquations = new List<LineEquation>();
+            candiateLineEquation_i = 0;
+            candiateLineEquation_j = candiateLineEquation_i + 1;
+            repairHoughLineViewer = new ImageViewer();
+            repairHoughLineViewer.FormClosing += repairHoughLineViewer_FormClosing;
+        }
+
+        void repairHoughLineViewer_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true; //關閉視窗時取消
+            repairHoughLineViewer.Hide(); //隱藏式窗,下次再show出
         }
 
         void ContoursAndScanLineViewer_FormClosing(object sender, FormClosingEventArgs e)
@@ -244,30 +264,15 @@ namespace ZebraCrossing_Test
                         colorIndex++;
                     }
 
-                    Console.WriteLine("total detect lines = " + lines[0].Length);
+                    Console.WriteLine("total detect lines = " + lines[0].Length + "\n");
 
                     houghLineViewer.Image = showLineImg;
                     houghLineViewer.Text = "HoughLine 偵測畫面";
                     houghLineViewer.Show();
 
-                    new ImageViewer(onlyLineImg).Show();
+                    new ImageViewer(onlyLineImg,"純線段").Show();
 
 
-                    //計算線段方程式有無相交
-                    for (int i = 0; i < candidateHoughLineEquations.Count; i++) { 
-                        bool interset = false;
-                        for (int j = i + 1; j < candidateHoughLineEquations.Count; j++)
-                        {
-                            int x = 0, y = 0;
-                            interset = Intersect(candidateHoughLineEquations[i], candidateHoughLineEquations[j],out x,out y);//= Intersect(candidateHoughLineEquations[i], candidateHoughLineEquations[j],out x, out y);
-                            if (interset)
-                            {
-                                showLineImg.Draw(new CircleF(new PointF(x, y), 1), new Bgr(255, 255, 255), 3);
-                                Console.WriteLine("Interset:" + interset + "\nLine1 P1 = " + candidateHoughLineEquations[i].Line.P1 + ",Line1 P2 = " + candidateHoughLineEquations[i].Line.P2 + ", length = " + candidateHoughLineEquations[i].Line.Length +
-                                    "\nLine2 P1 = " + candidateHoughLineEquations[j].Line.P1 + ",Line2 P2 = " + candidateHoughLineEquations[j].Line.P2 + ", length = " + candidateHoughLineEquations[j].Line.Length);
-                            }
-                        }
-                    }
                 }
 
             }
@@ -279,60 +284,112 @@ namespace ZebraCrossing_Test
 
         private LineEquation GetLineEquation(LineSegment2D line) {
             float m = (line.P2.Y - line.P1.Y) / (float)(line.P2.X - line.P1.X);
-            // y2 - y1 = m(x2 - x1)
+            // y - y1 = m(x - x1)
             //ax + by = c 
-            //a = m, b = -y2, c = mx1 - y1
+            //a = m, b = -1, c = mx1 - y1
             float a = m;
-            float b = -line.P2.Y;
+            float b = -1;
             float c = m * line.P1.X - line.P1.Y;
             //http://dufu.math.ncu.edu.tw/calculus/calculus_bus/node11.html
             Console.WriteLine("a =" + a + ",b = " + b + ",c = " + c);
-            return new LineEquation() { A = a, B = b,C = c,Line = line};
+            return new LineEquation() { A = a, B = b,C = c, Slope = m,Line = line};
         }
 
-        //private bool Intersect(LineEquation line1, LineEquation line2, out int x, out int y)
-        //{
-        //    float v = (line1.A * line2.B) - line2.A * line1.B;
-        //    Console.WriteLine("v = " + v);
-        //    if (v != 0)
-        //    {
-        //        float delta_x = (line1.C * line2.B) - line2.C * line1.B;
-        //        float delta_y = (line1.A * line2.C) - line2.A * line1.C;
+        //共線或是相交
+        private bool Intersect(LineEquation line1, LineEquation line2, out int x, out int y)
+        {
+            //檢查共線(檢查向量 A,B,C三點,A->B 與B->C兩條向量會是比例關係 or A-B 與 A-C的斜率會依樣 or 向量叉積 A)
+            //使用 x1(y2- y3) + x2(y3- y1) + x3(y1- y2) = 0 面積公式 http://math.tutorvista.com/geometry/collinear-points.html
+            int x1 = line1.Line.P1.X;
+            int y1 = line1.Line.P1.Y;
+            int x2 = line1.Line.P2.X;
+            int y2 = line1.Line.P2.Y;
+            int x3 = line2.Line.P1.X;
+            int y3 = line2.Line.P2.Y;
 
-        //        x = Convert.ToInt32(delta_x / v);
-        //        y = Convert.ToInt32(delta_y / v);
-        //        Console.WriteLine("intersect x = " + x + ",intersect y = " + y);
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        x = -1;
-        //        y = -1;
-        //        return false;
-        //    }
-
-        //}
-
-        private bool Intersect(LineSegment2D line1, LineSegment2D line2) {
-
-            /*
-                a1 = (y2-y1)/(x2-x1)
-                b1 = y1 - a1*x1 
-                a2 = (y4-y3)/(x4-x3)
-                b2 = y3 - a2*x3
-             */
-            float a1 = (line1.P2.Y - line1.P1.Y) / (line1.P2.X - line1.P1.X);
-            float b1 = line1.P1.Y - a1 * line1.P1.X;
-            float a2 = (line2.P2.Y - line2.P1.Y) / (line2.P2.X - line2.P1.X);
-            float b2 = line2.P1.Y - a2 * line2.P1.X;
-            Console.WriteLine("line 1 slope = " + a1 + ", line 2 slope = " + a2);
-            if ((line1.P2.Y - line1.P1.Y) * (line2.P2.X - line2.P1.X) == (line1.P2.X - line1.P1.X) *line2.P2.Y - line2.P1.Y) )
-            {
-                if (Math.Abs(b1 - b2) == 0) { 
-                
-                }    
+            float v = (line1.A * line2.B) - line2.A * line1.B;
+            Console.WriteLine("line1 slope = " + line1.Slope + ", line 2 slope = " + line2.Slope);
+            Console.WriteLine("line1 P1 = " + line1.Line.P1 + ",line1 P2 = " + line1.Line.P2 + ", length = " + line1.Line.Length);
+            Console.WriteLine("line2 P1 = " + line2.Line.P1 + ",line2 P2 = " + line2.Line.P2 + ", length = " + line2.Line.Length);
+            //不太可能會有共線,需要給一個Range
+            //面積公式來看 1/2 * x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2) 如果小於1000可以是
+            //or 用A-B 與 A-C的斜率去看斜率誤差 約接近0表示共線高
+            Console.WriteLine(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));                            
+            if (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2) == 0) {
+                Console.WriteLine("共線" + "\n");
+                x = -1;
+                y = -1;
+                return true;
             }
+            else if(v != 0){  //代表兩條線段方程式不是平行
+                Console.WriteLine("相交");
+                Console.WriteLine("v = " + v);
+                float delta_x = (line1.C * line2.B) - line2.C * line1.B;
+                float delta_y = (line1.A * line2.C) - line2.A * line1.C;
+
+                x = Convert.ToInt32(delta_x / v);
+                y = Convert.ToInt32(delta_y / v);
+                Console.WriteLine("intersect x = " + x + ",intersect y = " + y + "\n");
+                return true;
+            }
+            else
+            {
+                x = -1;
+                y = -1;
+                Console.WriteLine("平行" + "\n");
+                return false;
+            }
+            
         }
+
+        private void restructLineButton_Click(object sender, EventArgs e)
+        {
+            
+            showRepairedHoughLineImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(Color.Black));
+            //透過點擊按鈕來實現一步一步的迴圈方式觀看
+            if (candiateLineEquation_i < candidateHoughLineEquations.Count){
+                bool interset = false;
+                if (candiateLineEquation_j < candidateHoughLineEquations.Count)
+                {
+                    int x = 0, y = 0;
+                    //是否共線或是相交的線段
+                    interset = Intersect(candidateHoughLineEquations[candiateLineEquation_i], candidateHoughLineEquations[candiateLineEquation_j], out x, out y);
+                    if (interset)
+                    {
+                        showRepairedHoughLineImg.Draw(new CircleF(new PointF(x, y), 1), new Bgr(255, 255, 255), 3);
+                       
+                        
+                    }
+                    //繪製正在比較有無共線或是相交的線段
+                    showRepairedHoughLineImg.Draw(candidateHoughLineEquations[candiateLineEquation_i].Line, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 1);
+                    showRepairedHoughLineImg.Draw(candidateHoughLineEquations[candiateLineEquation_j].Line, drawLineColos[(candiateLineEquation_j % drawLineColos.Length)], 1);
+                    candiateLineEquation_j++;
+
+                    repairHoughLineViewer.Image = showRepairedHoughLineImg;
+                }
+                else {
+                    //換到下一條比對的線段
+                    candiateLineEquation_i++;
+                    candiateLineEquation_j = candiateLineEquation_i + 1;
+                }
+
+            }
+            else {
+                MessageBox.Show("檢測完畢");
+                candiateLineEquation_i = 0;
+                candiateLineEquation_j = candiateLineEquation_i + 1;
+            
+            }
+
+           
+            repairHoughLineViewer.Text = "HoughLine 修復檢測";
+            if (repairHoughLineViewer.Visible) {
+                repairHoughLineViewer.Hide(); //隱藏式窗,下次再show出
+            }
+            repairHoughLineViewer.Show();
+            
+        }
+       
 
         private void contourButton_Click(object sender, EventArgs e)
         {
@@ -658,10 +715,9 @@ namespace ZebraCrossing_Test
             return x;
         }
 
-        private void detectZebraCrossingButton_Click(object sender, EventArgs e)
-        {
-            
-        }
+        
+
+        
        
     }
 
@@ -693,6 +749,7 @@ namespace ZebraCrossing_Test
         public float A { get; set; }
         public float B { get; set; }
         public float C { get; set; }
+        public float Slope { get; set; }
         public LineSegment2D Line{ get; set; }
     }
 }
