@@ -45,6 +45,7 @@
             this.filterPepperButton = new System.Windows.Forms.Button();
             this.findScanLineButton = new System.Windows.Forms.Button();
             this.restructLineButton = new System.Windows.Forms.Button();
+            this.replayRestrcutLinesButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.oriImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maskImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.grayImgBox)).BeginInit();
@@ -210,7 +211,7 @@
             // restructLineButton
             // 
             this.restructLineButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.restructLineButton.Location = new System.Drawing.Point(723, 95);
+            this.restructLineButton.Location = new System.Drawing.Point(723, 71);
             this.restructLineButton.Name = "restructLineButton";
             this.restructLineButton.Size = new System.Drawing.Size(220, 31);
             this.restructLineButton.TabIndex = 18;
@@ -218,11 +219,23 @@
             this.restructLineButton.UseVisualStyleBackColor = true;
             this.restructLineButton.Click += new System.EventHandler(this.restructLineButton_Click);
             // 
+            // replayRestrcutLinesButton
+            // 
+            this.replayRestrcutLinesButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.replayRestrcutLinesButton.Location = new System.Drawing.Point(949, 71);
+            this.replayRestrcutLinesButton.Name = "replayRestrcutLinesButton";
+            this.replayRestrcutLinesButton.Size = new System.Drawing.Size(220, 31);
+            this.replayRestrcutLinesButton.TabIndex = 19;
+            this.replayRestrcutLinesButton.Text = "步驟播放破碎線段連線";
+            this.replayRestrcutLinesButton.UseVisualStyleBackColor = true;
+            this.replayRestrcutLinesButton.Click += new System.EventHandler(this.replayRestrcutLinesButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1649, 706);
+            this.Controls.Add(this.replayRestrcutLinesButton);
             this.Controls.Add(this.restructLineButton);
             this.Controls.Add(this.findScanLineButton);
             this.Controls.Add(this.filterPepperButton);
@@ -268,6 +281,7 @@
         private System.Windows.Forms.Button filterPepperButton;
         private System.Windows.Forms.Button findScanLineButton;
         private System.Windows.Forms.Button restructLineButton;
+        private System.Windows.Forms.Button replayRestrcutLinesButton;
     }
 }
 
