@@ -45,10 +45,12 @@ namespace ZebraCrossing_Test
         private static Bgr[] drawLineColos;
 
         Image<Bgr, byte> showRepairedHoughLineStepImg;
+        Image<Bgr, byte> showSearchrepairedHoughLineStepImg;
         int candiateLineEquation_i, candiateLineEquation_j;
-        ImageViewer repairHoughLineStepViewer;
-        ImageViewer repairedHoughLineViwer;
-        List<LineSegment2D> repairedHoughLine;
+        ImageViewer repairedHoughLineStepViewer; //顯示修復線好段的步驟
+        ImageViewer searchRepairHoughLineStepViewer; //顯示尋找各線段是否可以修復的步驟
+        ImageViewer repairedHoughLineViwer; //顯示全部修復好的線段
+        List<LineSegment2D> repairedHoughLine; //紀錄修復後的所有線段
         public Form1()
         {
             InitializeComponent();
@@ -87,11 +89,27 @@ namespace ZebraCrossing_Test
             candidateHoughLineEquations = new List<LineEquation>();
             candiateLineEquation_i = 0;
             candiateLineEquation_j = candiateLineEquation_i + 1;
-            repairHoughLineStepViewer = new ImageViewer();
-            repairHoughLineStepViewer.FormClosing += repairHoughLineViewer_FormClosing;
+            
             repairedHoughLine = new List<LineSegment2D>();
+
+            //初始化 修復線段步驟的尋找可否修復圖
+            repairedHoughLineStepViewer = new ImageViewer();
+            repairedHoughLineStepViewer.FormClosing += repairHoughLineViewer_FormClosing;
+          
+
             repairedHoughLineViwer = new ImageViewer();
             repairedHoughLineViwer.FormClosing += repairedHoughLineViwer_FormClosing;
+
+            //初始化 修復線段步驟的修復圖
+            searchRepairHoughLineStepViewer = new ImageViewer();
+            searchRepairHoughLineStepViewer.FormClosing += searchRepairHoughLineStepViewer_FormClosing;
+           
+        }
+
+        void searchRepairHoughLineStepViewer_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true; //關閉視窗時取消
+            searchRepairHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
         }
 
         void repairedHoughLineViwer_FormClosing(object sender, FormClosingEventArgs e)
@@ -103,7 +121,7 @@ namespace ZebraCrossing_Test
         void repairHoughLineViewer_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true; //關閉視窗時取消
-            repairHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
+            repairedHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
         }
 
         void ContoursAndScanLineViewer_FormClosing(object sender, FormClosingEventArgs e)
@@ -226,6 +244,37 @@ namespace ZebraCrossing_Test
             }
         }
 
+        #region 圖像處理 去雜訊 膨脹
+
+        private void dilateButton_Click(object sender, EventArgs e)
+        {
+            if (maskWhiteImg != null)
+            {
+                //膨脹
+                maskWhiteImg = maskWhiteImg.Dilate(1);
+
+                filterImageBox.Image = maskWhiteImg;
+            }
+            else
+            {
+                MessageBox.Show("尚未Mask");
+            }
+        }
+
+        private void filterPepperButton_Click(object sender, EventArgs e)
+        {
+            if (maskWhiteImg != null)
+            {
+                //用中值濾波去雜訊
+                maskWhiteImg = maskWhiteImg.SmoothMedian(3);
+                filterImageBox.Image = maskWhiteImg;
+            }
+            else
+            {
+                MessageBox.Show("尚未Mask");
+            }
+        }
+        #endregion
 
         private void houghLineButton_Click(object sender, EventArgs e)
         {
@@ -364,9 +413,15 @@ namespace ZebraCrossing_Test
                 x = Convert.ToInt32(delta_x / v);
                 y = Convert.ToInt32(delta_y / v);
                 Console.WriteLine("intersect x = " + x + ",intersect y = " + y + "\n");
-
-                repaiedLine = RepaiedHoughLine(points);
-                return true;
+                if (x < 0 || x > oriImg.Width || y < 0 || y > oriImg.Height) {
+                    Console.WriteLine("相交但超出畫面");
+                    return false;
+                }
+                else
+                {
+                    repaiedLine = RepaiedHoughLine(points);
+                    return true;
+                }
             }
             else
             {
@@ -384,7 +439,7 @@ namespace ZebraCrossing_Test
             showRepairedHoughLineStepImg = oriImg.Copy();
             for (int i = 0; i < candidateHoughLineEquations.Count; i++) {
                  bool intersect = false;
-                 for (int j = i + 1; i < candidateHoughLineEquations.Count; j++){
+                 for (int j = i + 1; j < candidateHoughLineEquations.Count; j++){
                      int x = 0, y = 0;
                      //是否共線或是相交的線段
                      LineSegment2D repairedLine = new LineSegment2D();
@@ -403,6 +458,10 @@ namespace ZebraCrossing_Test
         private void replayRestrcutLinesButton_Click(object sender, EventArgs e)
         {
             showRepairedHoughLineStepImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(Color.Black));
+            showSearchrepairedHoughLineStepImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(Color.Black));
+            //清空原先的資料
+            repairedHoughLine.Clear();
+
             //透過點擊按鈕來實現一步一步的迴圈方式觀看
             if (candiateLineEquation_i < candidateHoughLineEquations.Count)
             {
@@ -418,15 +477,17 @@ namespace ZebraCrossing_Test
                     if (interset)
                     {
                         showRepairedHoughLineStepImg.Draw(new CircleF(new PointF(x, y), 1), new Bgr(255, 255, 255), 3);
-
-                        
+                        repairedHoughLine.Add(repairedLine);
+                        //繪製新的線段
+                        showSearchrepairedHoughLineStepImg.Draw(repairedLine, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 1);
                     }
                     //繪製正在比較有無共線或是相交的線段
                     showRepairedHoughLineStepImg.Draw(candidateHoughLineEquations[candiateLineEquation_i].Line, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 1);
                     showRepairedHoughLineStepImg.Draw(candidateHoughLineEquations[candiateLineEquation_j].Line, drawLineColos[(candiateLineEquation_j % drawLineColos.Length)], 1);
                     candiateLineEquation_j++;
 
-                    repairHoughLineStepViewer.Image = showRepairedHoughLineStepImg;
+                    repairedHoughLineStepViewer.Image = showRepairedHoughLineStepImg;
+                    searchRepairHoughLineStepViewer.Image = showSearchrepairedHoughLineStepImg;
                 }
                 else
                 {
@@ -445,23 +506,33 @@ namespace ZebraCrossing_Test
             }
 
 
-            repairHoughLineStepViewer.Text = "HoughLine 修復檢測";
-            if (repairHoughLineStepViewer.Visible)
+            repairedHoughLineStepViewer.Text = "HoughLine 修復檢測";
+            if (repairedHoughLineStepViewer.Visible)
             {
-                repairHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
+                repairedHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
             }
-            repairHoughLineStepViewer.Show();
+            repairedHoughLineStepViewer.Show();
+
+            searchRepairHoughLineStepViewer.Text = "HoughLine 修復完成檢測";
+            if (searchRepairHoughLineStepViewer.Visible)
+            {
+                searchRepairHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
+            }
+            searchRepairHoughLineStepViewer.Show();
+            
         }
 
-
+        #region 尋找斑馬線的黑白特徵
+        //////////////////////////////////////////////////////////////
         private void contourButton_Click(object sender, EventArgs e)
         {
             if (maskWhiteImg != null)
             {
-                
+
 
                 Contour<Point> contours = DoContours(maskWhiteImg);
-                using (Image<Bgr, byte> showContoursImg = oriImg.Copy()) {
+                using (Image<Bgr, byte> showContoursImg = oriImg.Copy())
+                {
                     //繪製所有輪廓
                     while (contours.HNext != null)
                     {
@@ -474,9 +545,9 @@ namespace ZebraCrossing_Test
                             showContoursImg.Draw(contours.BoundingRectangle, new Bgr(Color.Yellow), 1);
                             //加入候選斑馬線
                             candidateZebraCrossingsByContour.Add(contours.BoundingRectangle);
-                            
+
                         }
-                        
+
                         Console.WriteLine("Width = " + contours.BoundingRectangle.Width + ",Height = " + contours.BoundingRectangle.Height + ",h/w = " + ratio);
                         //繪製輪廓
                         //showContoursImg.Draw(contours, new Bgr(Color.Yellow), new Bgr(Color.GreenYellow), 1, 2);
@@ -487,10 +558,11 @@ namespace ZebraCrossing_Test
                     contourImageBox.Image = showContoursImg;
                 }
             }
-            else {
+            else
+            {
                 MessageBox.Show("尚未Mask");
             }
-           
+
         }
 
         #region 取輪廓
@@ -565,56 +637,28 @@ namespace ZebraCrossing_Test
         //////////////////////////////////////////////////////////////////////////////////////////////
         #endregion
 
-
-
-        private void dilateButton_Click(object sender, EventArgs e)
-        {
-            if (maskWhiteImg != null)
-            {
-                //膨脹
-                maskWhiteImg = maskWhiteImg.Dilate(1);
-                
-                filterImageBox.Image = maskWhiteImg;
-            }
-            else {
-                MessageBox.Show("尚未Mask");
-            }
-        }
-
-        private void filterPepperButton_Click(object sender, EventArgs e)
-        {
-            if (maskWhiteImg != null)
-            {
-                //用中值濾波去雜訊
-                maskWhiteImg = maskWhiteImg.SmoothMedian(3);
-                filterImageBox.Image = maskWhiteImg;
-            }
-            else
-            {
-                MessageBox.Show("尚未Mask");
-            }
-        }
-
         private void findScanLineButton_Click(object sender, EventArgs e)
         {
-       
+
             Point prePoint = new Point();
             Point currentPoint = new Point();
-            
+
             //依照y軸座標排序
             var zebras = from boundingBox in candidateZebraCrossingsByContour orderby boundingBox.Y select boundingBox;
-            foreach (Rectangle rec in zebras) {
-                if(!currentPoint.IsEmpty)
+            foreach (Rectangle rec in zebras)
+            {
+                if (!currentPoint.IsEmpty)
                     prePoint = currentPoint;
                 currentPoint = new Point((rec.X + rec.Width / 2), (rec.Y + rec.Height / 2));
 
                 //兩點 =>存放線條,並繪製
-                if (!currentPoint.IsEmpty && !prePoint.IsEmpty){
+                if (!currentPoint.IsEmpty && !prePoint.IsEmpty)
+                {
                     LineSegment2DF line = new LineSegment2DF(prePoint, currentPoint);
                     //記錄每一條線段
                     crossingConnectionlines.Add(line);
                     Console.WriteLine("draw Line:direction ,x = " + line.Direction.X + "y =" + line.Direction.Y + ",point p1.x =" + prePoint.X + ",p1.y = " + prePoint.Y + ", p2.x =" + currentPoint.X + ",p2.y = " + currentPoint.Y);
-                    showScanlineImg.Draw(new LineSegment2DF(prePoint, currentPoint),new Bgr(Color.Azure),2);
+                    showScanlineImg.Draw(new LineSegment2DF(prePoint, currentPoint), new Bgr(Color.Azure), 2);
                 }
                 Console.WriteLine("center x =" + currentPoint.X + ",y = " + currentPoint.Y);
                 showScanlineImg.Draw(new CircleF(currentPoint, 1), new Bgr(Color.Blue), 3);
@@ -630,9 +674,10 @@ namespace ZebraCrossing_Test
             DoBlackWhiteStatistics(crossingConnectionlines);
         }
 
-        private void DoBlackWhiteStatistics(List<LineSegment2DF> lines) {
+        private void DoBlackWhiteStatistics(List<LineSegment2DF> lines)
+        {
             //寬480是圖片高(等於垂直走訪的話,最多的pixel),高Intensity是255,但拉高到300好方便觀看
-            Image<Bgr, byte> showBlackWhiteCurve = new Image<Bgr, byte>(480,300,new Bgr(Color.White));
+            Image<Bgr, byte> showBlackWhiteCurve = new Image<Bgr, byte>(480, 300, new Bgr(Color.White));
             Image<Bgr, byte> showBlackIncreasedCurve = new Image<Bgr, byte>(480, 300, new Bgr(Color.White));
             int x = 0; // 要尋訪的起點
             IntensityPoint current, previous;
@@ -655,7 +700,7 @@ namespace ZebraCrossing_Test
             {
                 float nextX;
                 float nextY = line.P1.Y;
-                
+
                 //新增一條線
                 blackWhiteHistograms.Add(new Dictionary<int, int>());
                 blackWhiteHistograms[index][0] = 0;
@@ -675,11 +720,13 @@ namespace ZebraCrossing_Test
                     current.SetData(new PointF(nextX, nextY), pixel.Intensity);
 
                     //判斷像素的變化是Peak-Valley的狀態
-                    if (peakValleyCheckPoint[0] == false) {
+                    if (peakValleyCheckPoint[0] == false)
+                    {
                         if (pixel.Intensity == 255) //White
                             peakValleyCheckPoint[0] = true;
                     }
-                    else if (peakValleyCheckPoint[0] == true && peakValleyCheckPoint[1] == false) {
+                    else if (peakValleyCheckPoint[0] == true && peakValleyCheckPoint[1] == false)
+                    {
                         if (pixel.Intensity == 0) //Black
                             peakValleyCheckPoint[1] = true;
                     }
@@ -694,16 +741,18 @@ namespace ZebraCrossing_Test
 
                     //繪製圖型======================================================================
                     //繪製呈現用，斑馬線黑白像素經過的圖形
-                    int projectY = Math.Abs((int)current.GetIntensity() - 300); 
-                    if (!current.IsEmpty() && !previous.IsEmpty()){
+                    int projectY = Math.Abs((int)current.GetIntensity() - 300);
+                    if (!current.IsEmpty() && !previous.IsEmpty())
+                    {
                         float prevPorjectY = Math.Abs((float)previous.GetIntensity() - 300);
-                        showBlackWhiteCurve.Draw(new LineSegment2DF(new PointF(x - 2, projectY), new PointF(x, prevPorjectY )), new Bgr(Color.Red), 1);
+                        showBlackWhiteCurve.Draw(new LineSegment2DF(new PointF(x - 2, projectY), new PointF(x, prevPorjectY)), new Bgr(Color.Red), 1);
                     }
-                    else {
-                        showBlackWhiteCurve.Draw(new LineSegment2DF(new PointF(0, 300), new PointF(x, projectY )), new Bgr(Color.Red), 1);
+                    else
+                    {
+                        showBlackWhiteCurve.Draw(new LineSegment2DF(new PointF(0, 300), new PointF(x, projectY)), new Bgr(Color.Red), 1);
                     }
-                    showBlackWhiteCurve.Draw(new CircleF(new PointF(x, projectY ), 1), new Bgr(Color.Blue), 1);
-                    x+=2; //跳2,用來方便顯示圖形時可以比較清晰
+                    showBlackWhiteCurve.Draw(new CircleF(new PointF(x, projectY), 1), new Bgr(Color.Blue), 1);
+                    x += 2; //跳2,用來方便顯示圖形時可以比較清晰
                     //繪製圖型======================================================================
 
                     //設定前一筆
@@ -711,25 +760,26 @@ namespace ZebraCrossing_Test
 
                     //步進Y
                     nextY++;
-                    
+
                 }
                 //如果有一個不是true,則代表不是peak valley的形狀
                 if (peakValleyCheckPoint[0] == false || peakValleyCheckPoint[1] == false || peakValleyCheckPoint[2] == false)
                 {
                     isBlackWhiteCrossing = false;
-                    
+
                 }
                 Console.WriteLine("Peak Valley State [0] =" + peakValleyCheckPoint[0] + ",[1] = " + peakValleyCheckPoint[1] + ",[2] = " + peakValleyCheckPoint[2]);
                 //初始化回來再看新的線段
                 peakValleyCheckPoint[0] = peakValleyCheckPoint[1] = peakValleyCheckPoint[2] = false;
 
                 index++; //記錄下一條線
-               
+
             }
 
-            x =10;
+            x = 10;
             //顯示每條線段的統計量
-            for (int i = 0; i < blackWhiteHistograms.Count;i++ ){
+            for (int i = 0; i < blackWhiteHistograms.Count; i++)
+            {
                 Console.WriteLine("Line[" + i + "] ,statistic : black = " + blackWhiteHistograms[i][0] + ", white = " + blackWhiteHistograms[i][255] + ",ratio = " + (blackWhiteHistograms[i][0] / (float)blackWhiteHistograms[i][255]));
 
                 //繪製圖型======================================================================
@@ -749,34 +799,44 @@ namespace ZebraCrossing_Test
                 //繪製圖型======================================================================
 
                 //判斷Black像素是否越來越多
-                if (previousBlackPixels != -1){
-                    if (previousBlackPixels > blackWhiteHistograms[i][0]) {
+                if (previousBlackPixels != -1)
+                {
+                    if (previousBlackPixels > blackWhiteHistograms[i][0])
+                    {
                         isBlackPixelIncreased = false;
                     }
                     previousBlackPixels = blackWhiteHistograms[i][0];
                 }
-                else {
+                else
+                {
                     previousBlackPixels = blackWhiteHistograms[i][0];
                 }
-            
-                
+
+
             }
             Console.WriteLine("Black pixel increased? =>" + isBlackWhiteCrossing);
-            ImageViewer blackIncreasedCurve = new ImageViewer(showBlackIncreasedCurve,"Statistic of black pixels curve");
+            ImageViewer blackIncreasedCurve = new ImageViewer(showBlackIncreasedCurve, "Statistic of black pixels curve");
             blackIncreasedCurve.Show();
 
-            ImageViewer blackWhiteScanCurve = new ImageViewer(showBlackWhiteCurve,"Scan Line Curve");
+            ImageViewer blackWhiteScanCurve = new ImageViewer(showBlackWhiteCurve, "Scan Line Curve");
             blackWhiteScanCurve.Show();
         }
         //計算直線方程式，並求x座標來取出圖片像素
         private float GetXPositionFromLineEquations(PointF p1, PointF p2, float y)
-        { 
+        {
             float m = (p2.Y - p1.Y) / (float)(p2.X - p1.X);
             // y - y0 = m(x - x0)
             float x = ((y - p2.Y) / m) + p2.X;
             //Console.WriteLine("y =" + y + "and find x=" + x);
             return x;
         }
+
+        #endregion
+        
+
+        
+
+       
 
       
         
