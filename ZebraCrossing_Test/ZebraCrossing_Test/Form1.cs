@@ -33,6 +33,8 @@ namespace ZebraCrossing_Test
         List<LineSegment2DF> crossingConnectionlines;
         //取得線偵測並過濾角度後的線段方程式
         List<LineEquation> candidateHoughLineEquations;
+        //取得線偵測並過濾角度後的線段方程式(播放用)
+        List<LineEquation> candidateHoughLineEquationsForReplay;
 
         //顯示繪製ScanLine的圖
         Image<Bgr, byte> showScanlineImg;
@@ -44,7 +46,8 @@ namespace ZebraCrossing_Test
 
         private static Bgr[] drawLineColos;
 
-        Image<Bgr, byte> showRepairedHoughLineStepImg;
+        Image<Bgr, byte> showFinishedRepairedHoughLineStepImg;
+        Image<Bgr, byte> showFinishedRepairedHoughLineImg;
         Image<Bgr, byte> showSearchrepairedHoughLineStepImg;
         int candiateLineEquation_i, candiateLineEquation_j;
         ImageViewer repairedHoughLineStepViewer; //顯示修復線好段的步驟
@@ -181,6 +184,10 @@ namespace ZebraCrossing_Test
                 crossingConnectionlines.Clear();
                 //預設是假設都為True
                 isBlackWhiteCrossing = isBlackPixelIncreased = true;
+
+                candidateHoughLineEquations.Clear();
+                repairedHoughLine.Clear();
+                
             }
         }
 
@@ -238,6 +245,9 @@ namespace ZebraCrossing_Test
                 oriImg = oriImg.Copy();
                 oriImg.ROI = new Rectangle(new Point(0, 240), new Size(640, 320));
                 oriImageBox.Image = oriImg;
+
+                //先先取得要做houghline步驟的圖片
+                showFinishedRepairedHoughLineStepImg = oriImg.Copy();
             }
             else {
                 MessageBox.Show("尚未載入圖片");
@@ -306,6 +316,8 @@ namespace ZebraCrossing_Test
 
                         double slope = (line.P2.Y - line.P1.Y) / Convert.ToDouble(line.P2.X - line.P1.X);
                         double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
+                        showLineImg.Draw(line, new Bgr(0, 0, 0), 2);
+                        onlyLineImg.Draw(line, new Bgr(255, 255, 255), 2);
                         if ((angle > 160 && angle < 190) || (angle > -190 && angle < -160) )
                         {
                             showLineImg.Draw(line, drawLineColos[(colorIndex % drawLineColos.Length)], 2);
@@ -316,10 +328,10 @@ namespace ZebraCrossing_Test
                             //計算並取得線段的直線方程式
                             LineEquation eqation = GetLineEquation(line);
                             candidateHoughLineEquations.Add(eqation);
+                            candidateHoughLineEquationsForReplay.Add(eqation);
                         }
                         Console.WriteLine("index =" + colorIndex + "Angle = " + angle + ", slope = " + slope + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
-                        showLineImg.Draw(line, new Bgr(0, 0, 0), 1);
-                        onlyLineImg.Draw(line, new Bgr(0, 0, 0), 1);
+                        
 
                         colorIndex++;
                     }
@@ -332,7 +344,7 @@ namespace ZebraCrossing_Test
 
                     new ImageViewer(onlyLineImg,"純線段").Show();
 
-
+                    
                 }
 
             }
@@ -351,7 +363,7 @@ namespace ZebraCrossing_Test
             float b = -1;
             float c = m * line.P1.X - line.P1.Y;
             //http://dufu.math.ncu.edu.tw/calculus/calculus_bus/node11.html
-            Console.WriteLine("a =" + a + ",b = " + b + ",c = " + c);
+            //Console.WriteLine("a =" + a + ",b = " + b + ",c = " + c);
             return new LineEquation() { A = a, B = b,C = c, Slope = m,Line = line};
         }
 
@@ -361,9 +373,9 @@ namespace ZebraCrossing_Test
             Point rightPoint = ps[0];
             for (int i = 1; i < ps.Length; i++)
             {
-                if (ps[i].X < leftPoint.X)
+                if (ps[i].X <= leftPoint.X)
                     leftPoint = ps[i];
-                if (ps[i].X > rightPoint.X)
+                if (ps[i].X >= rightPoint.X)
                     rightPoint = ps[i];
             }
             return new LineSegment2D(leftPoint,rightPoint);
@@ -382,39 +394,39 @@ namespace ZebraCrossing_Test
             int y3 = line2.Line.P2.Y;
 
             float v = (line1.A * line2.B) - line2.A * line1.B;
-            Console.WriteLine("line1 slope = " + line1.Slope + ", line 2 slope = " + line2.Slope);
-            Console.WriteLine("line1 P1 = " + line1.Line.P1 + ",line1 P2 = " + line1.Line.P2 + ", length = " + line1.Line.Length);
-            Console.WriteLine("line2 P1 = " + line2.Line.P1 + ",line2 P2 = " + line2.Line.P2 + ", length = " + line2.Line.Length);
+            //Console.WriteLine("line1 slope = " + line1.Slope + ", line 2 slope = " + line2.Slope);
+            //Console.WriteLine("line1 P1 = " + line1.Line.P1 + ",line1 P2 = " + line1.Line.P2 + ", length = " + line1.Line.Length);
+            //Console.WriteLine("line2 P1 = " + line2.Line.P1 + ",line2 P2 = " + line2.Line.P2 + ", length = " + line2.Line.Length);
             //不太可能會有共線,需要給一個Range
             //面積公式來看 1/2 * x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2) 如果小於1000可以是
             //or 用A-B 與 A-C的斜率去看斜率誤差 約接近0表示共線高
-            Console.WriteLine("面積公式 = " + Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)));
+            Console.WriteLine("面積公式 = " + Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) + " y3 -y1 = " + Math.Abs(y3 - y1));
             float p1p2Slope = (y2 - y1) / (float)(x2 - x1);
             float p1p3Slope = (y3 - y1) / (float)(x3 - x1);
-            Console.WriteLine("Slope p1 -> p2 = " +p1p2Slope+ ", Slope p1 -> p3 ="+ p1p3Slope + "差距值 = " + Math.Abs(Math.Abs(p1p2Slope) - Math.Abs(p1p3Slope)));
+            //Console.WriteLine("Slope p1 -> p2 = " +p1p2Slope+ ", Slope p1 -> p3 ="+ p1p3Slope + "差距值 = " + Math.Abs(Math.Abs(p1p2Slope) - Math.Abs(p1p3Slope)));
 
             //尋找兩端點
             Point[] points = new Point[] { line1.Line.P1, line1.Line.P2, line2.Line.P1, line2.Line.P2 };
 
-            if (Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) < 1000)
+            if (Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) < 1000 && Math.Abs(y3 - y1) < 5) //y3 - y1表示距離
             {
-                Console.WriteLine("共線" + "\n");
+                //Console.WriteLine("共線" + "\n");
                 x = -1;
                 y = -1;
                 repaiedLine = RepaiedHoughLine(points);
                 return true;
             }
-            else if(v != 0){  //代表兩條線段方程式不是平行
-                Console.WriteLine("相交");
-                Console.WriteLine("v = " + v);
+            else if(v != 0 && Math.Abs(y3 - y1) <10){  //代表兩條線段方程式不是平行,y3 - y1表示距離
+                //Console.WriteLine("相交");
+                //Console.WriteLine("v = " + v);
                 float delta_x = (line1.C * line2.B) - line2.C * line1.B;
                 float delta_y = (line1.A * line2.C) - line2.A * line1.C;
 
                 x = Convert.ToInt32(delta_x / v);
                 y = Convert.ToInt32(delta_y / v);
-                Console.WriteLine("intersect x = " + x + ",intersect y = " + y + "\n");
+                //Console.WriteLine("intersect x = " + x + ",intersect y = " + y + "\n");
                 if (x < 0 || x > oriImg.Width || y < 0 || y > oriImg.Height) {
-                    Console.WriteLine("相交但超出畫面");
+                    //Console.WriteLine("相交但超出畫面");
                     return false;
                 }
                 else
@@ -427,73 +439,107 @@ namespace ZebraCrossing_Test
             {
                 x = -1;
                 y = -1;
-                Console.WriteLine("平行" + "\n");
-                return true;
+                //Console.WriteLine("平行" + "\n");
+                return false;
             }
             
         }
 
         private void restructLineButton_Click(object sender, EventArgs e)
         {
-            
-            showRepairedHoughLineStepImg = oriImg.Copy();
-            for (int i = 0; i < candidateHoughLineEquations.Count; i++) {
-                 bool intersect = false;
-                 for (int j = i + 1; j < candidateHoughLineEquations.Count; j++){
-                     int x = 0, y = 0;
-                     //是否共線或是相交的線段
-                     LineSegment2D repairedLine = new LineSegment2D();
-                     intersect = Intersect(candidateHoughLineEquations[i], candidateHoughLineEquations[j], out x, out y, ref repairedLine);
-                     if (intersect)
-                     {
-                         showRepairedHoughLineStepImg.Draw(new CircleF(new PointF(x, y), 1), new Bgr(255, 255, 255), 3);
-
-
+            showFinishedRepairedHoughLineImg = oriImg.Copy();
+            int i = 0;
+            //ToArray避開刪除後的List長度問題
+            foreach (LineEquation eq in candidateHoughLineEquations.ToArray()) {
+                bool intersect = false;
+                foreach (LineEquation matchEq in candidateHoughLineEquations.ToArray()) {
+                    if (matchEq == eq)
+                        continue;
+                     else{
+                         int x = 0, y = 0;
+                         //是否共線或是相交的線段
+                         LineSegment2D repairedLine = new LineSegment2D();
+                         intersect = Intersect(eq, matchEq, out x, out y, ref repairedLine);
+                         if (intersect)
+                         {
+                             repairedHoughLine.Add(repairedLine);
+                             //改掉原先的線段
+                             eq.Line = repairedLine;
+                             //並刪除被比較的線段
+                             candidateHoughLineEquations.Remove(matchEq);
+                           
+                         }
                      }
-                 }
+                }
+                repairedHoughLine.Add(eq.Line);
+                //並把這次比過的線段畫上去
+                showFinishedRepairedHoughLineImg.Draw(eq.Line, drawLineColos[(i % drawLineColos.Length)], 2);
+                i++;
             }
-            
-            
+
+            repairedHoughLineViwer.Image = showFinishedRepairedHoughLineImg;
+            repairedHoughLineViwer.Text = "HoughLine 修復完成";
+            if (repairedHoughLineViwer.Visible)
+            {
+                repairedHoughLineViwer.Hide(); //隱藏式窗,下次再show出
+            }
+            repairedHoughLineViwer.Show();
+
+           
         }
         private void replayRestrcutLinesButton_Click(object sender, EventArgs e)
         {
-            showRepairedHoughLineStepImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(Color.Black));
             showSearchrepairedHoughLineStepImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(Color.Black));
-            //清空原先的資料
-            repairedHoughLine.Clear();
-
             //透過點擊按鈕來實現一步一步的迴圈方式觀看
-            if (candiateLineEquation_i < candidateHoughLineEquations.Count)
+            if (candiateLineEquation_i < candidateHoughLineEquationsForReplay.Count)
             {
                 bool interset = false;
-                if (candiateLineEquation_j < candidateHoughLineEquations.Count)
+                if (candiateLineEquation_j < candidateHoughLineEquationsForReplay.Count)
                 {
+                    
                     int x = 0, y = 0;
                     LineSegment2D repairedLine = new LineSegment2D();
                     //預設資料都是0
                     Console.WriteLine(repairedLine.Length + "," + repairedLine.P1 + "," + repairedLine.P2);
-                    //是否共線或是相交的線段
-                    interset = Intersect(candidateHoughLineEquations[candiateLineEquation_i], candidateHoughLineEquations[candiateLineEquation_j], out x, out y,ref repairedLine);
+
+                    //繪製正在比較有無共線或是相交的線段
+                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 1);
+                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_j].Line, drawLineColos[(candiateLineEquation_j % drawLineColos.Length)], 1);
+                    
+                    //判斷是否共線或是相交的線段
+                    interset = Intersect(candidateHoughLineEquationsForReplay[candiateLineEquation_i], candidateHoughLineEquationsForReplay[candiateLineEquation_j], out x, out y, ref repairedLine);
                     if (interset)
                     {
-                        showRepairedHoughLineStepImg.Draw(new CircleF(new PointF(x, y), 1), new Bgr(255, 255, 255), 3);
+                        showSearchrepairedHoughLineStepImg.Draw(new CircleF(new PointF(x, y), 1), new Bgr(255, 255, 255), 1);
                         repairedHoughLine.Add(repairedLine);
-                        //繪製新的線段
-                        showSearchrepairedHoughLineStepImg.Draw(repairedLine, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 1);
-                    }
-                    //繪製正在比較有無共線或是相交的線段
-                    showRepairedHoughLineStepImg.Draw(candidateHoughLineEquations[candiateLineEquation_i].Line, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 1);
-                    showRepairedHoughLineStepImg.Draw(candidateHoughLineEquations[candiateLineEquation_j].Line, drawLineColos[(candiateLineEquation_j % drawLineColos.Length)], 1);
-                    candiateLineEquation_j++;
 
-                    repairedHoughLineStepViewer.Image = showRepairedHoughLineStepImg;
+                        //改掉原先的線段
+                        candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line = repairedLine;
+                        //並刪除被比較的線段
+                        candidateHoughLineEquationsForReplay.RemoveAt(candiateLineEquation_j);
+                    }
+                    //如果是自己則跳過
+                    if (candiateLineEquation_j + 1 == candiateLineEquation_i)
+                    {
+                        candiateLineEquation_j += 2;
+
+                    }
+                    else
+                        candiateLineEquation_j++;
+
+                  
+                    repairedHoughLineStepViewer.Image = showFinishedRepairedHoughLineStepImg;
                     searchRepairHoughLineStepViewer.Image = showSearchrepairedHoughLineStepImg;
                 }
                 else
                 {
+                    //並把這次比過的線段畫上去
+                    showFinishedRepairedHoughLineStepImg.Draw(candidateHoughLineEquations[candiateLineEquation_i].Line, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 2);
                     //換到下一條比對的線段
                     candiateLineEquation_i++;
-                    candiateLineEquation_j = candiateLineEquation_i + 1;
+                    //都從0開始比，並跳過自己
+                    candiateLineEquation_j = 0;
+                    
                 }
 
             }
@@ -502,18 +548,18 @@ namespace ZebraCrossing_Test
                 MessageBox.Show("檢測完畢");
                 candiateLineEquation_i = 0;
                 candiateLineEquation_j = candiateLineEquation_i + 1;
-
+                showSearchrepairedHoughLineStepImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(Color.Black));
             }
 
 
-            repairedHoughLineStepViewer.Text = "HoughLine 修復檢測";
+            repairedHoughLineStepViewer.Text = "HoughLine 修復檢測完成";
             if (repairedHoughLineStepViewer.Visible)
             {
                 repairedHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
             }
             repairedHoughLineStepViewer.Show();
 
-            searchRepairHoughLineStepViewer.Text = "HoughLine 修復完成檢測";
+            searchRepairHoughLineStepViewer.Text = "HoughLine 修復檢測";
             if (searchRepairHoughLineStepViewer.Visible)
             {
                 searchRepairHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
