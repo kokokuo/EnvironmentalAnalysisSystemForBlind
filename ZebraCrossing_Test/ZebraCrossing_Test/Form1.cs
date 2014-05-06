@@ -184,7 +184,7 @@ namespace ZebraCrossing_Test
             if (filename !=null)
             {
                 oriImg = new Image<Bgr, byte>(filename);
-                oriImg = oriImg.Resize(640, 480, INTER.CV_INTER_LINEAR);
+                oriImg = oriImg.Resize(400, 300, INTER.CV_INTER_LINEAR);
                 oriImageBox.Image = oriImg;
 
                 //清空先前的資料
@@ -199,11 +199,19 @@ namespace ZebraCrossing_Test
               
                 repairedHoughLine.Clear();
                 
+                //Auto測驗
+                //ToCrop();
+                //ToGray();
+                //MaskWhite();
+                //filterPepper();
+                //DoHoughLine("灰階");
+                //Smooth();
+                //DoHoughLine("灰階模糊");
             }
         }
 
-        private void maskImgButton_Click(object sender, EventArgs e)
-        {
+        private void MaskWhite() {
+
             //oriImg 與 grayImg 測試
             if (grayImg != null)
             {
@@ -218,38 +226,54 @@ namespace ZebraCrossing_Test
 
                     MessageBox.Show(ex.Message);
                 }
-               
+
             }
             else
             {
                 MessageBox.Show("取消此功能");
             }
+        
+        }
+        private void maskImgButton_Click(object sender, EventArgs e)
+        {
+            MaskWhite();
         }
 
-        //先灰階再模糊 以去除Mask時的雜訊白點，增加足夠有利的線段
-        private void smoothButton_Click(object sender, EventArgs e)
-        {
+        private void Smooth() {
+
             if (oriImg != null)
             {
                 grayImg = oriImg.Convert<Gray, byte>();
                 CvInvoke.cvSmooth(grayImg, grayImg, SMOOTH_TYPE.CV_GAUSSIAN, 13, 13, 1.5, 1);
                 grayImgBox.Image = grayImg;
             }
+            
         }
 
-        private void toGrayButton_Click(object sender, EventArgs e)
+        //先灰階再模糊 以去除Mask時的雜訊白點，增加足夠有利的線段
+        private void smoothButton_Click(object sender, EventArgs e)
         {
+            Smooth();
+        }
+
+        private void ToGray() {
             if (oriImg != null)
             {
                 grayImg = oriImg.Convert<Gray, byte>();
                 grayImgBox.Image = grayImg;
             }
-            else {
+            else
+            {
                 MessageBox.Show("尚未剪裁");
             }
         }
 
-        private void cropBottomButton_Click(object sender, EventArgs e)
+        private void toGrayButton_Click(object sender, EventArgs e)
+        {
+            ToGray();
+        }
+
+        private void ToCrop()
         {
             if (oriImg != null)
             {
@@ -260,21 +284,42 @@ namespace ZebraCrossing_Test
                 //先先取得要做houghline步驟的圖片
                 showFinishedRepairedHoughLineStepImg = oriImg.Copy();
             }
-            else {
+            else
+            {
                 MessageBox.Show("尚未載入圖片");
             }
         }
 
-        #region 圖像處理 去雜訊 膨脹
-
-        private void dilateButton_Click(object sender, EventArgs e)
+        private void cropBottomButton_Click(object sender, EventArgs e)
         {
-            if (maskWhiteImg != null)
+            ToCrop();
+        }
+
+        #region 圖像處理 去雜訊 膨脹
+        private void Dilate() {
+            if (grayImg != null)
             {
                 //膨脹
-                maskWhiteImg = maskWhiteImg.Dilate(1);
+                grayImg = grayImg.Dilate(1);
 
-                filterImageBox.Image = maskWhiteImg;
+                filterImageBox.Image = grayImg;
+            }
+            else
+            {
+                MessageBox.Show("尚未Mask");
+            }
+        }
+        private void dilateButton_Click(object sender, EventArgs e)
+        {
+            Dilate();
+        }
+
+        private void filterPepper() {
+            if (grayImg != null)
+            {
+                //用中值濾波去雜訊
+                grayImg = grayImg.SmoothMedian(3);
+                filterImageBox.Image = grayImg;
             }
             else
             {
@@ -284,27 +329,17 @@ namespace ZebraCrossing_Test
 
         private void filterPepperButton_Click(object sender, EventArgs e)
         {
-            if (maskWhiteImg != null)
-            {
-                //用中值濾波去雜訊
-                maskWhiteImg = maskWhiteImg.SmoothMedian(3);
-                filterImageBox.Image = maskWhiteImg;
-            }
-            else
-            {
-                MessageBox.Show("尚未Mask");
-            }
+            filterPepper();
         }
         #endregion
 
-        private void houghLineButton_Click(object sender, EventArgs e)
-        {
-            candidateHoughLineEquations.Clear();
-            candidateHoughLineEquationsForReplay.Clear();
+      
+
+        private void DoHoughLine(string title) {
             #region 偵測整張Mask White圖片
             if (grayImg != null)
             {
-                Image<Bgr, byte> onlyLineImg = new Image<Bgr,byte>(oriImg.Width,oriImg.Height,new Bgr(0,0,0));
+                Image<Bgr, byte> onlyLineImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(0, 0, 0));
                 using (Image<Bgr, byte> showLineImg = oriImg.Copy())
                 {
                     //Hough transform for line detection
@@ -330,21 +365,21 @@ namespace ZebraCrossing_Test
                         double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
                         showLineImg.Draw(line, new Bgr(0, 0, 0), 2);
                         onlyLineImg.Draw(line, new Bgr(255, 255, 255), 2);
-                        if ((angle > 160 && angle < 190) || (angle > -190 && angle < -160) )
+                        if ((angle > 160 && angle < 190) || (angle > -190 && angle < -160))
                         {
                             showLineImg.Draw(line, drawLineColos[(colorIndex % drawLineColos.Length)], 2);
                             onlyLineImg.Draw(line, drawLineColos[(colorIndex % drawLineColos.Length)], 2);
                             //加入候選線
                             candidateZebraCrossingsByHoughLine.Add(line);
-                            
+
                             //計算並取得線段的直線方程式
                             LineEquation eqation = GetLineEquation(line);
                             candidateHoughLineEquations.AddLast(eqation);
                             //步驟用
-                            candidateHoughLineEquationsForReplay.Add(new LineEquation() { A = eqation.A, B = eqation.B, C = eqation.C, Slope = eqation.Slope, Line = eqation.Line});
+                            candidateHoughLineEquationsForReplay.Add(new LineEquation() { A = eqation.A, B = eqation.B, C = eqation.C, Slope = eqation.Slope, Line = eqation.Line });
                         }
                         Console.WriteLine("index =" + colorIndex + "Angle = " + angle + ", slope = " + slope + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
-                        
+
 
                         colorIndex++;
                     }
@@ -354,15 +389,23 @@ namespace ZebraCrossing_Test
                     houghLineViewer.Image = showLineImg;
                     houghLineViewer.Text = "HoughLine 偵測畫面";
                     houghLineViewer.Show();
-
-                    new ImageViewer(onlyLineImg,"純線段").Show();
-
+                    //new ImageViewer(showLineImg, title).Show();
                     
+                    new ImageViewer(onlyLineImg, title).Show();
+
+
                 }
 
             }
             #endregion
-            
+        }
+
+        private void houghLineButton_Click(object sender, EventArgs e)
+        {
+            candidateHoughLineEquations.Clear();
+            candidateHoughLineEquationsForReplay.Clear();
+
+            DoHoughLine("純線段方便觀看");
         }
         
 
