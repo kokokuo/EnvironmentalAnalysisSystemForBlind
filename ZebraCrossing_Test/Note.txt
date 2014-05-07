@@ -39,3 +39,12 @@ http://docs.opencv.org/doc/tutorials/imgproc/imgtrans/warp_affine/warp_affine.ht
 Next:
 р硈絬场だヴよ常σ納秈ЧΘ硈絬
 参璸瑈絬琿
+
+5/7
+----------------------------------------
+р硈絬场だヴよ常σ納秈ЧΘ硈絬
+ヘ玡ΤBug穦粇硈Τㄇ絬琿à琌璽 Τㄇ琌タ琌ㄢ常荡癸秏ぃ琌琌タ絋よΑ
+
+Next
+Fix 硈絬Bug
+参璸瑈絬琿

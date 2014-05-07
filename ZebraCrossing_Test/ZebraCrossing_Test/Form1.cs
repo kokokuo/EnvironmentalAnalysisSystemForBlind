@@ -184,7 +184,7 @@ namespace ZebraCrossing_Test
             if (filename !=null)
             {
                 oriImg = new Image<Bgr, byte>(filename);
-                oriImg = oriImg.Resize(400, 300, INTER.CV_INTER_LINEAR);
+                oriImg = oriImg.Resize(640, 480, INTER.CV_INTER_LINEAR);
                 oriImageBox.Image = oriImg;
 
                 //清空先前的資料
@@ -372,12 +372,14 @@ namespace ZebraCrossing_Test
                             //加入候選線
                             candidateZebraCrossingsByHoughLine.Add(line);
 
-                            //計算並取得線段的直線方程式
-                            LineEquation eqation = GetLineEquation(line);
-                            candidateHoughLineEquations.AddLast(eqation);
-                            //步驟用
-                            candidateHoughLineEquationsForReplay.Add(new LineEquation() { A = eqation.A, B = eqation.B, C = eqation.C, Slope = eqation.Slope, Line = eqation.Line });
+                            
                         }
+                        //計算並取得線段的直線方程式
+                        LineEquation eqation = GetLineEquation(line);
+                        candidateHoughLineEquations.AddLast(eqation);
+                        //步驟用
+                        candidateHoughLineEquationsForReplay.Add(new LineEquation() { A = eqation.A, B = eqation.B, C = eqation.C, Slope = eqation.Slope, Angle = eqation.Angle, Line = eqation.Line });
+
                         Console.WriteLine("index =" + colorIndex + "Angle = " + angle + ", slope = " + slope + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
 
 
@@ -418,9 +420,11 @@ namespace ZebraCrossing_Test
             float a = m;
             float b = -1;
             float c = m * line.P1.X - line.P1.Y;
+            PointF vector = line.Direction;
+            double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
             //http://dufu.math.ncu.edu.tw/calculus/calculus_bus/node11.html
             //Console.WriteLine("a =" + a + ",b = " + b + ",c = " + c);
-            return new LineEquation() { A = a, B = b,C = c, Slope = m,Line = line};
+            return new LineEquation() { A = a, B = b, C = c, Slope = m, Angle = angle, Line = line };
         }
 
         //重建接近水平線段
@@ -493,7 +497,7 @@ namespace ZebraCrossing_Test
             int y2 = line1.Line.P2.Y;
             int x3 = line2.Line.P2.X;
             int y3 = line2.Line.P2.Y;
-
+            
             float v = (line1.A * line2.B) - line2.A * line1.B;
             //Console.WriteLine("line1 slope = " + line1.Slope + ", line 2 slope = " + line2.Slope);
             //Console.WriteLine("line1 P1 = " + line1.Line.P1 + ",line1 P2 = " + line1.Line.P2 + ", length = " + line1.Line.Length);
@@ -522,29 +526,73 @@ namespace ZebraCrossing_Test
             {  //代表兩條線段方程式不是平行,y3 - y1表示距離
                 Console.Write("相交");
                 //Console.WriteLine("v = " + v);
-                float delta_x = (line1.C * line2.B) - line2.C * line1.B;
-                float delta_y = (line1.A * line2.C) - line2.A * line1.C;
-
-                x = Convert.ToInt32(delta_x / v);
-                y = Convert.ToInt32(delta_y / v);
-                //Console.WriteLine("intersect x = " + x + ",intersect y = " + y + "\n");
-                if ((x < 0 || x > oriImg.Width || y < 0 || y > oriImg.Height) || !CheckHorizontalIntersectionPoint(points, x, y))
+                //兩條線相似
+                Console.WriteLine("線段一角度：" + Math.Abs(line1.Angle) + ",線段二角度：" + Math.Abs(line2.Angle));
+                Console.WriteLine("兩條線的角度差為：" + Math.Abs(Math.Abs(line1.Angle) - Math.Abs(line2.Angle)));
+                if (Math.Abs(Math.Abs(line1.Angle) - Math.Abs(line2.Angle)) < 15)
                 {
-                    Console.WriteLine("且超出畫面");
+                    Console.WriteLine("兩條線可能是可以銜接");
+                    float delta_x = (line1.C * line2.B) - line2.C * line1.B;
+                    float delta_y = (line1.A * line2.C) - line2.A * line1.C;
+
+                    x = Convert.ToInt32(delta_x / v);
+                    y = Convert.ToInt32(delta_y / v);
+
+
+                    if ((x < 0 || x > oriImg.Width || y < 0 || y > oriImg.Height))
+                    {
+                        Console.WriteLine("所以超出畫面");
+                        x = -1;
+                        y = -1;
+                        return false;
+                    }
+                    else
+                    {
+                        
+                        double line1_angle = Math.Abs(line1.Angle);
+                        double line2_angle = Math.Abs(line2.Angle);
+                        
+                        //接近平行線
+                        if (line1_angle > 150 && line2_angle > 150 )
+                        {
+                            if (!CheckHorizontalIntersectionPoint(points, x, y))
+                                return false;
+                            Console.WriteLine("接近水平的線段,且交點有在兩線段內");
+                        }
+                        else if (line1_angle <= 150 && line1_angle >= 120 && line2_angle <= 150 && line2_angle >= 120)
+                        {
+                            //斜45度
+                            if (!CheckVerticalIntersectionPoint(points, x, y) && !CheckHorizontalIntersectionPoint(points, x, y))
+                                return false;
+                            Console.WriteLine("接近斜45度或135度的線段,且交點有在兩線段內");
+                        }
+                        else if (line1_angle < 120 && line2_angle < 120) //接近垂直
+                        {
+                            if (!CheckVerticalIntersectionPoint(points, x, y))
+                                return false;
+                            Console.WriteLine("接近垂直的線段,且交點有在兩線段內");
+                        }
+
+                        Console.Write("\n");
+                        repaiedLine = RepaiedHorizontalHoughLine(points);
+                        return true;
+                    }
+                }
+                else{
+                    Console.WriteLine("但是角度差異過大，研判不是\n");
+                    x = -1;
+                    y = -1;
                     return false;
                 }
-                else
-                {
-                    Console.Write("\n");
-                    repaiedLine = RepaiedHorizontalHoughLine(points);
-                    return true;
-                }
+
+                //Console.WriteLine("intersect x = " + x + ",intersect y = " + y + "\n");
+              
             }
             else
             {
                 x = -1;
                 y = -1;
-                //Console.WriteLine("平行" + "\n");
+                Console.WriteLine("平行" + "\n");
                 return false;
             }
             
@@ -1026,6 +1074,7 @@ namespace ZebraCrossing_Test
         public float B { get; set; }
         public float C { get; set; }
         public float Slope { get; set; }
+        public double Angle { get; set; }
         public LineSegment2D Line{ get; set; }
     }
 }
