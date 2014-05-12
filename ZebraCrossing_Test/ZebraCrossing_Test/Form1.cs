@@ -63,6 +63,9 @@ namespace ZebraCrossing_Test
         Image<Bgr, byte> showFinishedRepairedHoughLineImg;
         
         List<LineSegment2D> repairedHoughLine; //紀錄修復後的所有線段
+
+        Dictionary<string, List<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
+        int mainDirectionLineGroupId = 0; //紀錄主要線段的群組ID
         public Form1()
         {
             InitializeComponent();
@@ -118,6 +121,8 @@ namespace ZebraCrossing_Test
             repairedHoughLineStepViewer.FormClosing += repairHoughLineViewer_FormClosing;
 
             candidateHoughLineEquationsForReplay = new List<LineEquation>();
+
+            linesHistogram = new Dictionary<string, List<LineEquation>>();
         }
 
         void searchRepairHoughLineStepViewer_FormClosing(object sender, FormClosingEventArgs e)
@@ -184,7 +189,7 @@ namespace ZebraCrossing_Test
             if (filename !=null)
             {
                 oriImg = new Image<Bgr, byte>(filename);
-                oriImg = oriImg.Resize(640, 480, INTER.CV_INTER_LINEAR);
+                oriImg = oriImg.Resize(480, 360, INTER.CV_INTER_LINEAR);
                 oriImageBox.Image = oriImg;
 
                 //清空先前的資料
@@ -198,7 +203,8 @@ namespace ZebraCrossing_Test
 
               
                 repairedHoughLine.Clear();
-                
+                showFinishedRepairedHoughLineStepImg = oriImg.Copy();
+                linesHistogram.Clear();
                 //Auto測驗
                 //ToCrop();
                 //ToGray();
@@ -348,9 +354,9 @@ namespace ZebraCrossing_Test
                         new Gray(260),  //Canny algorithm high threshold
                         1,              //rho parameter
                         Math.PI / 180.0,  //theta parameter 
-                        110,            //threshold
+                        100,            //threshold
                         1,             //min length for a line
-                        30);            //max allowed gap along the line
+                        20);            //max allowed gap along the line
 
                     int colorIndex = 0;
                     //draw lines on image
@@ -378,9 +384,9 @@ namespace ZebraCrossing_Test
                         LineEquation eqation = GetLineEquation(line);
                         candidateHoughLineEquations.AddLast(eqation);
                         //步驟用
-                        candidateHoughLineEquationsForReplay.Add(new LineEquation() { A = eqation.A, B = eqation.B, C = eqation.C, Slope = eqation.Slope, Angle = eqation.Angle, Line = eqation.Line });
+                        candidateHoughLineEquationsForReplay.Add(new LineEquation() { A = eqation.A, B = eqation.B, C = eqation.C, Slope = eqation.Slope, Angle = eqation.Angle,AdjustAngle = eqation.AdjustAngle ,Line = eqation.Line });
 
-                        Console.WriteLine("index =" + colorIndex + "Angle = " + angle + ", slope = " + slope + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
+                        Console.WriteLine("index =" + colorIndex + "Angle = " + eqation.Angle + ",Adjusted Angle = " + eqation.AdjustAngle + ", slope = " + slope + ", P1 = " + line.P1 + ", P2 = " + line.P2 + ", length = " + line.Length);
 
 
                         colorIndex++;
@@ -422,9 +428,12 @@ namespace ZebraCrossing_Test
             float c = m * line.P1.X - line.P1.Y;
             PointF vector = line.Direction;
             double angle = Math.Atan2(vector.Y, vector.X) * 180.0 / Math.PI;
+            double adjustAngle = angle;
+            if (angle < 0)
+                adjustAngle = 360 + angle;
             //http://dufu.math.ncu.edu.tw/calculus/calculus_bus/node11.html
             //Console.WriteLine("a =" + a + ",b = " + b + ",c = " + c);
-            return new LineEquation() { A = a, B = b, C = c, Slope = m, Angle = angle, Line = line };
+            return new LineEquation() { A = a, B = b, C = c, Slope = m, Angle = angle, AdjustAngle = adjustAngle, Line = line };
         }
 
         //重建接近水平線段
@@ -495,9 +504,10 @@ namespace ZebraCrossing_Test
             int y1 = line1.Line.P1.Y;
             int x2 = line1.Line.P2.X;
             int y2 = line1.Line.P2.Y;
-            int x3 = line2.Line.P2.X;
-            int y3 = line2.Line.P2.Y;
-            
+            int x3 = line2.Line.P1.X;
+            int y3 = line2.Line.P1.Y;
+            int x4 = line2.Line.P2.X;
+            int y4 = line2.Line.P2.Y;
             float v = (line1.A * line2.B) - line2.A * line1.B;
             //Console.WriteLine("line1 slope = " + line1.Slope + ", line 2 slope = " + line2.Slope);
             //Console.WriteLine("line1 P1 = " + line1.Line.P1 + ",line1 P2 = " + line1.Line.P2 + ", length = " + line1.Line.Length);
@@ -505,16 +515,18 @@ namespace ZebraCrossing_Test
             //不太可能會有共線,需要給一個Range
             //面積公式來看 1/2 * x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2) 如果小於1000可以是
             //or 用A-B 與 A-C的斜率去看斜率誤差 約接近0表示共線高
-            Console.WriteLine("面積公式 = " + Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) + " y3 -y1 = " + Math.Abs(y3 - y1));
-            float p1p2Slope = (y2 - y1) / (float)(x2 - x1);
-            float p1p3Slope = (y3 - y1) / (float)(x3 - x1);
+            Console.WriteLine("面積公式1 = " + Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) + " y3 -y1 = " + Math.Abs(y3 - y1));
+            Console.WriteLine("面積公式2 = " + Math.Abs(x1 * (y2 - y4) + x2 * (y4 - y1) + x4 * (y1 - y2)) + " y4 -y1 = " + Math.Abs(y4 - y1));
+            //float p1p2Slope = (y2 - y1) / (float)(x2 - x1);
+            //float p1p3Slope = (y3 - y1) / (float)(x3 - x1);
             //Console.WriteLine("Slope p1 -> p2 = " +p1p2Slope+ ", Slope p1 -> p3 ="+ p1p3Slope + "差距值 = " + Math.Abs(Math.Abs(p1p2Slope) - Math.Abs(p1p3Slope)));
 
             //尋找兩端點
             Point[] points = new Point[] { line1.Line.P1, line1.Line.P2, line2.Line.P1, line2.Line.P2 };
-            float area = Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) ;
-            if (area <= 1000 && Math.Abs(y3-y1) < 8 ) 
-             //y3 - y1表示距離
+            float area1 = Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) ;
+            float area2 = Math.Abs(x1 * (y2 - y4) + x2 * (y4 - y1) + x4 * (y1 - y2));
+            if (area1 <= 1000 && area2 <=1000 && Math.Abs(y3 - y1) < 8  &&  Math.Abs(y4 - y1) < 8 )
+            // Math.Abs(y3 - y1) < 8 => y3 - y1表示距離
             {
                 Console.WriteLine("共線" + "\n");
                 x = -1;
@@ -527,9 +539,10 @@ namespace ZebraCrossing_Test
                 Console.Write("相交");
                 //Console.WriteLine("v = " + v);
                 //兩條線相似
-                Console.WriteLine("線段一角度：" + Math.Abs(line1.Angle) + ",線段二角度：" + Math.Abs(line2.Angle));
-                Console.WriteLine("兩條線的角度差為：" + Math.Abs(Math.Abs(line1.Angle) - Math.Abs(line2.Angle)));
-                if (Math.Abs(Math.Abs(line1.Angle) - Math.Abs(line2.Angle)) < 15)
+                Console.WriteLine("線段一原角度：" + line1.Angle + ",修正角度:" + line1.AdjustAngle + "\n線段原二角度：" + line2.Angle + ",修正角度" + line2.AdjustAngle);
+                double angleDifference =  Math.Abs(line1.AdjustAngle - line2.AdjustAngle);
+                Console.WriteLine("兩條線的角度差為：" + angleDifference);
+                if (angleDifference< 15)
                 {
                     Console.WriteLine("兩條線可能是可以銜接");
                     float delta_x = (line1.C * line2.B) - line2.C * line1.B;
@@ -548,9 +561,9 @@ namespace ZebraCrossing_Test
                     }
                     else
                     {
-                        
-                        double line1_angle = Math.Abs(line1.Angle);
-                        double line2_angle = Math.Abs(line2.Angle);
+
+                        double line1_angle = Math.Abs(line1.AdjustAngle);
+                        double line2_angle = Math.Abs(line2.AdjustAngle);
                         
                         //接近平行線
                         if (line1_angle > 150 && line2_angle > 150 )
@@ -639,9 +652,9 @@ namespace ZebraCrossing_Test
                 repairedHoughLineViwer.Hide(); //隱藏式窗,下次再show出
             }
             repairedHoughLineViwer.Show();
-
-           
         }
+
+
         private void replayRestrcutLinesButton_Click(object sender, EventArgs e)
         {
             showSearchrepairedHoughLineStepImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(Color.Black));
@@ -672,13 +685,6 @@ namespace ZebraCrossing_Test
                         //並刪除被比較的線段
                         candidateHoughLineEquationsForReplay.RemoveAt(candiateLineEquation_j);
                     }
-                    ////如果是自己則跳過
-                    //if (candiateLineEquation_j + 1 == candiateLineEquation_i)
-                    //{
-                    //    candiateLineEquation_j += 2;
-
-                    //}
-                    //else
                      candiateLineEquation_j++;
 
                   
@@ -721,8 +727,155 @@ namespace ZebraCrossing_Test
             searchRepairHoughLineStepViewer.Show();
             
         }
+        private void QuquantifyLinesByAngle() {
+            //統計線段
+            foreach (LineEquation line in candidateHoughLineEquations)
+            {
+                //量化分類
+                if (170 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) <= 180)
+                {
+                    if (!linesHistogram.ContainsKey("0"))
+                    {
+                        linesHistogram.Add("0", new List<LineEquation>());
+                        linesHistogram["0"].Add(line);
+                    }
+                    else
+                        linesHistogram["0"].Add(line);
+                }
+                else if (160 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 170)
+                {
+                    if (!linesHistogram.ContainsKey("1"))
+                    {
+                        linesHistogram.Add("1", new List<LineEquation>());
+                        linesHistogram["1"].Add(line);
+                    }
+                    else
+                        linesHistogram["1"].Add(line);
+                }
+                else if (160 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 170)
+                {
+                    if (!linesHistogram.ContainsKey("2"))
+                    {
+                        linesHistogram.Add("2", new List<LineEquation>());
+                        linesHistogram["2"].Add(line);
+                    }
+                    else
+                        linesHistogram["2"].Add(line);
+                }
+                else if (150 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 160)
+                {
+                    if (!linesHistogram.ContainsKey("3"))
+                    {
+                        linesHistogram.Add("3", new List<LineEquation>());
+                        linesHistogram["3"].Add(line);
+                    }
+                    else
+                        linesHistogram["3"].Add(line);
+                }
+                else if (140 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 150)
+                {
+                    if (!linesHistogram.ContainsKey("4"))
+                    {
+                        linesHistogram.Add("4", new List<LineEquation>());
+                        linesHistogram["4"].Add(line);
+                    }
+                    else
+                        linesHistogram["4"].Add(line);
+                }
+                else if (130 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 140)
+                {
+                    if (!linesHistogram.ContainsKey("5"))
+                    {
+                        linesHistogram.Add("5", new List<LineEquation>());
+                        linesHistogram["5"].Add(line);
+                    }
+                    else
+                        linesHistogram["5"].Add(line);
+                }
+                else if (120 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 130)
+                {
+                    if (!linesHistogram.ContainsKey("6"))
+                    {
+                        linesHistogram.Add("6", new List<LineEquation>());
+                        linesHistogram["6"].Add(line);
+                    }
+                    else
+                        linesHistogram["6"].Add(line);
+                }
+                else if (110 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 120)
+                {
+                    if (!linesHistogram.ContainsKey("7"))
+                    {
+                        linesHistogram.Add("7", new List<LineEquation>());
+                        linesHistogram["7"].Add(line);
+                    }
+                    else
+                        linesHistogram["7"].Add(line);
+                }
+                else if (100 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 110)
+                {
+                    if (!linesHistogram.ContainsKey("8"))
+                    {
+                        linesHistogram.Add("8", new List<LineEquation>());
+                        linesHistogram["8"].Add(line);
+                    }
+                    else
+                        linesHistogram["8"].Add(line);
+                }
+                else if (90 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 100)
+                {
+                    if (!linesHistogram.ContainsKey("9"))
+                    {
+                        linesHistogram.Add("9", new List<LineEquation>());
+                        linesHistogram["9"].Add(line);
+                    }
+                    else
+                        linesHistogram["9"].Add(line);
+                }
+            }
 
-        #region 尋找斑馬線的黑白特徵
+           
+        }
+        private void filterLineButton_Click(object sender, EventArgs e)
+        {
+            QuquantifyLinesByAngle();
+           
+            float mainDirectionRatio = 0;
+            //過濾線段
+            int total = candidateHoughLineEquations.Count;
+            Console.WriteLine("Total Lines = " + total);
+            for (int i = 0; i <= 9; i++)
+            {
+                if (linesHistogram.ContainsKey(i.ToString()))
+                {
+                    Console.WriteLine("line[" + i + "]:" + linesHistogram[i.ToString()].Count);
+                    float ratio = (linesHistogram[i.ToString()].Count / (float)total);
+                    if (mainDirectionRatio < ratio)
+                    {
+                        mainDirectionRatio = ratio;
+                        mainDirectionLineGroupId = i;
+                    }
+                    Console.WriteLine("佔全部線段的比例 =>" + ratio );
+                }
+                else
+                    Console.WriteLine("line[" + i + "]:" + 0);
+            }
+             Console.WriteLine("主方向群為:" + mainDirectionLineGroupId + "佔全部線段的比例 =>" + mainDirectionRatio );
+              
+        }
+        
+       
+
+        private void analyzeBlackWhiteButton_Click(object sender, EventArgs e)
+        {
+            //依照y軸座標排序
+            var orderedMainLines = from line in linesHistogram[mainDirectionLineGroupId.ToString()] orderby (line.Line.P1.Y + line.Line.P2.Y) / 2 select line;
+            foreach (LineEquation line in orderedMainLines) {
+                int lineCenterY = (line.Line.P1.Y + line.Line.P2.Y) / 2;
+            }
+        }
+
+        #region 尋找斑馬線的黑白特徵(輪廓法,舊方法)
         //////////////////////////////////////////////////////////////
         private void contourButton_Click(object sender, EventArgs e)
         {
@@ -755,7 +908,7 @@ namespace ZebraCrossing_Test
                     }
                     Console.WriteLine("Total Candidate Contours = " + candidateZebraCrossingsByContour.Count);
                     showScanlineImg = showContoursImg.Copy();
-                    contourImageBox.Image = showContoursImg;
+                    //contourImageBox.Image = showContoursImg;
                 }
             }
             else
@@ -865,16 +1018,16 @@ namespace ZebraCrossing_Test
 
             }
             //show center point
-            contourImageBox.Image = showScanlineImg;
+            //contourImageBox.Image = showScanlineImg;
             //ImageViewer
             ContoursAndScanLineViewer.Image = showScanlineImg;
             ContoursAndScanLineViewer.Show();
 
             //統計黑白像素與判斷是否每條線段為白黑白的特徵
-            DoBlackWhiteStatistics(crossingConnectionlines);
+            DoBlackWhiteStatisticsByScanLine(crossingConnectionlines);
         }
 
-        private void DoBlackWhiteStatistics(List<LineSegment2DF> lines)
+        private void DoBlackWhiteStatisticsByScanLine(List<LineSegment2DF> lines)
         {
             //寬480是圖片高(等於垂直走訪的話,最多的pixel),高Intensity是255,但拉高到300好方便觀看
             Image<Bgr, byte> showBlackWhiteCurve = new Image<Bgr, byte>(480, 300, new Bgr(Color.White));
@@ -1032,17 +1185,6 @@ namespace ZebraCrossing_Test
         }
 
         #endregion
-        
-
-        
-
-       
-
-      
-        
-
-        
-       
     }
 
 
@@ -1075,6 +1217,7 @@ namespace ZebraCrossing_Test
         public float C { get; set; }
         public float Slope { get; set; }
         public double Angle { get; set; }
+        public double AdjustAngle { get; set; }
         public LineSegment2D Line{ get; set; }
     }
 }

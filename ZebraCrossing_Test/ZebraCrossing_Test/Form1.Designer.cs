@@ -37,19 +37,17 @@
             this.toGrayButton = new System.Windows.Forms.Button();
             this.cropBottomButton = new System.Windows.Forms.Button();
             this.grayImgBox = new Emgu.CV.UI.ImageBox();
-            this.contourButton = new System.Windows.Forms.Button();
-            this.contourImageBox = new Emgu.CV.UI.ImageBox();
             this.smoothButton = new System.Windows.Forms.Button();
             this.dilateButton = new System.Windows.Forms.Button();
             this.filterImageBox = new Emgu.CV.UI.ImageBox();
             this.filterPepperButton = new System.Windows.Forms.Button();
-            this.findScanLineButton = new System.Windows.Forms.Button();
             this.restructLineButton = new System.Windows.Forms.Button();
             this.replayRestrcutLinesButton = new System.Windows.Forms.Button();
+            this.filterLineButton = new System.Windows.Forms.Button();
+            this.analyzeBlackWhiteButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.oriImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maskImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.grayImgBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.contourImageBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.filterImageBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -135,26 +133,6 @@
             this.grayImgBox.TabIndex = 10;
             this.grayImgBox.TabStop = false;
             // 
-            // contourButton
-            // 
-            this.contourButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.contourButton.Location = new System.Drawing.Point(744, 393);
-            this.contourButton.Name = "contourButton";
-            this.contourButton.Size = new System.Drawing.Size(126, 35);
-            this.contourButton.TabIndex = 11;
-            this.contourButton.Text = "5.連通";
-            this.contourButton.UseVisualStyleBackColor = true;
-            this.contourButton.Click += new System.EventHandler(this.contourButton_Click);
-            // 
-            // contourImageBox
-            // 
-            this.contourImageBox.Location = new System.Drawing.Point(744, 445);
-            this.contourImageBox.Name = "contourImageBox";
-            this.contourImageBox.Size = new System.Drawing.Size(320, 240);
-            this.contourImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.contourImageBox.TabIndex = 12;
-            this.contourImageBox.TabStop = false;
-            // 
             // smoothButton
             // 
             this.smoothButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
@@ -197,17 +175,6 @@
             this.filterPepperButton.UseVisualStyleBackColor = true;
             this.filterPepperButton.Click += new System.EventHandler(this.filterPepperButton_Click);
             // 
-            // findScanLineButton
-            // 
-            this.findScanLineButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.findScanLineButton.Location = new System.Drawing.Point(876, 393);
-            this.findScanLineButton.Name = "findScanLineButton";
-            this.findScanLineButton.Size = new System.Drawing.Size(188, 35);
-            this.findScanLineButton.TabIndex = 17;
-            this.findScanLineButton.Text = "6.連出Scan Line";
-            this.findScanLineButton.UseVisualStyleBackColor = true;
-            this.findScanLineButton.Click += new System.EventHandler(this.findScanLineButton_Click);
-            // 
             // restructLineButton
             // 
             this.restructLineButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
@@ -230,20 +197,41 @@
             this.replayRestrcutLinesButton.UseVisualStyleBackColor = true;
             this.replayRestrcutLinesButton.Click += new System.EventHandler(this.replayRestrcutLinesButton_Click);
             // 
+            // filterLineButton
+            // 
+            this.filterLineButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.filterLineButton.Location = new System.Drawing.Point(723, 122);
+            this.filterLineButton.Name = "filterLineButton";
+            this.filterLineButton.Size = new System.Drawing.Size(220, 31);
+            this.filterLineButton.TabIndex = 20;
+            this.filterLineButton.Text = "過濾線段";
+            this.filterLineButton.UseVisualStyleBackColor = true;
+            this.filterLineButton.Click += new System.EventHandler(this.filterLineButton_Click);
+            // 
+            // analyzeBlackWhiteButton
+            // 
+            this.analyzeBlackWhiteButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.analyzeBlackWhiteButton.Location = new System.Drawing.Point(723, 183);
+            this.analyzeBlackWhiteButton.Name = "analyzeBlackWhiteButton";
+            this.analyzeBlackWhiteButton.Size = new System.Drawing.Size(220, 31);
+            this.analyzeBlackWhiteButton.TabIndex = 21;
+            this.analyzeBlackWhiteButton.Text = "分析黑白變化";
+            this.analyzeBlackWhiteButton.UseVisualStyleBackColor = true;
+            this.analyzeBlackWhiteButton.Click += new System.EventHandler(this.analyzeBlackWhiteButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1649, 706);
+            this.Controls.Add(this.analyzeBlackWhiteButton);
+            this.Controls.Add(this.filterLineButton);
             this.Controls.Add(this.replayRestrcutLinesButton);
             this.Controls.Add(this.restructLineButton);
-            this.Controls.Add(this.findScanLineButton);
             this.Controls.Add(this.filterPepperButton);
             this.Controls.Add(this.filterImageBox);
             this.Controls.Add(this.dilateButton);
             this.Controls.Add(this.smoothButton);
-            this.Controls.Add(this.contourImageBox);
-            this.Controls.Add(this.contourButton);
             this.Controls.Add(this.grayImgBox);
             this.Controls.Add(this.cropBottomButton);
             this.Controls.Add(this.toGrayButton);
@@ -257,7 +245,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.oriImageBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.maskImageBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.grayImgBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.contourImageBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.filterImageBox)).EndInit();
             this.ResumeLayout(false);
 
@@ -273,15 +260,14 @@
         private System.Windows.Forms.Button toGrayButton;
         private System.Windows.Forms.Button cropBottomButton;
         private Emgu.CV.UI.ImageBox grayImgBox;
-        private System.Windows.Forms.Button contourButton;
-        private Emgu.CV.UI.ImageBox contourImageBox;
         private System.Windows.Forms.Button smoothButton;
         private System.Windows.Forms.Button dilateButton;
         private Emgu.CV.UI.ImageBox filterImageBox;
         private System.Windows.Forms.Button filterPepperButton;
-        private System.Windows.Forms.Button findScanLineButton;
         private System.Windows.Forms.Button restructLineButton;
         private System.Windows.Forms.Button replayRestrcutLinesButton;
+        private System.Windows.Forms.Button filterLineButton;
+        private System.Windows.Forms.Button analyzeBlackWhiteButton;
     }
 }
 
