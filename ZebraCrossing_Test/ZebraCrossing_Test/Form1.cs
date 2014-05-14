@@ -66,6 +66,10 @@ namespace ZebraCrossing_Test
 
         Dictionary<string, List<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
         int mainDirectionLineGroupId = 0; //紀錄主要線段的群組ID
+        int maxLineLength = 0;
+        //統計每一條線的黑色與白色的pixel數量
+        List<Dictionary<int, bool>> blackWhiteCheckPoints = new List<Dictionary<int, bool>>();
+
         public Form1()
         {
             InitializeComponent();
@@ -740,7 +744,7 @@ namespace ZebraCrossing_Test
             foreach (LineEquation line in candidateHoughLineEquations)
             {
                 //量化分類
-                if (170 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) <= 180 && line.Direction == 1)
+                if (170 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) <= 180)
                 {
                     if (!linesHistogram.ContainsKey("0"))
                     {
@@ -840,10 +844,7 @@ namespace ZebraCrossing_Test
                     else
                         linesHistogram["9"].Add(line);
                 }
-
-
-                //不同方向開始的線段
-                else if (170 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) <= 180 && line.Direction == -1)
+                else if (160 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 170 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("10"))
                     {
@@ -863,7 +864,7 @@ namespace ZebraCrossing_Test
                     else
                         linesHistogram["11"].Add(line);
                 }
-                else if (160 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 170 && line.Direction == -1)
+                else if (150 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 160 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("12"))
                     {
@@ -873,7 +874,7 @@ namespace ZebraCrossing_Test
                     else
                         linesHistogram["12"].Add(line);
                 }
-                else if (150 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 160 && line.Direction == -1)
+                else if (140 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 150 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("13"))
                     {
@@ -883,7 +884,7 @@ namespace ZebraCrossing_Test
                     else
                         linesHistogram["13"].Add(line);
                 }
-                else if (140 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 150 && line.Direction == -1)
+                else if (130 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 140 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("14"))
                     {
@@ -893,7 +894,7 @@ namespace ZebraCrossing_Test
                     else
                         linesHistogram["14"].Add(line);
                 }
-                else if (130 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 140 && line.Direction == -1)
+                else if (120 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 130 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("15"))
                     {
@@ -903,7 +904,7 @@ namespace ZebraCrossing_Test
                     else
                         linesHistogram["15"].Add(line);
                 }
-                else if (120 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 130 && line.Direction == -1)
+                else if (110 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 120 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("16"))
                     {
@@ -913,7 +914,7 @@ namespace ZebraCrossing_Test
                     else
                         linesHistogram["16"].Add(line);
                 }
-                else if (110 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 120 && line.Direction == -1)
+                else if (100 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 110 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("17"))
                     {
@@ -923,7 +924,7 @@ namespace ZebraCrossing_Test
                     else
                         linesHistogram["17"].Add(line);
                 }
-                else if (100 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 110 && line.Direction == -1)
+                else if (90 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 100 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("18"))
                     {
@@ -932,16 +933,6 @@ namespace ZebraCrossing_Test
                     }
                     else
                         linesHistogram["18"].Add(line);
-                }
-                else if (90 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 100 && line.Direction == -1)
-                {
-                    if (!linesHistogram.ContainsKey("19"))
-                    {
-                        linesHistogram.Add("19", new List<LineEquation>());
-                        linesHistogram["19"].Add(line);
-                    }
-                    else
-                        linesHistogram["19"].Add(line);
                 }
             }
 
@@ -957,7 +948,7 @@ namespace ZebraCrossing_Test
             //過濾線段
             int total = candidateHoughLineEquations.Count;
             Console.WriteLine("Total Lines = " + total);
-            for (int i = 0; i <= 19; i++)
+            for (int i = 0; i < 19; i++)
             {
                 if (linesHistogram.ContainsKey(i.ToString()))
                 {
@@ -975,29 +966,149 @@ namespace ZebraCrossing_Test
             }
             Console.WriteLine("主方向群為:" + mainDirectionLineGroupId + "佔全部線段的比例 =>" + mainDirectionRatio );
               
+            //過濾過短的線段
+            //1.找最大
+            var maxLengthLine = (from selectLine in linesHistogram[mainDirectionLineGroupId.ToString()]
+                                 select selectLine).Max(line => line.Line.Length);
+
+            //2.依照比例把過段的濾掉
+
+            Console.WriteLine("最長的線段為:" + maxLengthLine);
         }
+
+        /// <summary>
+        /// 繪製黑白交錯的曲線(縱軸是Intensity,橫軸是排序的線段從最前面的線段到最下面的線段的座標)
+        /// </summary>
+        /// <param name="drawImg"></param>
+        /// <param name="current">現在的座標像素</param>
+        /// <param name="previous">前一個點的座標像素</param>
+        /// <param name="x">x軸步近的值</param>
+        private void DrawBlackWhiteCurve(Image<Bgr, byte> drawImg, IntensityPoint current, IntensityPoint previous,int x) 
+        {
+            //繪製呈現用，斑馬線黑白像素經過的圖形
+            int projectY = Math.Abs((int)current.GetIntensity() - 300);
+            if (!current.IsEmpty() && !previous.IsEmpty())
+            {
+                float prevPorjectY = Math.Abs((float)previous.GetIntensity() - 300);
+                drawImg.Draw(new LineSegment2DF(new PointF(x - 2, projectY), new PointF(x, prevPorjectY)), new Bgr(Color.Green), 1);
+            }
+            else
+            {
+                drawImg.Draw(new LineSegment2DF(new PointF(0, 300), new PointF(x, projectY)), new Bgr(Color.Red), 1);
+            }
+            drawImg.Draw(new CircleF(new PointF(x, projectY), 1), new Bgr(Color.Blue), 2);
         
-       
+        }
+
+        /// <summary>
+        /// 判斷紋路是否黑白交錯
+        /// </summary>
+        /// <param name="checkPoints">記錄每一條線的黑白是否交錯的格式</param>
+        /// <param name="intensity">當前像素亮度</param>
+        /// <param name="lineIndex">目前的線段索引</param>
+        /// <param name="pixelSum">黑或白的像素總和(有連續兩個)</param>
+        /// <param name="previousPixelValue">前一個像素的值(來判斷當下與前一個像素的數值一致否)</param>
+        private void CheckBlackWhiteTexture(List<Dictionary<int, bool>> checkPoints, double intensity, int lineIndex, ref int pixelSum, ref int previousPixelValue)
+        {
+
+            if (intensity == 255)
+            {
+                if (previousPixelValue != -1)
+                {
+                    if (intensity == previousPixelValue)
+                        pixelSum++;
+                    else
+                    {
+                        previousPixelValue = 255;
+                        pixelSum = 1;
+                    }
+                }
+                else
+                {
+                    previousPixelValue = 255;
+                    pixelSum++;
+                }
+            }
+            else
+            {
+                if (previousPixelValue != -1)
+                {
+                    if (intensity == previousPixelValue)
+                        pixelSum++;
+                    else
+                    {
+                        previousPixelValue = 0;
+                        pixelSum = 1;
+                    }
+                }
+                else
+                {
+                    previousPixelValue = 0;
+                    pixelSum++;
+                }
+            }
+
+            if (pixelSum == 2)
+            {
+                if (intensity == 255 && !checkPoints[lineIndex][255])
+                    checkPoints[lineIndex][255] = true;
+                else if (intensity == 0 && !checkPoints[lineIndex][0])
+                    checkPoints[lineIndex][0] = true;
+            }
+        
+        }
 
         private void analyzeBlackWhiteButton_Click(object sender, EventArgs e)
         {
-            //統計每一條線的黑色與白色的pixel數量
-            List<Dictionary<int, int>> blackWhiteHistograms = new List<Dictionary<int, int>>();
-            //一條線段會是白黑白的經過
-            bool[] peakValleyCheckPoint = new bool[] { false, false, false };
-
+            
+            blackWhiteCheckPoints.Clear();
+            Image<Bgr, byte> showBlackWhiteCurve = new Image<Bgr, byte>(480, 300, new Bgr(Color.White));
+            IntensityPoint current, previous;
+            current = new IntensityPoint();
+            previous = new IntensityPoint();
+            int x = 0;
             int patch = 3;
+            int index = 0;
+            List<LineEquation> orderedLines=new List<LineEquation>();
             //依照y軸座標排序
-            var orderedMainLines = from line in linesHistogram[mainDirectionLineGroupId.ToString()] orderby (line.Line.P1.Y + line.Line.P2.Y) / 2 select line;
-            foreach (LineEquation line in orderedMainLines) {
+            if ((17 <= mainDirectionLineGroupId && mainDirectionLineGroupId <=18) || (7 <= mainDirectionLineGroupId && mainDirectionLineGroupId <= 9)){
+                var orderedMainLines = from line in linesHistogram[mainDirectionLineGroupId.ToString()] orderby (line.Line.P1.Y + line.Line.P2.Y) / 2 select line;
+                foreach (LineEquation line in orderedMainLines) {
+                    orderedLines.Add(line);
+                }
+            }
+            else {
+                var orderedMainLines = from line in linesHistogram[mainDirectionLineGroupId.ToString()] orderby (line.Line.P1.X + line.Line.P2.X) / 2 select line;
+                foreach (LineEquation line in orderedMainLines){
+                    orderedLines.Add(line);
+                }
+            }
+
+            foreach (LineEquation line in orderedLines){
                 int lineCenterY = (line.Line.P1.Y + line.Line.P2.Y) / 2;
                 int lineCenterX = (line.Line.P1.X + line.Line.P2.X) / 2;
+
+                int pixelSum = 0;
+                int previousPixelValue = -1;
+                blackWhiteCheckPoints.Add(new Dictionary<int, bool>());
+                blackWhiteCheckPoints[index][0] = false;
+                blackWhiteCheckPoints[index][255] = false;
+
                 if (Math.Abs(line.Angle) > 120) {
                     for (int start = lineCenterY - patch; start < lineCenterY + patch; start++)
                     {
                         //抓灰階 or 二值化做測試
                         Gray pixel = grayImg[Convert.ToInt32(start), Convert.ToInt32(lineCenterX)];
+                        CheckBlackWhiteTexture(blackWhiteCheckPoints, pixel.Intensity, index, ref pixelSum, ref previousPixelValue);
+                        //取得目前掃描線步進的素值
+                        current.SetData(new PointF(lineCenterX, start), pixel.Intensity);
+
+                        DrawBlackWhiteCurve(showBlackWhiteCurve, current, previous, x);
+                        //設定前一筆
+                        previous.SetData(current.GetLocation(), current.GetIntensity());
                         Console.WriteLine("x:" + lineCenterX + ",y:" + start + ",Intensity:" + pixel.Intensity);
+                        x += 5;
+
                     }
                 }
                 else if (Math.Abs(line.Angle) <= 120 && Math.Abs(line.Angle) >= 90){
@@ -1005,146 +1116,33 @@ namespace ZebraCrossing_Test
                     {
                         //抓灰階 or 二值化做測試
                         Gray pixel = grayImg[Convert.ToInt32(lineCenterY), Convert.ToInt32(start)];
+                        CheckBlackWhiteTexture(blackWhiteCheckPoints, pixel.Intensity, index, ref pixelSum, ref previousPixelValue);
+
+                        //取得目前掃描線步進的素值
+                        current.SetData(new PointF(lineCenterX, start), pixel.Intensity);
+
+                        DrawBlackWhiteCurve(showBlackWhiteCurve, current, previous, x);
+                        //設定前一筆
+                        previous.SetData(current.GetLocation(), current.GetIntensity());
                         Console.WriteLine("x:" + lineCenterX + ",y:" + start + ",Intensity:" + pixel.Intensity);
+                        x += 5;
                     }
                 }
                 Console.WriteLine("-------------------------------------");
+                index++;
             }
-
-           
-            /*
-            //記錄每一條線段的像素統計用的索引
-            int index = 0;
-
-            //紀錄前一個線段的黑色像素統計值
-            int previousBlackPixels = -1;
-
-            //計算線段通過pixel
-            foreach (LineSegment2DF line in lines)
-            {
-                float nextX;
-                float nextY = line.P1.Y;
-
-                //新增一條線
-                blackWhiteHistograms.Add(new Dictionary<int, int>());
-                blackWhiteHistograms[index][0] = 0;
-                blackWhiteHistograms[index][255] = 0;
-
-                //如果尋訪小於線段結束點的y軸，則不斷尋訪
-                while (nextY < line.P2.Y)
-                {
-
-                    nextX = GetXPositionFromLineEquations(line.P1, line.P2, nextY);
-
-                    //抓灰階 or 二值化做測試
-                    Gray pixel = maskWhiteImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
-                    //Console.WriteLine("next x =" + nextX + ",y = " + nextY + ",intensity = " + pixel.Intensity);
-
-                    //取得目前掃描線步進的素值
-                    current.SetData(new PointF(nextX, nextY), pixel.Intensity);
-
-                    //判斷像素的變化是Peak-Valley的狀態
-                    if (peakValleyCheckPoint[0] == false)
-                    {
-                        if (pixel.Intensity == 255) //White
-                            peakValleyCheckPoint[0] = true;
-                    }
-                    else if (peakValleyCheckPoint[0] == true && peakValleyCheckPoint[1] == false)
-                    {
-                        if (pixel.Intensity == 0) //Black
-                            peakValleyCheckPoint[1] = true;
-                    }
-                    else if (peakValleyCheckPoint[0] == true && peakValleyCheckPoint[1] == true && peakValleyCheckPoint[2] == false)
-                    {
-                        if (pixel.Intensity == 255) //White
-                            peakValleyCheckPoint[2] = true;
-                    }
-
-                    //統計目前這條線的像素量
-                    blackWhiteHistograms[index][(int)pixel.Intensity]++;
-
-                    //繪製圖型======================================================================
-                    //繪製呈現用，斑馬線黑白像素經過的圖形
-                    int projectY = Math.Abs((int)current.GetIntensity() - 300);
-                    if (!current.IsEmpty() && !previous.IsEmpty())
-                    {
-                        float prevPorjectY = Math.Abs((float)previous.GetIntensity() - 300);
-                        showBlackWhiteCurve.Draw(new LineSegment2DF(new PointF(x - 2, projectY), new PointF(x, prevPorjectY)), new Bgr(Color.Red), 1);
-                    }
-                    else
-                    {
-                        showBlackWhiteCurve.Draw(new LineSegment2DF(new PointF(0, 300), new PointF(x, projectY)), new Bgr(Color.Red), 1);
-                    }
-                    showBlackWhiteCurve.Draw(new CircleF(new PointF(x, projectY), 1), new Bgr(Color.Blue), 1);
-                    x += 2; //跳2,用來方便顯示圖形時可以比較清晰
-                    //繪製圖型======================================================================
-
-                    //設定前一筆
-                    previous.SetData(current.GetLocation(), current.GetIntensity());
-
-                    //步進Y
-                    nextY++;
-
-                }
-                //如果有一個不是true,則代表不是peak valley的形狀
-                if (peakValleyCheckPoint[0] == false || peakValleyCheckPoint[1] == false || peakValleyCheckPoint[2] == false)
-                {
-                    isBlackWhiteCrossing = false;
-
-                }
-                Console.WriteLine("Peak Valley State [0] =" + peakValleyCheckPoint[0] + ",[1] = " + peakValleyCheckPoint[1] + ",[2] = " + peakValleyCheckPoint[2]);
-                //初始化回來再看新的線段
-                peakValleyCheckPoint[0] = peakValleyCheckPoint[1] = peakValleyCheckPoint[2] = false;
-
-                index++; //記錄下一條線
-
-            }
-
-            x = 10;
-            //顯示每條線段的統計量
-            for (int i = 0; i < blackWhiteHistograms.Count; i++)
-            {
-                Console.WriteLine("Line[" + i + "] ,statistic : black = " + blackWhiteHistograms[i][0] + ", white = " + blackWhiteHistograms[i][255] + ",ratio = " + (blackWhiteHistograms[i][0] / (float)blackWhiteHistograms[i][255]));
-
-                //繪製圖型======================================================================
-                int projectY = Math.Abs((int)blackWhiteHistograms[i][0] - 300);
-                if (previousBlackPixels == -1)
-                {
-                    showBlackIncreasedCurve.Draw(new LineSegment2DF(new PointF(0, 300), new PointF(x, projectY)), new Bgr(Color.Red), 1);
-                }
-                else
-                {
-                    float prevPorjectY = Math.Abs((float)previousBlackPixels - 300);
-                    showBlackIncreasedCurve.Draw(new LineSegment2DF(new PointF(x - 10, prevPorjectY), new PointF(x, projectY)), new Bgr(Color.Red), 1);
-                }
-                showBlackIncreasedCurve.Draw(new CircleF(new PointF(x, projectY), 1), new Bgr(Color.Blue), 1);
-                //繪製圖型的X座標步進
-                x += 10;
-                //繪製圖型======================================================================
-
-                //判斷Black像素是否越來越多
-                if (previousBlackPixels != -1)
-                {
-                    if (previousBlackPixels > blackWhiteHistograms[i][0])
-                    {
-                        isBlackPixelIncreased = false;
-                    }
-                    previousBlackPixels = blackWhiteHistograms[i][0];
-                }
-                else
-                {
-                    previousBlackPixels = blackWhiteHistograms[i][0];
-                }
-
-
-            }
-            Console.WriteLine("Black pixel increased? =>" + isBlackWhiteCrossing);
-            ImageViewer blackIncreasedCurve = new ImageViewer(showBlackIncreasedCurve, "Statistic of black pixels curve");
-            blackIncreasedCurve.Show();
-
             ImageViewer blackWhiteScanCurve = new ImageViewer(showBlackWhiteCurve, "Scan Line Curve");
-            blackWhiteScanCurve.Show();
-             * */
+            blackWhiteScanCurve.Show();            
+
+            //顯示所有check的狀況
+            foreach(Dictionary<int,bool> lineCheckPoint in blackWhiteCheckPoints){
+                 Console.WriteLine("black = " + lineCheckPoint[0] + ", white = " + lineCheckPoint[255]);
+
+                //判斷都是True即可
+
+                //判斷線段數量
+            } 
+           
         }
 
         #region 尋找斑馬線的黑白特徵(輪廓法,舊方法)
