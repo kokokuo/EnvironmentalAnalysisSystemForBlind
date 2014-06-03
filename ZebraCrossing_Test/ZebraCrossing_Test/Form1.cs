@@ -63,11 +63,11 @@ namespace ZebraCrossing_Test
         
         List<LineSegment2D> repairedHoughLine; //紀錄修復後的所有線段
 
-        Dictionary<string, List<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
+        Dictionary<string, LinkedList<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
         int mainDirectionLineGroupId = 0; //紀錄主要線段的群組ID
         int maxLineLength = 0;
         //統計每一條線的黑色與白色的pixel數量
-        List<bool> checkBlackWhiteCrossingPoint = new List<bool>();
+        string checkBlackWhiteCrossingPoint;
 
         public Form1()
         {
@@ -125,7 +125,7 @@ namespace ZebraCrossing_Test
 
             candidateHoughLineEquationsForReplay = new List<LineEquation>();
 
-            linesHistogram = new Dictionary<string, List<LineEquation>>();
+            linesHistogram = new Dictionary<string, LinkedList<LineEquation>>();
 
            
         }
@@ -203,8 +203,8 @@ namespace ZebraCrossing_Test
                 candidateZebraCrossingsByContour.Clear();
                 //清空原先上一張偵測的圖
                 crossingConnectionlines.Clear();
-                //預設是假設都為True
-                isBlackWhiteCrossing = true;
+               
+                isBlackWhiteCrossing = false;
 
               
                 repairedHoughLine.Clear();
@@ -749,191 +749,191 @@ namespace ZebraCrossing_Test
                 {
                     if (!linesHistogram.ContainsKey("0"))
                     {
-                        linesHistogram.Add("0", new List<LineEquation>());
-                        linesHistogram["0"].Add(line);
+                        linesHistogram.Add("0", new LinkedList<LineEquation>());
+                        linesHistogram["0"].AddLast(line);
                     }
                     else
-                        linesHistogram["0"].Add(line);
+                        linesHistogram["0"].AddLast(line);
                 }
                 else if (160 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 170 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("1"))
                     {
-                        linesHistogram.Add("1", new List<LineEquation>());
-                        linesHistogram["1"].Add(line);
+                        linesHistogram.Add("1", new LinkedList<LineEquation>());
+                        linesHistogram["1"].AddLast(line);
                     }
                     else
-                        linesHistogram["1"].Add(line);
+                        linesHistogram["1"].AddLast(line);
                 }
                 else if (160 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 170 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("2"))
                     {
-                        linesHistogram.Add("2", new List<LineEquation>());
-                        linesHistogram["2"].Add(line);
+                        linesHistogram.Add("2", new LinkedList<LineEquation>());
+                        linesHistogram["2"].AddLast(line);
                     }
                     else
-                        linesHistogram["2"].Add(line);
+                        linesHistogram["2"].AddLast(line);
                 }
                 else if (150 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 160 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("3"))
                     {
-                        linesHistogram.Add("3", new List<LineEquation>());
-                        linesHistogram["3"].Add(line);
+                        linesHistogram.Add("3", new LinkedList<LineEquation>());
+                        linesHistogram["3"].AddLast(line);
                     }
                     else
-                        linesHistogram["3"].Add(line);
+                        linesHistogram["3"].AddLast(line);
                 }
                 else if (140 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 150 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("4"))
                     {
-                        linesHistogram.Add("4", new List<LineEquation>());
-                        linesHistogram["4"].Add(line);
+                        linesHistogram.Add("4", new LinkedList<LineEquation>());
+                        linesHistogram["4"].AddLast(line);
                     }
                     else
-                        linesHistogram["4"].Add(line);
+                        linesHistogram["4"].AddLast(line);
                 }
                 else if (130 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 140 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("5"))
                     {
-                        linesHistogram.Add("5", new List<LineEquation>());
-                        linesHistogram["5"].Add(line);
+                        linesHistogram.Add("5", new LinkedList<LineEquation>());
+                        linesHistogram["5"].AddLast(line);
                     }
                     else
-                        linesHistogram["5"].Add(line);
+                        linesHistogram["5"].AddLast(line);
                 }
                 else if (120 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 130 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("6"))
                     {
-                        linesHistogram.Add("6", new List<LineEquation>());
-                        linesHistogram["6"].Add(line);
+                        linesHistogram.Add("6", new LinkedList<LineEquation>());
+                        linesHistogram["6"].AddLast(line);
                     }
                     else
-                        linesHistogram["6"].Add(line);
+                        linesHistogram["6"].AddLast(line);
                 }
                 else if (110 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 120 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("7"))
                     {
-                        linesHistogram.Add("7", new List<LineEquation>());
-                        linesHistogram["7"].Add(line);
+                        linesHistogram.Add("7", new LinkedList<LineEquation>());
+                        linesHistogram["7"].AddLast(line);
                     }
                     else
-                        linesHistogram["7"].Add(line);
+                        linesHistogram["7"].AddLast(line);
                 }
                 else if (100 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 110 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("8"))
                     {
-                        linesHistogram.Add("8", new List<LineEquation>());
-                        linesHistogram["8"].Add(line);
+                        linesHistogram.Add("8", new LinkedList<LineEquation>());
+                        linesHistogram["8"].AddLast(line);
                     }
                     else
-                        linesHistogram["8"].Add(line);
+                        linesHistogram["8"].AddLast(line);
                 }
                 else if (90 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 100 && line.Direction == 1)
                 {
                     if (!linesHistogram.ContainsKey("9"))
                     {
-                        linesHistogram.Add("9", new List<LineEquation>());
-                        linesHistogram["9"].Add(line);
+                        linesHistogram.Add("9", new LinkedList<LineEquation>());
+                        linesHistogram["9"].AddLast(line);
                     }
                     else
-                        linesHistogram["9"].Add(line);
+                        linesHistogram["9"].AddLast(line);
                 }
                 else if (160 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 170 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("10"))
                     {
-                        linesHistogram.Add("10", new List<LineEquation>());
-                        linesHistogram["10"].Add(line);
+                        linesHistogram.Add("10", new LinkedList<LineEquation>());
+                        linesHistogram["10"].AddLast(line);
                     }
                     else
-                        linesHistogram["10"].Add(line);
+                        linesHistogram["10"].AddLast(line);
                 }
                 else if (160 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 170 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("11"))
                     {
-                        linesHistogram.Add("11", new List<LineEquation>());
-                        linesHistogram["11"].Add(line);
+                        linesHistogram.Add("11", new LinkedList<LineEquation>());
+                        linesHistogram["11"].AddLast(line);
                     }
                     else
-                        linesHistogram["11"].Add(line);
+                        linesHistogram["11"].AddLast(line);
                 }
                 else if (150 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 160 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("12"))
                     {
-                        linesHistogram.Add("12", new List<LineEquation>());
-                        linesHistogram["12"].Add(line);
+                        linesHistogram.Add("12", new LinkedList<LineEquation>());
+                        linesHistogram["12"].AddLast(line);
                     }
                     else
-                        linesHistogram["12"].Add(line);
+                        linesHistogram["12"].AddLast(line);
                 }
                 else if (140 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 150 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("13"))
                     {
-                        linesHistogram.Add("13", new List<LineEquation>());
-                        linesHistogram["13"].Add(line);
+                        linesHistogram.Add("13", new LinkedList<LineEquation>());
+                        linesHistogram["13"].AddLast(line);
                     }
                     else
-                        linesHistogram["13"].Add(line);
+                        linesHistogram["13"].AddLast(line);
                 }
                 else if (130 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 140 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("14"))
                     {
-                        linesHistogram.Add("14", new List<LineEquation>());
-                        linesHistogram["14"].Add(line);
+                        linesHistogram.Add("14", new LinkedList<LineEquation>());
+                        linesHistogram["14"].AddLast(line);
                     }
                     else
-                        linesHistogram["14"].Add(line);
+                        linesHistogram["14"].AddLast(line);
                 }
                 else if (120 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 130 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("15"))
                     {
-                        linesHistogram.Add("15", new List<LineEquation>());
-                        linesHistogram["15"].Add(line);
+                        linesHistogram.Add("15", new LinkedList<LineEquation>());
+                        linesHistogram["15"].AddLast(line);
                     }
                     else
-                        linesHistogram["15"].Add(line);
+                        linesHistogram["15"].AddLast(line);
                 }
                 else if (110 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 120 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("16"))
                     {
-                        linesHistogram.Add("16", new List<LineEquation>());
-                        linesHistogram["16"].Add(line);
+                        linesHistogram.Add("16", new LinkedList<LineEquation>());
+                        linesHistogram["16"].AddLast(line);
                     }
                     else
-                        linesHistogram["16"].Add(line);
+                        linesHistogram["16"].AddLast(line);
                 }
                 else if (100 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 110 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("17"))
                     {
-                        linesHistogram.Add("17", new List<LineEquation>());
-                        linesHistogram["17"].Add(line);
+                        linesHistogram.Add("17", new LinkedList<LineEquation>());
+                        linesHistogram["17"].AddLast(line);
                     }
                     else
-                        linesHistogram["17"].Add(line);
+                        linesHistogram["17"].AddLast(line);
                 }
                 else if (90 <= Math.Abs(line.Angle) && Math.Abs(line.Angle) < 100 && line.Direction == -1)
                 {
                     if (!linesHistogram.ContainsKey("18"))
                     {
-                        linesHistogram.Add("18", new List<LineEquation>());
-                        linesHistogram["18"].Add(line);
+                        linesHistogram.Add("18", new LinkedList<LineEquation>());
+                        linesHistogram["18"].AddLast(line);
                     }
                     else
-                        linesHistogram["18"].Add(line);
+                        linesHistogram["18"].AddLast(line);
                 }
             }
 
@@ -971,10 +971,19 @@ namespace ZebraCrossing_Test
             //1.找最大
             var maxLengthLine = (from selectLine in linesHistogram[mainDirectionLineGroupId.ToString()]
                                  select selectLine).Max(line => line.Line.Length);
-
-            //2.依照比例把過段的濾掉
-
             Console.WriteLine("最長的線段為:" + maxLengthLine);
+            //2.依照比例把過段的濾掉
+            LinkedListNode<LineEquation> node = linesHistogram[mainDirectionLineGroupId.ToString()].First;
+            while(node!= null){
+                if (node.Value.Line.Length < (maxLengthLine / 3))
+                {
+                    linesHistogram[mainDirectionLineGroupId.ToString()].Remove(node);
+                    Console.WriteLine("移除的線段為:\nLength:" + node.Value.Line.Length + ",p1:" + node.Value.Line.P1 +",p2:" + node.Value.Line.P2);
+                }
+                node = node.Next;
+            }
+
+            
         }
 
         /// <summary>
@@ -1009,7 +1018,7 @@ namespace ZebraCrossing_Test
         /// <param name="lineIndex">目前的線段索引</param>
         /// <param name="pixelSum">黑或白的像素總和(有連續兩個)</param>
         /// <param name="previousPixelValue">前一個像素的值(來判斷當下與前一個像素的數值一致否)</param>
-        private void CheckBlackWhiteTexture(List<bool> checkPoints, double intensity, int lineIndex, ref int pixelSum, ref int previousPixelValue, ref int previousCheckIntentisty)
+        private void CheckBlackWhiteTexture(string checkPoints, double intensity, ref int pixelSum, ref int previousPixelValue, ref int previousCheckIntentisty)
         {
 
             if (intensity == 255)
@@ -1048,23 +1057,28 @@ namespace ZebraCrossing_Test
                     pixelSum++;
                 }
             }
-
+            //有連續5個同樣像素及判斷為是此紋路
             if (pixelSum == 5)
             {
                 Console.WriteLine("---------------\nIntensity: " + intensity + " has accumulated!");
-                if (previousCheckIntentisty == -1)
+                //如果是第一次判斷紋路或是前一個紋路與線段的紋路不相同,紀錄
+                if (previousCheckIntentisty != intensity || previousCheckIntentisty == -1)
                 {
-                    previousCheckIntentisty = Convert.ToInt32(intensity);
-                    checkBlackWhiteCrossingPoint.Add(true);
-                    Console.WriteLine("index = " + lineIndex + "\n---------------");
+                    //白色用true
+                    if (intensity == 255)
+                    {
+                        checkBlackWhiteCrossingPoint +="1";
+                        previousCheckIntentisty = 255;
+                    }
+                    else  //黑色用true
+                    {
+                        checkBlackWhiteCrossingPoint += "0";
+                        previousCheckIntentisty = 0;
+                    }
                 }
-                else 
-                {
-                    if (previousCheckIntentisty != intensity)
-                        checkBlackWhiteCrossingPoint.Add(true);
-                    Console.WriteLine("Previous intensity = " + previousCheckIntentisty + " previous index = " + lineIndex + "\n---------------");
-                }
-              
+                Console.WriteLine("Previous intensity = " + previousCheckIntentisty + "\n---------------");
+                
+                pixelSum = 0;
             }
             
         }
@@ -1121,14 +1135,18 @@ namespace ZebraCrossing_Test
 
             //統計黑白像素與判斷是否每條線段為白黑白的特徵
             DoBlackWhiteStatisticsByScanLine(crossingConnectionlines);
-           
+
+            if (isBlackWhiteCrossing && linesHistogram[mainDirectionLineGroupId.ToString()].Count > 3) {
+                MessageBox.Show("找到斑馬線");
+            }
+
         }
 
         #region 尋找斑馬線的黑白特徵(輪廓法,舊方法)
         //////////////////////////////////////////////////////////////
         private void DoBlackWhiteStatisticsByScanLine(List<LineSegment2DF> lines)
         {
-            checkBlackWhiteCrossingPoint.Clear();
+            checkBlackWhiteCrossingPoint="";
             Image<Bgr, byte> blackWhiteCurveImg = new Image<Bgr, byte>(480, 300, new Bgr(Color.White));
             int x = 0; // 要尋訪的起點
             IntensityPoint current, previous;
@@ -1136,7 +1154,7 @@ namespace ZebraCrossing_Test
             previous = new IntensityPoint();
 
             //記錄每一條線段的像素統計用的索引
-            int index = 0;
+          
             int pixelSum = 0;
             int previousPixelValue = -1;
             int previousCheckIntentisty = -1;
@@ -1155,12 +1173,8 @@ namespace ZebraCrossing_Test
 
                     //抓灰階 or 二值化做測試
                     Gray pixel = grayImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
-                    CheckBlackWhiteTexture(checkBlackWhiteCrossingPoint, pixel.Intensity, index, ref pixelSum, ref previousPixelValue,ref previousCheckIntentisty);
+                    CheckBlackWhiteTexture(checkBlackWhiteCrossingPoint, pixel.Intensity, ref pixelSum, ref previousPixelValue,ref previousCheckIntentisty);
                     
-                    //像素值改變
-                    if (previousCheckIntentisty != pixel.Intensity)
-                        index++;
-
                     //取得目前掃描線步進的素值
                     current.SetData(new PointF(nextX, nextY), pixel.Intensity);
 
@@ -1184,14 +1198,13 @@ namespace ZebraCrossing_Test
 
 
             ////顯示所有check的狀況
-            foreach(bool check in checkBlackWhiteCrossingPoint){
-                Console.WriteLine(checkBlackWhiteCrossingPoint);
-
-                //判斷都是True即可
-
-                //判斷線段數量
-            } 
-           
+            Console.WriteLine(checkBlackWhiteCrossingPoint);
+            if (checkBlackWhiteCrossingPoint.Contains("010101") || checkBlackWhiteCrossingPoint.Contains("101010"))
+            {
+                Console.WriteLine("有交錯");
+                isBlackWhiteCrossing = true;
+            }
+          
         }
         //計算直線方程式，並求x座標來取出圖片像素
         private float GetXPositionFromLineEquations(PointF p1, PointF p2, float y)
