@@ -194,7 +194,7 @@ namespace ZebraCrossing_Test
             if (filename !=null)
             {
                 oriImg = new Image<Bgr, byte>(filename);
-                oriImg = oriImg.Resize(480, 360, INTER.CV_INTER_LINEAR);
+                oriImg = oriImg.Resize(640, 480, INTER.CV_INTER_LINEAR);
                 oriImageBox.Image = oriImg;
 
                 //清空先前的資料
@@ -1373,37 +1373,8 @@ namespace ZebraCrossing_Test
     }
 
 
-    public class IntensityPoint {
-        private PointF location;
-        private double intensity;
-
-        public IntensityPoint() {
-            location = new PointF();
-            intensity = -1;
-        }
-
-        public bool IsEmpty() {
-            if (location.IsEmpty && intensity == -1)
-                return true;
-            return false;
-        }
-        public void SetData(PointF p,double value){
-            location = p;
-            intensity = value;
-        }
-        public PointF GetLocation(){  return location; }
-        public double GetIntensity() { return intensity; }
-    }
+  
 
     
-    public class LineEquation {
-        public float A { get; set; }
-        public float B { get; set; }
-        public float C { get; set; }
-        public float Slope { get; set; }
-        public double Angle { get; set; }
-        public double AdjustAngle { get; set; }
-        public int Direction { get; set; }
-        public LineSegment2D Line{ get; set; }
-    }
+   
 }
