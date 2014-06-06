@@ -1141,12 +1141,9 @@ namespace ZebraCrossing_Test
             }
 
         }
-
-        #region 尋找斑馬線的黑白特徵(輪廓法,舊方法)
-        //////////////////////////////////////////////////////////////
         private void DoBlackWhiteStatisticsByScanLine(List<LineSegment2DF> lines)
         {
-            checkBlackWhiteCrossingPoint="";
+            checkBlackWhiteCrossingPoint = "";
             Image<Bgr, byte> blackWhiteCurveImg = new Image<Bgr, byte>(480, 300, new Bgr(Color.White));
             int x = 0; // 要尋訪的起點
             IntensityPoint current, previous;
@@ -1154,7 +1151,7 @@ namespace ZebraCrossing_Test
             previous = new IntensityPoint();
 
             //記錄每一條線段的像素統計用的索引
-          
+
             int pixelSum = 0;
             int previousPixelValue = -1;
             int previousCheckIntentisty = -1;
@@ -1173,8 +1170,8 @@ namespace ZebraCrossing_Test
 
                     //抓灰階 or 二值化做測試
                     Gray pixel = grayImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
-                    CheckBlackWhiteTexture(checkBlackWhiteCrossingPoint, pixel.Intensity, ref pixelSum, ref previousPixelValue,ref previousCheckIntentisty);
-                    
+                    CheckBlackWhiteTexture(checkBlackWhiteCrossingPoint, pixel.Intensity, ref pixelSum, ref previousPixelValue, ref previousCheckIntentisty);
+
                     //取得目前掃描線步進的素值
                     current.SetData(new PointF(nextX, nextY), pixel.Intensity);
 
@@ -1204,7 +1201,7 @@ namespace ZebraCrossing_Test
                 Console.WriteLine("有交錯");
                 isBlackWhiteCrossing = true;
             }
-          
+
         }
         //計算直線方程式，並求x座標來取出圖片像素
         private float GetXPositionFromLineEquations(PointF p1, PointF p2, float y)
@@ -1215,6 +1212,9 @@ namespace ZebraCrossing_Test
             //Console.WriteLine("y =" + y + "and find x=" + x);
             return x;
         }
+        #region 尋找斑馬線的黑白特徵(輪廓法,舊方法)
+        //////////////////////////////////////////////////////////////
+
 
         
         
