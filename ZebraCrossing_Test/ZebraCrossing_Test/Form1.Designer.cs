@@ -153,7 +153,7 @@
             this.dilateButton.TabIndex = 14;
             this.dilateButton.Text = "4.opt-膨脹";
             this.dilateButton.UseVisualStyleBackColor = true;
-            this.dilateButton.Click += new System.EventHandler(this.dilateButton_Click);
+     
             // 
             // filterImageBox
             // 

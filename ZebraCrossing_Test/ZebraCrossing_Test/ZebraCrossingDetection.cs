@@ -96,9 +96,9 @@ namespace ZebraCrossingDetection
             //oriImg 與 grayImg 測試
             if (source != null)
             {
-                source = new Image<Gray, byte>(new Size(source.Width, source.Height));
-                CvInvoke.cvInRangeS(source, new MCvScalar(160, 160, 160), new MCvScalar(255, 255, 255), source);
-                return source;
+                Image<Gray, byte> dst = new Image<Gray, byte>(new Size(source.Width, source.Height));
+                CvInvoke.cvInRangeS(source, new MCvScalar(160, 160, 160), new MCvScalar(255, 255, 255), dst);
+                return dst;
                 
             }
             else
@@ -143,8 +143,6 @@ namespace ZebraCrossingDetection
           
             if (source != null)
             {
-                Image<Bgr, byte> onlyLineImg = new Image<Bgr, byte>(source.Width, source.Height, new Bgr(0, 0, 0));
-
                 //Hough transform for line detection
                 LineSegment2D[][] lines = source.HoughLines(
                     new Gray(125),  //Canny algorithm low threshold
@@ -269,7 +267,7 @@ namespace ZebraCrossingDetection
         }
 
         //共線或是相交
-        private static bool CheckIntersectOrNot(LineEquation line1, LineEquation line2, out Point intersectP, ref LineSegment2D repaiedLine, Image<Bgr, byte> source)
+        public static bool CheckIntersectOrNot(LineEquation line1, LineEquation line2, out Point intersectP, ref LineSegment2D repaiedLine, Image<Bgr, byte> source)
         {
              intersectP = new Point();
             //檢查共線(檢查向量 A,B,C三點,A->B 與B->C兩條向量會是比例關係 or A-B 與 A-C的斜率會依樣 or 向量叉積 A)
@@ -622,7 +620,7 @@ namespace ZebraCrossingDetection
         #endregion
 
         #region 分析黑白紋路
-        public static void AnalyzeZebraCrossingTexture(int mainDirectionLineGroupId, Dictionary<LineQuantification, LinkedList<LineEquation>> linesHistogram, Image<Gray, byte> source, Image<Bgr, byte> oriImg)
+        public static bool AnalyzeZebraCrossingTexture(int mainDirectionLineGroupId, Dictionary<LineQuantification, LinkedList<LineEquation>> linesHistogram, Image<Gray, byte> source, Image<Bgr, byte> oriImg, Image<Bgr, byte> stasticDst)
         {
             //紀錄斑馬線之間白色連結起來的線段
             List<LineSegment2DF> crossingConnectionlines = new List<LineSegment2DF>();  
@@ -679,14 +677,15 @@ namespace ZebraCrossingDetection
             ImageViewer showScanLine = new ImageViewer(scanLineImg, "Scan Line");
             showScanLine.Show();
 
-            Image<Bgr, byte> stasticDst = new Image<Bgr, byte>(640, 480, new Bgr(Color.White));
             //統計黑白像素與判斷是否每條線段為白黑白的特徵
             bool isBlackWhiteCrossing = DoBlackWhiteStatisticsByScanLine(crossingConnectionlines, source, stasticDst);
 
             if (isBlackWhiteCrossing && linesHistogram[(LineQuantification)mainDirectionLineGroupId].Count > 3)
             {
-                //MessageBox.Show("找到斑馬線");
+                return true;
             }
+            else
+                return false;
         
         }
         /// <summary>
