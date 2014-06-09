@@ -142,7 +142,7 @@
             this.smoothButton.TabIndex = 13;
             this.smoothButton.Text = "2.opt-灰階與模糊";
             this.smoothButton.UseVisualStyleBackColor = true;
-            this.smoothButton.Click += new System.EventHandler(this.smoothButton_Click);
+            this.smoothButton.Click += new System.EventHandler(this.toGrayAndSmoothButton_Click);
             // 
             // dilateButton
             // 

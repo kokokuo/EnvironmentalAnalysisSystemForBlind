@@ -25,7 +25,7 @@ namespace ZebraCrossing_Test
 
         DirectoryInfo dir;
         Image<Bgr, byte> oriImg;
-        Image<Gray, byte> grayImg;
+        Image<Gray, byte> processingImg;
         Image<Gray, byte> maskWhiteImg;
         ImageViewer houghLineViewer;
         ImageViewer ContoursAndScanLineViewer;
@@ -69,6 +69,7 @@ namespace ZebraCrossing_Test
         //統計每一條線的黑色與白色的pixel數量
         string checkBlackWhiteCrossingPoint;
 
+        ZebraCrossingDetection.ZebraCrossingDetection crossingDetection = new ZebraCrossingDetection.ZebraCrossingDetection();
         public Form1()
         {
             InitializeComponent();
@@ -193,8 +194,7 @@ namespace ZebraCrossing_Test
             string filename = OpenLearningImgFile();
             if (filename !=null)
             {
-                oriImg = new Image<Bgr, byte>(filename);
-                oriImg = oriImg.Resize(640, 480, INTER.CV_INTER_LINEAR);
+                oriImg = ZebraCrossingDetection.ZebraCrossingDetection.LoadImg(filename);
                 oriImageBox.Image = oriImg;
 
                 //清空先前的資料
@@ -206,7 +206,6 @@ namespace ZebraCrossing_Test
                
                 isBlackWhiteCrossing = false;
 
-              
                 repairedHoughLine.Clear();
                 showFinishedRepairedHoughLineStepImg = oriImg.Copy();
                 linesHistogram.Clear();
@@ -220,17 +219,39 @@ namespace ZebraCrossing_Test
                 //DoHoughLine("灰階模糊");
             }
         }
+        private void cropBottomButton_Click(object sender, EventArgs e)
+        {
+            oriImg = ZebraCrossingDetection.ZebraCrossingDetection.ToCrop(oriImg);
+            oriImageBox.Image = oriImg;
+        }
+        private void toGrayButton_Click(object sender, EventArgs e)
+        {
+            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.ToGray(oriImg);
+            grayImgBox.Image = processingImg;
+        }
+        //先灰階再模糊 以去除Mask時的雜訊白點，增加足夠有利的線段
+        private void toGrayAndSmoothButton_Click(object sender, EventArgs e)
+        {
+            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.ToGray(oriImg);
+            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.Smooth(processingImg);
+            grayImgBox.Image = processingImg;
+        }
+        private void maskImgButton_Click(object sender, EventArgs e)
+        {
+            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.MaskWhite(processingImg);
+            maskImageBox.Image = processingImg;
+        }
 
         private void MaskWhite() {
 
             //oriImg 與 grayImg 測試
-            if (grayImg != null)
+            if (processingImg != null)
             {
                 try
                 {
-                    maskWhiteImg = new Image<Gray, byte>(new Size(grayImg.Width, grayImg.Height));
-                    CvInvoke.cvInRangeS(grayImg, new MCvScalar(160, 160, 160), new MCvScalar(255, 255, 255), grayImg);
-                    maskImageBox.Image = grayImg;
+                    maskWhiteImg = new Image<Gray, byte>(new Size(processingImg.Width, processingImg.Height));
+                    CvInvoke.cvInRangeS(processingImg, new MCvScalar(160, 160, 160), new MCvScalar(255, 255, 255), processingImg);
+                    maskImageBox.Image = processingImg;
                 }
                 catch (Exception ex)
                 {
@@ -245,75 +266,16 @@ namespace ZebraCrossing_Test
             }
         
         }
-        private void maskImgButton_Click(object sender, EventArgs e)
-        {
-            MaskWhite();
-        }
-
-        private void Smooth() {
-
-            if (oriImg != null)
-            {
-                grayImg = oriImg.Convert<Gray, byte>();
-                CvInvoke.cvSmooth(grayImg, grayImg, SMOOTH_TYPE.CV_GAUSSIAN, 13, 13, 1.5, 1);
-                grayImgBox.Image = grayImg;
-            }
-            
-        }
-
-        //先灰階再模糊 以去除Mask時的雜訊白點，增加足夠有利的線段
-        private void smoothButton_Click(object sender, EventArgs e)
-        {
-            Smooth();
-        }
-
-        private void ToGray() {
-            if (oriImg != null)
-            {
-                grayImg = oriImg.Convert<Gray, byte>();
-                grayImgBox.Image = grayImg;
-            }
-            else
-            {
-                MessageBox.Show("尚未剪裁");
-            }
-        }
-
-        private void toGrayButton_Click(object sender, EventArgs e)
-        {
-            ToGray();
-        }
-
-        private void ToCrop()
-        {
-            if (oriImg != null)
-            {
-                oriImg = oriImg.Copy();
-                oriImg.ROI = new Rectangle(new Point(0, oriImg.Height / 2), new Size(oriImg.Width, oriImg.Height / 2));
-                oriImageBox.Image = oriImg;
-
-                //先先取得要做houghline步驟的圖片
-                showFinishedRepairedHoughLineStepImg = oriImg.Copy();
-            }
-            else
-            {
-                MessageBox.Show("尚未載入圖片");
-            }
-        }
-
-        private void cropBottomButton_Click(object sender, EventArgs e)
-        {
-            ToCrop();
-        }
-
+       
+       
         #region 圖像處理 去雜訊 膨脹
         private void Dilate() {
-            if (grayImg != null)
+            if (processingImg != null)
             {
                 //膨脹
-                grayImg = grayImg.Dilate(1);
+                processingImg = processingImg.Dilate(1);
 
-                filterImageBox.Image = grayImg;
+                filterImageBox.Image = processingImg;
             }
             else
             {
@@ -326,11 +288,11 @@ namespace ZebraCrossing_Test
         }
 
         private void filterPepper() {
-            if (grayImg != null)
+            if (processingImg != null)
             {
                 //用中值濾波去雜訊
-                grayImg = grayImg.SmoothMedian(3);
-                filterImageBox.Image = grayImg;
+                processingImg = processingImg.SmoothMedian(3);
+                filterImageBox.Image = processingImg;
             }
             else
             {
@@ -348,13 +310,13 @@ namespace ZebraCrossing_Test
 
         private void DoHoughLine(string title) {
             #region 偵測整張Mask White圖片
-            if (grayImg != null)
+            if (processingImg != null)
             {
                 Image<Bgr, byte> onlyLineImg = new Image<Bgr, byte>(oriImg.Width, oriImg.Height, new Bgr(0, 0, 0));
                 using (Image<Bgr, byte> showLineImg = oriImg.Copy())
                 {
                     //Hough transform for line detection
-                    LineSegment2D[][] lines = grayImg.HoughLines(
+                    LineSegment2D[][] lines = processingImg.HoughLines(
                         new Gray(125),  //Canny algorithm low threshold
                         new Gray(260),  //Canny algorithm high threshold
                         1,              //rho parameter
@@ -1169,7 +1131,7 @@ namespace ZebraCrossing_Test
                     nextX = GetXPositionFromLineEquations(line.P1, line.P2, nextY);
 
                     //抓灰階 or 二值化做測試
-                    Gray pixel = grayImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
+                    Gray pixel = processingImg[Convert.ToInt32(nextY), Convert.ToInt32(nextX)];
                     CheckBlackWhiteTexture(checkBlackWhiteCrossingPoint, pixel.Intensity, ref pixelSum, ref previousPixelValue, ref previousCheckIntentisty);
 
                     //取得目前掃描線步進的素值
