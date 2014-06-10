@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ZebraCrossing_Test
+namespace ZebraCrossingDetector
 {
     public class IntensityPoint
     {

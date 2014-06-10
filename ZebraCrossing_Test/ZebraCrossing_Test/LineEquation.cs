@@ -12,7 +12,7 @@ using Emgu.CV.Features2D;
 using Emgu.CV.CvEnum;
 using System.Drawing;
 
-namespace ZebraCrossing_Test
+namespace ZebraCrossingDetector
 {
     public class LineEquation
     {

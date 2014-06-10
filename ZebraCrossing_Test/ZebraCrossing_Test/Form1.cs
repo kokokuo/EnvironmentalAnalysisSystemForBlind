@@ -15,13 +15,12 @@ using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.Features2D;
 using Emgu.CV.CvEnum;
+using ZebraCrossingDetector;
 
 namespace ZebraCrossing_Test
 {
     public partial class Form1 : Form
     {
-        //接近水平線的線段修復，線段與線段之間的y高度的差距誤差(避免斑馬線上是兩個不同的y線段，但是因為拍攝的視角關係，被誤認為是同一條)
-        const int HORIZATON_REPAIR_HOUGH_LINE_HEIGHT_THRESHOLD = 7;
 
         DirectoryInfo dir;
         Image<Bgr, byte> oriImg;
@@ -52,10 +51,8 @@ namespace ZebraCrossing_Test
         
         List<LineSegment2D> repairedHoughLine; //紀錄修復後的所有線段
 
-        Dictionary<ZebraCrossingDetection.LineQuantification, LinkedList<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
+        Dictionary<ZebraCrossingDetector.LineQuantification, LinkedList<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
         int mainDirectionLineGroupId = 0; //紀錄主要線段的群組ID
-
-        ZebraCrossingDetection.ZebraCrossingDetection crossingDetection = new ZebraCrossingDetection.ZebraCrossingDetection();
         
         public Form1()
         {
@@ -93,7 +90,7 @@ namespace ZebraCrossing_Test
 
             candidateHoughLineEquationsForReplay = new List<LineEquation>();
 
-            linesHistogram = new Dictionary<ZebraCrossingDetection.LineQuantification, LinkedList<LineEquation>>();
+            linesHistogram = new Dictionary<ZebraCrossingDetector.LineQuantification, LinkedList<LineEquation>>();
 
            
         }
@@ -161,7 +158,7 @@ namespace ZebraCrossing_Test
             string filename = OpenLearningImgFile();
             if (filename !=null)
             {
-                oriImg = ZebraCrossingDetection.ZebraCrossingDetection.LoadImg(filename);
+                oriImg = ZebraCrossingDetector.ZebraCrossingDetector.LoadImg(filename);
                 oriImageBox.Image = oriImg;
 
                 //清空先前的資料
@@ -179,30 +176,30 @@ namespace ZebraCrossing_Test
         }
         private void cropBottomButton_Click(object sender, EventArgs e)
         {
-            oriImg = ZebraCrossingDetection.ZebraCrossingDetection.ToCrop(oriImg);
+            oriImg = ZebraCrossingDetector.ZebraCrossingDetector.ToCrop(oriImg);
             oriImageBox.Image = oriImg;
         }
         private void toGrayButton_Click(object sender, EventArgs e)
         {
-            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.ToGray(oriImg);
+            processingImg = ZebraCrossingDetector.ZebraCrossingDetector.ToGray(oriImg);
             grayImgBox.Image = processingImg;
         }
         //先灰階再模糊 以去除Mask時的雜訊白點，增加足夠有利的線段
         private void toGrayAndSmoothButton_Click(object sender, EventArgs e)
         {
-            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.ToGray(oriImg);
-            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.Smooth(processingImg);
+            processingImg = ZebraCrossingDetector.ZebraCrossingDetector.ToGray(oriImg);
+            processingImg = ZebraCrossingDetector.ZebraCrossingDetector.Smooth(processingImg);
             grayImgBox.Image = processingImg;
         }
         private void maskImgButton_Click(object sender, EventArgs e)
         {
-            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.MaskWhite(processingImg);
+            processingImg = ZebraCrossingDetector.ZebraCrossingDetector.MaskWhite(processingImg);
             maskImageBox.Image = processingImg;
         }
 
         private void filterPepperButton_Click(object sender, EventArgs e)
         {
-            processingImg = ZebraCrossingDetection.ZebraCrossingDetection.PepperFilter(processingImg);
+            processingImg = ZebraCrossingDetector.ZebraCrossingDetector.PepperFilter(processingImg);
             filterImageBox.Image = processingImg;
         }
        
@@ -211,7 +208,7 @@ namespace ZebraCrossing_Test
         {
             candidateHoughLineEquations.Clear();
             candidateHoughLineEquationsForReplay.Clear();
-            candidateHoughLineEquations = ZebraCrossingDetection.ZebraCrossingDetection.DetectHoughLine(processingImg);
+            candidateHoughLineEquations = ZebraCrossingDetector.ZebraCrossingDetector.DetectHoughLine(processingImg);
 
             //步驟用
             candidateHoughLineEquationsForReplay = candidateHoughLineEquations.ToList<LineEquation>();
@@ -221,7 +218,7 @@ namespace ZebraCrossing_Test
             Image<Bgr, byte> houghlineImg = oriImg.Clone();
             int colorIndex = 0;
             while (node != null) {
-                houghlineImg.Draw(node.Value.Line, DrawColorLines.LineColors[(colorIndex % DrawColorLines.LineColors.Length)], 2);
+                houghlineImg.Draw(node.Value.Line, Utilities.LineColors[(colorIndex % Utilities.LineColors.Length)], 2);
                
                 node = node.Next;
                 colorIndex++;
@@ -235,7 +232,7 @@ namespace ZebraCrossing_Test
 
         private void restructLineButton_Click(object sender, EventArgs e)
         {
-            candidateHoughLineEquations = ZebraCrossingDetection.ZebraCrossingDetection.
+            candidateHoughLineEquations = ZebraCrossingDetector.ZebraCrossingDetector.
                 RepairedLines(candidateHoughLineEquations, oriImg);
 
             //Show repaired Image
@@ -245,7 +242,7 @@ namespace ZebraCrossing_Test
             LinkedListNode<LineEquation> node = candidateHoughLineEquations.First;
             while (node != null) {
                 //把線段畫上去
-                showFinishedRepairedHoughLineImg.Draw(node.Value.Line, DrawColorLines.LineColors[(i % DrawColorLines.LineColors.Length)], 2);
+                showFinishedRepairedHoughLineImg.Draw(node.Value.Line, Utilities.LineColors[(i % Utilities.LineColors.Length)], 2);
                 //下一個Node
                 node = node.Next;
                 i++;
@@ -278,11 +275,11 @@ namespace ZebraCrossing_Test
                     Console.WriteLine(repairedLine.Length + "," + repairedLine.P1 + "," + repairedLine.P2);
 
                     //繪製正在比較有無共線或是相交的線段
-                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, DrawColorLines.LineColors[(candiateLineEquation_i % DrawColorLines.LineColors.Length)], 1);
-                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_j].Line, DrawColorLines.LineColors[(candiateLineEquation_j % DrawColorLines.LineColors.Length)], 1);
+                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, Utilities.LineColors[(candiateLineEquation_i % Utilities.LineColors.Length)], 1);
+                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_j].Line, Utilities.LineColors[(candiateLineEquation_j % Utilities.LineColors.Length)], 1);
                     
                     //判斷是否共線或是相交的線段
-                    interset = ZebraCrossingDetection.ZebraCrossingDetection.CheckIntersectOrNot(candidateHoughLineEquationsForReplay[candiateLineEquation_i], candidateHoughLineEquationsForReplay[candiateLineEquation_j], out p, ref repairedLine,oriImg);
+                    interset = ZebraCrossingDetector.ZebraCrossingDetector.CheckIntersectOrNot(candidateHoughLineEquationsForReplay[candiateLineEquation_i], candidateHoughLineEquationsForReplay[candiateLineEquation_j], out p, ref repairedLine,oriImg);
                     if (interset)
                     {
                         showSearchrepairedHoughLineStepImg.Draw(new CircleF(new PointF(x, y), 1), new Bgr(255, 255, 255), 1);
@@ -301,7 +298,7 @@ namespace ZebraCrossing_Test
                 else
                 {
                     //並把這次比過的線段畫上去
-                    showFinishedRepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, DrawColorLines.LineColors[(candiateLineEquation_i % DrawColorLines.LineColors.Length)], 2);
+                    showFinishedRepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, Utilities.LineColors[(candiateLineEquation_i % Utilities.LineColors.Length)], 2);
                     //換到下一條比對的線段
                     candiateLineEquation_i++;
                     //都從0開始比，並跳過自己
@@ -337,7 +334,7 @@ namespace ZebraCrossing_Test
 
         private void filterLineButton_Click(object sender, EventArgs e)
         {
-            linesHistogram =  ZebraCrossingDetection.ZebraCrossingDetection.
+            linesHistogram =  ZebraCrossingDetector.ZebraCrossingDetector.
                 MainGroupLineFilter(candidateHoughLineEquations,ref mainDirectionLineGroupId);
 
         }
@@ -347,7 +344,7 @@ namespace ZebraCrossing_Test
         {
             Image<Bgr, byte> stasticDst = new Image<Bgr, byte>(640, 480, new Bgr(Color.White));
             Image<Bgr, byte> drawScanLineImg = oriImg.Clone();
-            bool isZebra = ZebraCrossingDetection.ZebraCrossingDetection.AnalyzeZebraCrossingTexture(mainDirectionLineGroupId, linesHistogram, processingImg, oriImg, stasticDst, drawScanLineImg);
+            bool isZebra = ZebraCrossingDetector.ZebraCrossingDetector.AnalyzeZebraCrossingTexture(mainDirectionLineGroupId, linesHistogram, processingImg, oriImg, stasticDst, drawScanLineImg);
             
             new ImageViewer(stasticDst, "統計圖表").Show();
 
@@ -358,7 +355,7 @@ namespace ZebraCrossing_Test
         private void runZebraDetectionButton_Click(object sender, EventArgs e)
         {
             if (oriImg != null) {
-                bool isZebra = ZebraCrossingDetection.ZebraCrossingDetection.StartToDetect(oriImg);
+                bool isZebra = ZebraCrossingDetector.ZebraCrossingDetector.StartToDetect(oriImg);
                 if (isZebra)
                     MessageBox.Show("有斑馬線");
                 else
@@ -369,25 +366,7 @@ namespace ZebraCrossing_Test
      
     }
 
-    public static class DrawColorLines
-    {
-        public static Bgr[] LineColors = new Bgr[]{
-                new Bgr(255,0,0),
-                new Bgr(255,255,0),
-                new Bgr(0,255,0),
-                new Bgr(0,255,255),
-                new Bgr(0,0,255),
-                new Bgr(255,0,255),
-                new Bgr(255,0,128),
-                new Bgr(128,0,128),
-                new Bgr(128,0,255),
-                new Bgr(128,255,255),
-                new Bgr(128,128,255),
-                new Bgr(255,128,128),
-                new Bgr(255,128,0),
-                new Bgr(255,128,0),
-            };
-    }
+  
 
 
     

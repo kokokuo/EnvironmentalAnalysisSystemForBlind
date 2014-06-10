@@ -11,8 +11,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.Features2D;
 using Emgu.CV.CvEnum;
 using System.Drawing;
-using ZebraCrossing_Test;
-namespace ZebraCrossingDetection
+namespace ZebraCrossingDetector
 {
     public enum LineQuantification { 
         ANGLE_170_TO_180 = 0,
@@ -35,12 +34,8 @@ namespace ZebraCrossingDetection
     };
 
 
-    public class ZebraCrossingDetection
+    public static class ZebraCrossingDetector
     {
-      
-        public ZebraCrossingDetection() {
-            
-        }
         //開始偵測
         public static bool StartToDetect(Image<Bgr,byte> source) {
             if (source != null)
@@ -687,7 +682,7 @@ namespace ZebraCrossingDetection
                     LineSegment2DF scanline = new LineSegment2DF(prePoint, currentPoint);
 
                     if(drawScanLineImg != null)
-                        drawScanLineImg.Draw(scanline, DrawColorLines.LineColors[index % DrawColorLines.LineColors.Length], 2);
+                        drawScanLineImg.Draw(scanline, Utilities.LineColors[index % Utilities.LineColors.Length], 2);
                     
                     //記錄每一條線段
                     crossingConnectionlines.Add(scanline);
