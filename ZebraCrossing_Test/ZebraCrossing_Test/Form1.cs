@@ -26,10 +26,7 @@ namespace ZebraCrossing_Test
         Image<Bgr, byte> oriImg;
         Image<Gray, byte> processingImg;
         ImageViewer houghLineViewer;
-        ImageViewer ContoursAndScanLineViewer;
         List<LineSegment2D> candidateZebraCrossingsByHoughLine;
-        //候選的斑馬線(BoundingBox的寬有大於100且高/寬是0.15)
-        List<Rectangle> candidateZebraCrossingsByContour;
         //紀錄斑馬線之間白色連結起來的線段
         List<LineSegment2DF> crossingConnectionlines;
         //取得線偵測並過濾角度後的線段方程式
@@ -61,10 +58,7 @@ namespace ZebraCrossing_Test
             houghLineViewer = new ImageViewer();
             houghLineViewer.FormClosing += houghLineViewer_FormClosing;
 
-            ContoursAndScanLineViewer = new ImageViewer();
-            ContoursAndScanLineViewer.FormClosing += ContoursAndScanLineViewer_FormClosing;
-
-            candidateZebraCrossingsByContour = new List<Rectangle>();
+        
             //ScanLine的各線段
             crossingConnectionlines = new List<LineSegment2DF>();
             candidateZebraCrossingsByHoughLine = new List<LineSegment2D>();
@@ -113,11 +107,6 @@ namespace ZebraCrossing_Test
             repairedHoughLineStepViewer.Hide(); //隱藏式窗,下次再show出
         }
 
-        void ContoursAndScanLineViewer_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            e.Cancel = true; //關閉視窗時取消
-            ContoursAndScanLineViewer.Hide(); //隱藏式窗,下次再show出
-        }
 
         void houghLineViewer_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -163,8 +152,7 @@ namespace ZebraCrossing_Test
 
                 //清空先前的資料
                 candidateZebraCrossingsByHoughLine.Clear();
-                //清空之前的資料
-                candidateZebraCrossingsByContour.Clear();
+               
                 //清空原先上一張偵測的圖
                 crossingConnectionlines.Clear();
 
