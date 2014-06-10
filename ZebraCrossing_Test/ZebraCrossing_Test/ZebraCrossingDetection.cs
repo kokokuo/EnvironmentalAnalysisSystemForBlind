@@ -42,9 +42,26 @@ namespace ZebraCrossingDetection
             
         }
         //開始偵測
-        public static bool StartToDetect(string filename) {
+        public static bool StartToDetect(Image<Bgr,byte> source) {
+            if (source != null)
+            {
+                source = ToCrop(source);
+                Image<Gray, byte> processingImg = ToGray(source);
+                processingImg = MaskWhite(processingImg);
+                processingImg = PepperFilter(processingImg);
 
-            return false;
+                LinkedList<LineEquation> candidateLines = DetectHoughLine(processingImg);
+                candidateLines = RepairedLines(candidateLines, source);
+
+                int mainGroupLinesId = -1;
+                Dictionary<LineQuantification,LinkedList<LineEquation>> linesGroupHistogram  = MainGroupLineFilter(candidateLines, ref mainGroupLinesId);
+                Image<Bgr, byte> stasticDst = new Image<Bgr, byte>(640, 480, new Bgr(Color.White));
+                bool result = AnalyzeZebraCrossingTexture(mainGroupLinesId, linesGroupHistogram, processingImg, source, stasticDst, null);
+                new ImageViewer(stasticDst, "統計圖表").Show();
+                return result;
+            }
+            else
+                return false;
         }
 
         //1.載入圖片
@@ -287,8 +304,10 @@ namespace ZebraCrossingDetection
             //不太可能會有共線,需要給一個Range
             //面積公式來看 1/2 * x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2) 如果小於1000可以是
             //or 用A-B 與 A-C的斜率去看斜率誤差 約接近0表示共線高
-            Console.WriteLine("面積公式1 = " + Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) + " y3 -y1 = " + Math.Abs(y3 - y1));
-            Console.WriteLine("面積公式2 = " + Math.Abs(x1 * (y2 - y4) + x2 * (y4 - y1) + x4 * (y1 - y2)) + " y4 -y1 = " + Math.Abs(y4 - y1));
+
+            //Console.WriteLine("面積公式1 = " + Math.Abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) + " y3 -y1 = " + Math.Abs(y3 - y1));
+            //Console.WriteLine("面積公式2 = " + Math.Abs(x1 * (y2 - y4) + x2 * (y4 - y1) + x4 * (y1 - y2)) + " y4 -y1 = " + Math.Abs(y4 - y1));
+            
             //float p1p2Slope = (y2 - y1) / (float)(x2 - x1);
             //float p1p3Slope = (y3 - y1) / (float)(x3 - x1);
             //Console.WriteLine("Slope p1 -> p2 = " +p1p2Slope+ ", Slope p1 -> p3 ="+ p1p3Slope + "差距值 = " + Math.Abs(Math.Abs(p1p2Slope) - Math.Abs(p1p3Slope)));
@@ -300,7 +319,7 @@ namespace ZebraCrossingDetection
             if (area1 <= 1000 && area2 <= 1000 && Math.Abs(y3 - y1) < 6 && Math.Abs(y4 - y1) < 6)
             // Math.Abs(y3 - y1) < 8 => y3 - y1表示距離
             {
-                Console.WriteLine("共線" + "\n");
+                //Console.WriteLine("共線" + "\n");
                 intersectP.X = -1;
                 intersectP.Y = -1;
                 repaiedLine = RepaiedHorizontalHoughLine(points);
@@ -308,15 +327,16 @@ namespace ZebraCrossingDetection
             }
             else if (v != 0)
             {  //代表兩條線段方程式不是平行,y3 - y1表示距離
-                Console.Write("相交");
+                //Console.Write("相交");
+                
                 //Console.WriteLine("v = " + v);
                 //兩條線相似
-                Console.WriteLine("線段一原角度：" + line1.Angle + ",修正角度:" + line1.AdjustAngle + "\n線段原二角度：" + line2.Angle + ",修正角度" + line2.AdjustAngle);
+                //Console.WriteLine("線段一原角度：" + line1.Angle + ",修正角度:" + line1.AdjustAngle + "\n線段原二角度：" + line2.Angle + ",修正角度" + line2.AdjustAngle);
                 double angleDifference = Math.Abs(line1.AdjustAngle - line2.AdjustAngle);
-                Console.WriteLine("兩條線的角度差為：" + angleDifference);
+                //Console.WriteLine("兩條線的角度差為：" + angleDifference);
                 if (angleDifference < 15)
                 {
-                    Console.WriteLine("兩條線可能是可以銜接");
+                    //Console.WriteLine("兩條線可能是可以銜接");
                     float delta_x = (line1.C * line2.B) - line2.C * line1.B;
                     float delta_y = (line1.A * line2.C) - line2.A * line1.C;
 
@@ -326,7 +346,7 @@ namespace ZebraCrossingDetection
 
                     if ((intersectP.X < 0 || intersectP.X > source.Width || intersectP.Y < 0 || intersectP.Y > source.Height))
                     {
-                        Console.WriteLine("所以超出畫面");
+                        //Console.WriteLine("所以超出畫面");
                         intersectP.X = -1;
                         intersectP.Y = -1;
                         return false;
@@ -342,30 +362,30 @@ namespace ZebraCrossingDetection
                         {
                             if (!CheckHorizontalIntersectionPoint(points, intersectP.X, intersectP.Y))
                                 return false;
-                            Console.WriteLine("接近水平的線段,且交點有在兩線段內");
+                            //Console.WriteLine("接近水平的線段,且交點有在兩線段內");
                         }
                         else if (line1_angle <= 150 && line1_angle >= 120 && line2_angle <= 150 && line2_angle >= 120 && line1.Direction == line2.Direction)
                         {
                             //斜45度
                             if (!CheckVerticalIntersectionPoint(points, intersectP.X, intersectP.Y) && !CheckHorizontalIntersectionPoint(points, intersectP.X, intersectP.Y))
                                 return false;
-                            Console.WriteLine("接近斜45度或135度的線段,且交點有在兩線段內");
+                            //Console.WriteLine("接近斜45度或135度的線段,且交點有在兩線段內");
                         }
                         else if (line1_angle < 120 && line2_angle < 120 && line1.Direction == line2.Direction) //接近垂直
                         {
                             if (!CheckVerticalIntersectionPoint(points, intersectP.X, intersectP.Y))
                                 return false;
-                            Console.WriteLine("接近垂直的線段,且交點有在兩線段內");
+                            //Console.WriteLine("接近垂直的線段,且交點有在兩線段內");
                         }
 
-                        Console.Write("\n");
+                        //Console.Write("\n");
                         repaiedLine = RepaiedHorizontalHoughLine(points);
                         return true;
                     }
                 }
                 else
                 {
-                    Console.WriteLine("但是角度差異過大，研判不是\n");
+                    //Console.WriteLine("但是角度差異過大，研判不是\n");
                     intersectP.X = -1;
                     intersectP.Y = -1;
                     return false;
@@ -378,7 +398,7 @@ namespace ZebraCrossingDetection
             {
                 intersectP.X = -1;
                 intersectP.Y = -1;
-                Console.WriteLine("平行" + "\n");
+                //Console.WriteLine("平行" + "\n");
                 return false;
             }
 
@@ -620,7 +640,7 @@ namespace ZebraCrossingDetection
         #endregion
 
         #region 分析黑白紋路
-        public static bool AnalyzeZebraCrossingTexture(int mainDirectionLineGroupId, Dictionary<LineQuantification, LinkedList<LineEquation>> linesHistogram, Image<Gray, byte> source, Image<Bgr, byte> oriImg, Image<Bgr, byte> stasticDst)
+        public static bool AnalyzeZebraCrossingTexture(int mainDirectionLineGroupId, Dictionary<LineQuantification, LinkedList<LineEquation>> linesHistogram, Image<Gray, byte> processingImg, Image<Bgr, byte> oriImg, Image<Bgr, byte> stasticDst,Image<Bgr,byte> drawScanLineImg)
         {
             //紀錄斑馬線之間白色連結起來的線段
             List<LineSegment2DF> crossingConnectionlines = new List<LineSegment2DF>();  
@@ -665,23 +685,26 @@ namespace ZebraCrossingDetection
                 if (!currentPoint.IsEmpty && !prePoint.IsEmpty)
                 {
                     LineSegment2DF scanline = new LineSegment2DF(prePoint, currentPoint);
+
+                    if(drawScanLineImg != null)
+                        drawScanLineImg.Draw(scanline, DrawColorLines.LineColors[index % DrawColorLines.LineColors.Length], 2);
+                    
                     //記錄每一條線段
                     crossingConnectionlines.Add(scanline);
-                    Console.WriteLine("draw Line:direction ,x = " + scanline.Direction.X + "y =" + scanline.Direction.Y + ",point p1.x =" + prePoint.X + ",p1.y = " + prePoint.Y + ", p2.x =" + currentPoint.X + ",p2.y = " + currentPoint.Y);
+                    //Console.WriteLine("draw Line:direction ,x = " + scanline.Direction.X + "y =" + scanline.Direction.Y + ",point p1.x =" + prePoint.X + ",p1.y = " + prePoint.Y + ", p2.x =" + currentPoint.X + ",p2.y = " + currentPoint.Y);
                     
                 }
 
-                Console.WriteLine("-------------------------------------");
+                //Console.WriteLine("-------------------------------------");
                 index++;
             }
-            ImageViewer showScanLine = new ImageViewer(scanLineImg, "Scan Line");
-            showScanLine.Show();
 
             //統計黑白像素與判斷是否每條線段為白黑白的特徵
-            bool isBlackWhiteCrossing = DoBlackWhiteStatisticsByScanLine(crossingConnectionlines, source, stasticDst);
+            bool isBlackWhiteCrossing = DoBlackWhiteStatisticsByScanLine(crossingConnectionlines, processingImg, stasticDst);
 
             if (isBlackWhiteCrossing && linesHistogram[(LineQuantification)mainDirectionLineGroupId].Count > 3)
             {
+                Console.WriteLine("共有" + linesHistogram[(LineQuantification)mainDirectionLineGroupId].Count + "相似斜率線段");
                 return true;
             }
             else
@@ -736,7 +759,7 @@ namespace ZebraCrossingDetection
                 }
             }
             //有連續5個同樣像素及判斷為是此紋路
-            if (pixelSum == 5)
+            if (pixelSum == 4)
             {
                 Console.WriteLine("---------------\nIntensity: " + intensity + " has accumulated!");
                 //如果是第一次判斷紋路或是前一個紋路與線段的紋路不相同,紀錄
@@ -795,11 +818,13 @@ namespace ZebraCrossingDetection
                     //取得目前掃描線步進的素值
                     current.SetData(new PointF(nextX, nextY), pixel.Intensity);
 
-                    DrawBlackWhiteCurve(stasticDst, current, previous, x);
+                    if(stasticDst !=null)
+                        DrawBlackWhiteCurve(stasticDst, current, previous, x);
+                    
                     //設定前一筆
                     previous.SetData(current.GetLocation(), current.GetIntensity());
 
-                    Console.WriteLine("x:" + nextX + ",y:" + nextY + ",Intensity:" + pixel.Intensity);
+                    //Console.WriteLine("x:" + nextX + ",y:" + nextY + ",Intensity:" + pixel.Intensity);
 
                     //步進Y
                     nextY++;
@@ -808,11 +833,6 @@ namespace ZebraCrossingDetection
                 }
 
             }
-
-            ImageViewer showBlackWhiteCurve = new ImageViewer(blackWhiteCurveImg, "Show Black and White Curve");
-            showBlackWhiteCurve.Show();
-
-
 
             ////顯示所有check的狀況
             Console.WriteLine(checkBlackWhiteCrossingPoint);

@@ -38,7 +38,7 @@
             this.cropBottomButton = new System.Windows.Forms.Button();
             this.grayImgBox = new Emgu.CV.UI.ImageBox();
             this.smoothButton = new System.Windows.Forms.Button();
-            this.dilateButton = new System.Windows.Forms.Button();
+            this.runZebraDetectionButton = new System.Windows.Forms.Button();
             this.filterImageBox = new Emgu.CV.UI.ImageBox();
             this.filterPepperButton = new System.Windows.Forms.Button();
             this.restructLineButton = new System.Windows.Forms.Button();
@@ -144,16 +144,16 @@
             this.smoothButton.UseVisualStyleBackColor = true;
             this.smoothButton.Click += new System.EventHandler(this.toGrayAndSmoothButton_Click);
             // 
-            // dilateButton
+            // runZebraDetectionButton
             // 
-            this.dilateButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.dilateButton.Location = new System.Drawing.Point(557, 393);
-            this.dilateButton.Name = "dilateButton";
-            this.dilateButton.Size = new System.Drawing.Size(137, 35);
-            this.dilateButton.TabIndex = 14;
-            this.dilateButton.Text = "4.opt-膨脹";
-            this.dilateButton.UseVisualStyleBackColor = true;
-     
+            this.runZebraDetectionButton.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.runZebraDetectionButton.Location = new System.Drawing.Point(723, 269);
+            this.runZebraDetectionButton.Name = "runZebraDetectionButton";
+            this.runZebraDetectionButton.Size = new System.Drawing.Size(220, 35);
+            this.runZebraDetectionButton.TabIndex = 14;
+            this.runZebraDetectionButton.Text = "直接全部處理";
+            this.runZebraDetectionButton.UseVisualStyleBackColor = true;
+            this.runZebraDetectionButton.Click += new System.EventHandler(this.runZebraDetectionButton_Click);
             // 
             // filterImageBox
             // 
@@ -230,7 +230,7 @@
             this.Controls.Add(this.restructLineButton);
             this.Controls.Add(this.filterPepperButton);
             this.Controls.Add(this.filterImageBox);
-            this.Controls.Add(this.dilateButton);
+            this.Controls.Add(this.runZebraDetectionButton);
             this.Controls.Add(this.smoothButton);
             this.Controls.Add(this.grayImgBox);
             this.Controls.Add(this.cropBottomButton);
@@ -261,7 +261,7 @@
         private System.Windows.Forms.Button cropBottomButton;
         private Emgu.CV.UI.ImageBox grayImgBox;
         private System.Windows.Forms.Button smoothButton;
-        private System.Windows.Forms.Button dilateButton;
+        private System.Windows.Forms.Button runZebraDetectionButton;
         private Emgu.CV.UI.ImageBox filterImageBox;
         private System.Windows.Forms.Button filterPepperButton;
         private System.Windows.Forms.Button restructLineButton;

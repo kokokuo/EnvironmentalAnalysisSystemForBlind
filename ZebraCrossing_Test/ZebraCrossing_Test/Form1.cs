@@ -26,7 +26,6 @@ namespace ZebraCrossing_Test
         DirectoryInfo dir;
         Image<Bgr, byte> oriImg;
         Image<Gray, byte> processingImg;
-        Image<Gray, byte> maskWhiteImg;
         ImageViewer houghLineViewer;
         ImageViewer ContoursAndScanLineViewer;
         List<LineSegment2D> candidateZebraCrossingsByHoughLine;
@@ -39,16 +38,6 @@ namespace ZebraCrossing_Test
         //取得線偵測並過濾角度後的線段方程式(播放用)
         List<LineEquation> candidateHoughLineEquationsForReplay;
 
-        //顯示繪製ScanLine的圖
-        Image<Bgr, byte> showScanlineImg;
-
-        //黑白像素是否交叉呈現
-        bool isBlackWhiteCrossing;
-       
-
-        private static Bgr[] drawLineColos;
-
-       
         int candiateLineEquation_i, candiateLineEquation_j;
 
         //步驟用
@@ -65,9 +54,6 @@ namespace ZebraCrossing_Test
 
         Dictionary<ZebraCrossingDetection.LineQuantification, LinkedList<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
         int mainDirectionLineGroupId = 0; //紀錄主要線段的群組ID
-        int maxLineLength = 0;
-        //統計每一條線的黑色與白色的pixel數量
-        string checkBlackWhiteCrossingPoint;
 
         ZebraCrossingDetection.ZebraCrossingDetection crossingDetection = new ZebraCrossingDetection.ZebraCrossingDetection();
         
@@ -85,26 +71,6 @@ namespace ZebraCrossing_Test
             //ScanLine的各線段
             crossingConnectionlines = new List<LineSegment2DF>();
             candidateZebraCrossingsByHoughLine = new List<LineSegment2D>();
-
-            //預設是假設都為True
-            isBlackWhiteCrossing = true;
-
-            drawLineColos = new Bgr[]{
-                new Bgr(255,0,0),
-                new Bgr(255,255,0),
-                new Bgr(0,255,0),
-                new Bgr(0,255,255),
-                new Bgr(0,0,255),
-                new Bgr(255,0,255),
-                new Bgr(255,0,128),
-                new Bgr(128,0,128),
-                new Bgr(128,0,255),
-                new Bgr(128,255,255),
-                new Bgr(128,128,255),
-                new Bgr(255,128,128),
-                new Bgr(255,128,0),
-                new Bgr(255,128,0),
-            };
 
            
             candiateLineEquation_i = 0;
@@ -204,20 +170,11 @@ namespace ZebraCrossing_Test
                 candidateZebraCrossingsByContour.Clear();
                 //清空原先上一張偵測的圖
                 crossingConnectionlines.Clear();
-               
-                isBlackWhiteCrossing = false;
 
                 repairedHoughLine.Clear();
                 showFinishedRepairedHoughLineStepImg = oriImg.Copy();
                 linesHistogram.Clear();
-                //Auto測驗
-                //ToCrop();
-                //ToGray();
-                //MaskWhite();
-                //filterPepper();
-                //DoHoughLine("灰階");
-                //Smooth();
-                //DoHoughLine("灰階模糊");
+
             }
         }
         private void cropBottomButton_Click(object sender, EventArgs e)
@@ -249,7 +206,6 @@ namespace ZebraCrossing_Test
             filterImageBox.Image = processingImg;
         }
        
-     
 
         private void houghLineButton_Click(object sender, EventArgs e)
         {
@@ -265,7 +221,9 @@ namespace ZebraCrossing_Test
             Image<Bgr, byte> houghlineImg = oriImg.Clone();
             int colorIndex = 0;
             while (node != null) {
-                houghlineImg.Draw(node.Value.Line, drawLineColos[(colorIndex % drawLineColos.Length)], 2);
+                houghlineImg.Draw(node.Value.Line, DrawColorLines.LineColors[(colorIndex % DrawColorLines.LineColors.Length)], 2);
+               
+                node = node.Next;
                 colorIndex++;
             }
 
@@ -287,7 +245,7 @@ namespace ZebraCrossing_Test
             LinkedListNode<LineEquation> node = candidateHoughLineEquations.First;
             while (node != null) {
                 //把線段畫上去
-                showFinishedRepairedHoughLineImg.Draw(node.Value.Line, drawLineColos[(i % drawLineColos.Length)], 2);
+                showFinishedRepairedHoughLineImg.Draw(node.Value.Line, DrawColorLines.LineColors[(i % DrawColorLines.LineColors.Length)], 2);
                 //下一個Node
                 node = node.Next;
                 i++;
@@ -320,8 +278,8 @@ namespace ZebraCrossing_Test
                     Console.WriteLine(repairedLine.Length + "," + repairedLine.P1 + "," + repairedLine.P2);
 
                     //繪製正在比較有無共線或是相交的線段
-                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 1);
-                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_j].Line, drawLineColos[(candiateLineEquation_j % drawLineColos.Length)], 1);
+                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, DrawColorLines.LineColors[(candiateLineEquation_i % DrawColorLines.LineColors.Length)], 1);
+                    showSearchrepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_j].Line, DrawColorLines.LineColors[(candiateLineEquation_j % DrawColorLines.LineColors.Length)], 1);
                     
                     //判斷是否共線或是相交的線段
                     interset = ZebraCrossingDetection.ZebraCrossingDetection.CheckIntersectOrNot(candidateHoughLineEquationsForReplay[candiateLineEquation_i], candidateHoughLineEquationsForReplay[candiateLineEquation_j], out p, ref repairedLine,oriImg);
@@ -343,7 +301,7 @@ namespace ZebraCrossing_Test
                 else
                 {
                     //並把這次比過的線段畫上去
-                    showFinishedRepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, drawLineColos[(candiateLineEquation_i % drawLineColos.Length)], 2);
+                    showFinishedRepairedHoughLineStepImg.Draw(candidateHoughLineEquationsForReplay[candiateLineEquation_i].Line, DrawColorLines.LineColors[(candiateLineEquation_i % DrawColorLines.LineColors.Length)], 2);
                     //換到下一條比對的線段
                     candiateLineEquation_i++;
                     //都從0開始比，並跳過自己
@@ -388,200 +346,49 @@ namespace ZebraCrossing_Test
         private void analyzeBlackWhiteButton_Click(object sender, EventArgs e)
         {
             Image<Bgr, byte> stasticDst = new Image<Bgr, byte>(640, 480, new Bgr(Color.White));
-            bool isZebra = ZebraCrossingDetection.ZebraCrossingDetection.AnalyzeZebraCrossingTexture(mainDirectionLineGroupId,linesHistogram, processingImg, oriImg, stasticDst);
+            Image<Bgr, byte> drawScanLineImg = oriImg.Clone();
+            bool isZebra = ZebraCrossingDetection.ZebraCrossingDetection.AnalyzeZebraCrossingTexture(mainDirectionLineGroupId, linesHistogram, processingImg, oriImg, stasticDst, drawScanLineImg);
             
             new ImageViewer(stasticDst, "統計圖表").Show();
+
+            //Show Scan Line
+            new ImageViewer(drawScanLineImg, "繪製掃描線路徑").Show();
         }
-        
-        #region 尋找斑馬線的黑白特徵(輪廓法,舊方法)
-        //////////////////////////////////////////////////////////////
 
-
-        
-        
-        private void contourButton_Click(object sender, EventArgs e)
+        private void runZebraDetectionButton_Click(object sender, EventArgs e)
         {
-            if (maskWhiteImg != null)
-            {
-
-
-                Contour<Point> contours = DoContours(maskWhiteImg);
-                using (Image<Bgr, byte> showContoursImg = oriImg.Copy())
-                {
-                    //繪製所有輪廓
-                    while (contours.HNext != null)
-                    {
-                        //繪製輪廓BoundingBox
-                        showContoursImg.Draw(contours.BoundingRectangle, new Bgr(Color.Red), 2);
-                        double ratio = Convert.ToDouble(contours.BoundingRectangle.Height) / contours.BoundingRectangle.Width;
-                        //斑馬線的boundingBox寬要大於100,寬高比值 < 0.15
-                        if (contours.BoundingRectangle.Width > 100 && ratio < 0.15)
-                        {
-                            showContoursImg.Draw(contours.BoundingRectangle, new Bgr(Color.Yellow), 1);
-                            //加入候選斑馬線
-                            candidateZebraCrossingsByContour.Add(contours.BoundingRectangle);
-
-                        }
-
-                        Console.WriteLine("Width = " + contours.BoundingRectangle.Width + ",Height = " + contours.BoundingRectangle.Height + ",h/w = " + ratio);
-                        //繪製輪廓
-                        //showContoursImg.Draw(contours, new Bgr(Color.Yellow), new Bgr(Color.GreenYellow), 1, 2);
-                        contours = contours.HNext;
-                    }
-                    Console.WriteLine("Total Candidate Contours = " + candidateZebraCrossingsByContour.Count);
-                    showScanlineImg = showContoursImg.Copy();
-                    //contourImageBox.Image = showContoursImg;
-                }
+            if (oriImg != null) {
+                bool isZebra = ZebraCrossingDetection.ZebraCrossingDetection.StartToDetect(oriImg);
+                if (isZebra)
+                    MessageBox.Show("有斑馬線");
+                else
+                    MessageBox.Show("不是斑馬線");
             }
-            else
-            {
-                MessageBox.Show("尚未Mask");
-            }
-
         }
-
-        #region 取輪廓
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        /// <summary>
-        /// 從圖像中取得所有的輪廓
-        /// </summary>
-        /// <param name="srcImg">來源圖像,這邊是二值化侵蝕膨脹後的圖像</param>
-        /// <returns>回傳輪廓</returns>
-        public Contour<Point> DoContours(Image<Gray, Byte> srcImg)
-        {
-            Contour<Point> objectContours = srcImg.FindContours(CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE, RETR_TYPE.CV_RETR_LIST);
-            //Contour<Point> objectContours = srcImg.FindContours();
-            return objectContours;
-        }
-        /// <summary>
-        /// 取得輪廓資料中的最大輪廓,若要取得最大輪廓的BoundingBox,使用contours.BoundingBox
-        /// </summary>
-        /// <param name="contours">輸入從圖像中取得的所有輪廓</param>
-        /// <returns>回傳最大面積的輪廓</returns>
-        public Contour<Point> GetMaxContours(Contour<Point> contours)
-        {
-            Contour<Point> MaxContour = contours;
-            while (contours.HNext != null)
-            {
-                if (MaxContour.Area < contours.HNext.Area)
-                {
-                    MaxContour = contours.HNext;
-                }
-                contours = contours.HNext;
-            }
-            return MaxContour;
-        }
-        public Image<Bgr, Byte> GetBoundingBoxImage(Contour<Point> contours, Image<Bgr, Byte> sceneImg)
-        {
-            Image<Bgr, Byte> roiImage = sceneImg.GetSubRect(contours.BoundingRectangle);
-            return roiImage;
-        }
-        /// <summary>
-        /// 劃出所有輪廓到圖像上
-        /// </summary>
-        /// <param name="contours">取得的輪廓</param>
-        /// <param name="drawImg">要畫到的圖像上</param>
-        /// <returns>回傳畫上輪廓的圖像</returns>
-        public Image<Bgr, Byte> DrawAllContoursOnImg(Contour<Point> contours, Image<Bgr, Byte> drawImg)
-        {
-            drawImg.Draw(contours, new Bgr(Color.Red), new Bgr(Color.Yellow), 1, 2);
-            return drawImg;
-        }
-        /// <summary>
-        /// 畫上最大的輪廓到圖像上
-        /// </summary>
-        /// <param name="maxContour">最大的輪廓</param>
-        /// <param name="drawImg">要畫到的圖像上</param>
-        /// <returns>回傳畫上輪廓的圖像</returns>
-        public Image<Bgr, Byte> DrawMaxContoursOnImg(Contour<Point> maxContour, Image<Bgr, Byte> drawImg)
-        {
-            drawImg.Draw(maxContour, new Bgr(Color.Red), new Bgr(Color.Yellow), 1, 2);
-            return drawImg;
-        }
-        /// <summary>
-        /// 畫上最大輪廓的BoundimgBox
-        /// </summary>
-        /// <param name="maxContour">最大的輪廓</param>
-        /// <param name="drawImg">要畫到的圖像上</param>
-        /// <returns>回傳畫上最大輪廓的BoundingBox的圖像</returns>
-        public Image<Bgr, Byte> DrawContoursMaxBoundingBoxOnImg(Contour<Point> maxContour, Image<Bgr, Byte> drawImg)
-        {
-            drawImg.Draw(maxContour.BoundingRectangle, new Bgr(Color.Red), 2);
-            return drawImg;
-        }
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        #endregion
-
-        private void findScanLineButton_Click(object sender, EventArgs e)
-        {
-
-            Point prePoint = new Point();
-            Point currentPoint = new Point();
-
-            //依照y軸座標排序
-            var zebras = from boundingBox in candidateZebraCrossingsByContour orderby boundingBox.Y select boundingBox;
-            foreach (Rectangle rec in zebras)
-            {
-                if (!currentPoint.IsEmpty)
-                    prePoint = currentPoint;
-                currentPoint = new Point((rec.X + rec.Width / 2), (rec.Y + rec.Height / 2));
-
-                //兩點 =>存放線條,並繪製
-                if (!currentPoint.IsEmpty && !prePoint.IsEmpty)
-                {
-                    LineSegment2DF line = new LineSegment2DF(prePoint, currentPoint);
-                    //記錄每一條線段
-                    crossingConnectionlines.Add(line);
-                    Console.WriteLine("draw Line:direction ,x = " + line.Direction.X + "y =" + line.Direction.Y + ",point p1.x =" + prePoint.X + ",p1.y = " + prePoint.Y + ", p2.x =" + currentPoint.X + ",p2.y = " + currentPoint.Y);
-                    showScanlineImg.Draw(new LineSegment2DF(prePoint, currentPoint), new Bgr(Color.Azure), 2);
-                }
-                Console.WriteLine("center x =" + currentPoint.X + ",y = " + currentPoint.Y);
-                showScanlineImg.Draw(new CircleF(currentPoint, 1), new Bgr(Color.Blue), 3);
-
-            }
-            //show center point
-            //contourImageBox.Image = showScanlineImg;
-            //ImageViewer
-            ContoursAndScanLineViewer.Image = showScanlineImg;
-            ContoursAndScanLineViewer.Show();
-
-            //統計黑白像素與判斷是否每條線段為白黑白的特徵
-            //DoBlackWhiteStatisticsByScanLine(crossingConnectionlines);
-        }
-
-      
-        #endregion
-
-
-        /// <summary>
-        /// 繪製黑白交錯的曲線(縱軸是Intensity,橫軸是排序的線段從最前面的線段到最下面的線段的座標)
-        /// </summary>
-        /// <param name="drawImg"></param>
-        /// <param name="current">現在的座標像素</param>
-        /// <param name="previous">前一個點的座標像素</param>
-        /// <param name="x">x軸步近的值</param>
-        private void DrawBlackWhiteCurve(Image<Bgr, byte> drawImg, IntensityPoint current, IntensityPoint previous, int x)
-        {
-            //繪製呈現用，斑馬線黑白像素經過的圖形
-            int projectY = Math.Abs((int)current.GetIntensity() - 300);
-            if (!current.IsEmpty() && !previous.IsEmpty())
-            {
-                float prevPorjectY = Math.Abs((float)previous.GetIntensity() - 300);
-                drawImg.Draw(new LineSegment2DF(new PointF(x - 2, projectY), new PointF(x, prevPorjectY)), new Bgr(Color.Green), 1);
-            }
-            else
-            {
-                drawImg.Draw(new LineSegment2DF(new PointF(0, 300), new PointF(x, projectY)), new Bgr(Color.Red), 1);
-            }
-            drawImg.Draw(new CircleF(new PointF(x, projectY), 1), new Bgr(Color.Blue), 2);
-
-        }
-
+       
      
     }
 
+    public static class DrawColorLines
+    {
+        public static Bgr[] LineColors = new Bgr[]{
+                new Bgr(255,0,0),
+                new Bgr(255,255,0),
+                new Bgr(0,255,0),
+                new Bgr(0,255,255),
+                new Bgr(0,0,255),
+                new Bgr(255,0,255),
+                new Bgr(255,0,128),
+                new Bgr(128,0,128),
+                new Bgr(128,0,255),
+                new Bgr(128,255,255),
+                new Bgr(128,128,255),
+                new Bgr(255,128,128),
+                new Bgr(255,128,0),
+                new Bgr(255,128,0),
+            };
+    }
 
-  
 
     
    
