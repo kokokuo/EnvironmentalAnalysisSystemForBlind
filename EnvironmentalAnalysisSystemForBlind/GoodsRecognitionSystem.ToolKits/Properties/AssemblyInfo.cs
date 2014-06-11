@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // 組件的一般資訊是由下列的屬性集控制。
 // 變更這些屬性的值即可修改組件的相關
 // 資訊。
-[assembly: AssemblyTitle("GoodsRecognitionSystem.ToolKits")]
+[assembly: AssemblyTitle("FeatureRecognitionSystem.ToolKits")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NTUT MIT LAB")]
-[assembly: AssemblyProduct("GoodsRecognitionSystem.ToolKits")]
+[assembly: AssemblyProduct("FeatureRecognitionSystem.ToolKits")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

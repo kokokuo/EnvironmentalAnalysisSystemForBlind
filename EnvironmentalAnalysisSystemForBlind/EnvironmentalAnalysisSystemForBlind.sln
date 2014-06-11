@@ -5,14 +5,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainSystem", "MainSystem\Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoEnvironmentObjLearningSys", "VideoEnvironmentObjLearningSys\VideoEnvironmentObjLearningSys.csproj", "{9DBFC5F0-91CB-42E9-AEB6-6A09CFFE31D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodsRecognitionSystem.FeatureLearning", "GoodsRecognitionSystem.FeatureLearning\GoodsRecognitionSystem.FeatureLearning.csproj", "{220AA9BA-D74F-4C57-911E-DAE1D8F48AED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureRecognitionSystem.FeatureLearning", "GoodsRecognitionSystem.FeatureLearning\FeatureRecognitionSystem.FeatureLearning.csproj", "{220AA9BA-D74F-4C57-911E-DAE1D8F48AED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodsRecognitionSystem.Recognition", "GoodsRecognitionSystem.Recognition\GoodsRecognitionSystem.Recognition.csproj", "{EFE0AE58-CF74-451F-9385-07B70A005549}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureRecognitionSystem.Recognition", "GoodsRecognitionSystem.Recognition\FeatureRecognitionSystem.Recognition.csproj", "{EFE0AE58-CF74-451F-9385-07B70A005549}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C78BF934-59A7-493B-B9EA-CDADF7B10209} = {C78BF934-59A7-493B-B9EA-CDADF7B10209}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodsRecognitionSystem.ToolKits", "GoodsRecognitionSystem.ToolKits\GoodsRecognitionSystem.ToolKits.csproj", "{C78BF934-59A7-493B-B9EA-CDADF7B10209}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureRecognitionSystem.ToolKits", "GoodsRecognitionSystem.ToolKits\FeatureRecognitionSystem.ToolKits.csproj", "{C78BF934-59A7-493B-B9EA-CDADF7B10209}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodsFeatureLearningApp", "GoodsFeatureLearningApp\GoodsFeatureLearningApp.csproj", "{9E4718CB-6DA6-438C-B5DE-A1819B6D05A5}"
 EndProject

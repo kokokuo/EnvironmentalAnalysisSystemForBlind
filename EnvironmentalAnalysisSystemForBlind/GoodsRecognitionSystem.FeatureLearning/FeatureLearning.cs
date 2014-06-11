@@ -28,6 +28,10 @@ namespace FeatureRecognitionSystem.FeatureLearning
         {
             this.templateImg = new Image<Bgr, byte>(fileName);
         }
+        public FeatureLearning(Image<Bgr, byte> wantExtractFeatureImg)
+        {
+            this.templateImg = wantExtractFeatureImg.Copy();
+        }
         /// <summary>
         /// 設定要學習的影像
         /// </summary>
