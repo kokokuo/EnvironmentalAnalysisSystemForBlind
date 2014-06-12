@@ -3,18 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainSystem", "MainSystem\MainSystem.csproj", "{C69BD66B-1651-415F-91ED-A0B8F6729BB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoEnvironmentObjLearningSys", "VideoEnvironmentObjLearningSys\VideoEnvironmentObjLearningSys.csproj", "{9DBFC5F0-91CB-42E9-AEB6-6A09CFFE31D8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoEnvironmentObjLearningApp", "VideoEnvironmentObjLearningSys\VideoEnvironmentObjLearningApp.csproj", "{9DBFC5F0-91CB-42E9-AEB6-6A09CFFE31D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureRecognitionSystem.FeatureLearning", "GoodsRecognitionSystem.FeatureLearning\FeatureRecognitionSystem.FeatureLearning.csproj", "{220AA9BA-D74F-4C57-911E-DAE1D8F48AED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecognitionSys.FeatureLearning", "GoodsRecognitionSystem.FeatureLearning\RecognitionSys.FeatureLearning.csproj", "{220AA9BA-D74F-4C57-911E-DAE1D8F48AED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureRecognitionSystem.Recognition", "GoodsRecognitionSystem.Recognition\FeatureRecognitionSystem.Recognition.csproj", "{EFE0AE58-CF74-451F-9385-07B70A005549}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecognitionSys.Recognition", "GoodsRecognitionSystem.Recognition\RecognitionSys.Recognition.csproj", "{EFE0AE58-CF74-451F-9385-07B70A005549}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C78BF934-59A7-493B-B9EA-CDADF7B10209} = {C78BF934-59A7-493B-B9EA-CDADF7B10209}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureRecognitionSystem.ToolKits", "GoodsRecognitionSystem.ToolKits\FeatureRecognitionSystem.ToolKits.csproj", "{C78BF934-59A7-493B-B9EA-CDADF7B10209}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecognitionSys.ToolKits", "GoodsRecognitionSystem.ToolKits\RecognitionSys.ToolKits.csproj", "{C78BF934-59A7-493B-B9EA-CDADF7B10209}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodsFeatureLearningApp", "GoodsFeatureLearningApp\GoodsFeatureLearningApp.csproj", "{9E4718CB-6DA6-438C-B5DE-A1819B6D05A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossingDetector", "CrossingDetector\CrossingDetector.csproj", "{00651F7A-1775-4F09-82A5-C79603BB5B70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,10 @@ Global
 		{9E4718CB-6DA6-438C-B5DE-A1819B6D05A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E4718CB-6DA6-438C-B5DE-A1819B6D05A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E4718CB-6DA6-438C-B5DE-A1819B6D05A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00651F7A-1775-4F09-82A5-C79603BB5B70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00651F7A-1775-4F09-82A5-C79603BB5B70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00651F7A-1775-4F09-82A5-C79603BB5B70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00651F7A-1775-4F09-82A5-C79603BB5B70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

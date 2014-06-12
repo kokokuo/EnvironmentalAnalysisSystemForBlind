@@ -17,9 +17,9 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Features2D;
 //使用ToolKit dll
-using FeatureRecognitionSystem.ToolKits;
-using FeatureRecognitionSystem.ToolKits.SURFMethod;
-namespace FeatureRecognitionSystem
+using RecognitionSys.ToolKits;
+using RecognitionSys.ToolKits.SURFMethod;
+namespace RecognitionSys
 {
     /// <summary>
     /// 匹配辨識

@@ -1,6 +1,6 @@
-﻿namespace VideoEnvironmentObjLearningSys
+﻿namespace VideoObjectLearningApp
 {
-    partial class Form1
+    partial class VideoObjectLearningForm
     {
         /// <summary>
         /// 設計工具所需的變數。
@@ -45,10 +45,10 @@
             // 
             // loadVideoButton
             // 
-            this.loadVideoButton.Location = new System.Drawing.Point(9, 20);
-            this.loadVideoButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.loadVideoButton.Location = new System.Drawing.Point(12, 25);
+            this.loadVideoButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.loadVideoButton.Name = "loadVideoButton";
-            this.loadVideoButton.Size = new System.Drawing.Size(86, 38);
+            this.loadVideoButton.Size = new System.Drawing.Size(115, 48);
             this.loadVideoButton.TabIndex = 0;
             this.loadVideoButton.Text = "1.載入影片";
             this.loadVideoButton.UseVisualStyleBackColor = true;
@@ -56,10 +56,10 @@
             // 
             // videoFrameBox
             // 
-            this.videoFrameBox.Location = new System.Drawing.Point(9, 74);
-            this.videoFrameBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.videoFrameBox.Location = new System.Drawing.Point(12, 92);
+            this.videoFrameBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.videoFrameBox.Name = "videoFrameBox";
-            this.videoFrameBox.Size = new System.Drawing.Size(480, 384);
+            this.videoFrameBox.Size = new System.Drawing.Size(640, 480);
             this.videoFrameBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.videoFrameBox.TabIndex = 1;
             this.videoFrameBox.TabStop = false;
@@ -69,19 +69,19 @@
             // 
             // videoTrackBar
             // 
-            this.videoTrackBar.Location = new System.Drawing.Point(9, 463);
-            this.videoTrackBar.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.videoTrackBar.Location = new System.Drawing.Point(12, 579);
+            this.videoTrackBar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.videoTrackBar.Name = "videoTrackBar";
-            this.videoTrackBar.Size = new System.Drawing.Size(480, 45);
+            this.videoTrackBar.Size = new System.Drawing.Size(640, 56);
             this.videoTrackBar.TabIndex = 2;
             this.videoTrackBar.ValueChanged += new System.EventHandler(this.videoTrackBar_ValueChanged);
             // 
             // playButton
             // 
-            this.playButton.Location = new System.Drawing.Point(9, 513);
-            this.playButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.playButton.Location = new System.Drawing.Point(12, 641);
+            this.playButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.playButton.Name = "playButton";
-            this.playButton.Size = new System.Drawing.Size(86, 38);
+            this.playButton.Size = new System.Drawing.Size(115, 48);
             this.playButton.TabIndex = 3;
             this.playButton.Text = "播放";
             this.playButton.UseVisualStyleBackColor = true;
@@ -89,10 +89,10 @@
             // 
             // suspendButton
             // 
-            this.suspendButton.Location = new System.Drawing.Point(106, 513);
-            this.suspendButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.suspendButton.Location = new System.Drawing.Point(141, 641);
+            this.suspendButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.suspendButton.Name = "suspendButton";
-            this.suspendButton.Size = new System.Drawing.Size(86, 38);
+            this.suspendButton.Size = new System.Drawing.Size(115, 48);
             this.suspendButton.TabIndex = 4;
             this.suspendButton.Text = "暫停";
             this.suspendButton.UseVisualStyleBackColor = true;
@@ -100,10 +100,10 @@
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(202, 513);
-            this.stopButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.stopButton.Location = new System.Drawing.Point(269, 641);
+            this.stopButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(86, 38);
+            this.stopButton.Size = new System.Drawing.Size(115, 48);
             this.stopButton.TabIndex = 5;
             this.stopButton.Text = "停止";
             this.stopButton.UseVisualStyleBackColor = true;
@@ -111,19 +111,19 @@
             // 
             // candidateExtractImgBox
             // 
-            this.candidateExtractImgBox.Location = new System.Drawing.Point(520, 74);
-            this.candidateExtractImgBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.candidateExtractImgBox.Location = new System.Drawing.Point(693, 92);
+            this.candidateExtractImgBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.candidateExtractImgBox.Name = "candidateExtractImgBox";
-            this.candidateExtractImgBox.Size = new System.Drawing.Size(38, 40);
+            this.candidateExtractImgBox.Size = new System.Drawing.Size(51, 50);
             this.candidateExtractImgBox.TabIndex = 2;
             this.candidateExtractImgBox.TabStop = false;
             // 
             // extractFeatureButton
             // 
-            this.extractFeatureButton.Location = new System.Drawing.Point(520, 20);
-            this.extractFeatureButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.extractFeatureButton.Location = new System.Drawing.Point(693, 25);
+            this.extractFeatureButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.extractFeatureButton.Name = "extractFeatureButton";
-            this.extractFeatureButton.Size = new System.Drawing.Size(86, 38);
+            this.extractFeatureButton.Size = new System.Drawing.Size(115, 48);
             this.extractFeatureButton.TabIndex = 6;
             this.extractFeatureButton.Text = "2.擷取特徵";
             this.extractFeatureButton.UseVisualStyleBackColor = true;
@@ -131,20 +131,20 @@
             // 
             // saveFeatureButton
             // 
-            this.saveFeatureButton.Location = new System.Drawing.Point(619, 20);
-            this.saveFeatureButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.saveFeatureButton.Location = new System.Drawing.Point(825, 25);
+            this.saveFeatureButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.saveFeatureButton.Name = "saveFeatureButton";
-            this.saveFeatureButton.Size = new System.Drawing.Size(86, 38);
+            this.saveFeatureButton.Size = new System.Drawing.Size(115, 48);
             this.saveFeatureButton.TabIndex = 7;
-            this.saveFeatureButton.Text = "3.純取特徵";
+            this.saveFeatureButton.Text = "3.存取特徵";
             this.saveFeatureButton.UseVisualStyleBackColor = true;
             this.saveFeatureButton.Click += new System.EventHandler(this.saveFeatureButton_Click);
             // 
-            // Form1
+            // VideoObjectLearningForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(891, 592);
+            this.ClientSize = new System.Drawing.Size(1188, 740);
             this.Controls.Add(this.saveFeatureButton);
             this.Controls.Add(this.extractFeatureButton);
             this.Controls.Add(this.candidateExtractImgBox);
@@ -154,8 +154,8 @@
             this.Controls.Add(this.videoTrackBar);
             this.Controls.Add(this.videoFrameBox);
             this.Controls.Add(this.loadVideoButton);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.Name = "Form1";
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Name = "VideoObjectLearningForm";
             this.Text = "影片環境物件學習系統";
             ((System.ComponentModel.ISupportInitialize)(this.videoFrameBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.videoTrackBar)).EndInit();

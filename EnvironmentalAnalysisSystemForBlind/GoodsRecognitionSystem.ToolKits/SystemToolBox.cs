@@ -13,8 +13,8 @@ using Emgu.CV.Util;
 using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
-using FeatureRecognitionSystem.ToolKits.SURFMethod;
-namespace FeatureRecognitionSystem.ToolKits
+using RecognitionSys.ToolKits.SURFMethod;
+namespace RecognitionSys.ToolKits
 {
     /// <summary>
     /// 此專案額外工具

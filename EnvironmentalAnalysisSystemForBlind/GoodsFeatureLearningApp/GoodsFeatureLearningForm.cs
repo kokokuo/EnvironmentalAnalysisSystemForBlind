@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using FeatureRecognitionSystem.FeatureLearning;
-using FeatureRecognitionSystem.ToolKits;
-using FeatureRecognitionSystem.ToolKits.SURFMethod;
+using RecognitionSys.FeatureLearning;
+using RecognitionSys.ToolKits;
+using RecognitionSys.ToolKits.SURFMethod;
 using Emgu.Util;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -52,9 +52,9 @@ namespace GoodsFeatureLearningApp
             if (learningSys != null)
             {
                 surfData = learningSys.CalSURFFeature();
-                Image<Bgr, Byte> drawKeyPointImg = learningSys.DrawSURFFeature(surfData, loadImg);
+                Image<Bgr, byte> drawKeyPointImg = learningSys.DrawSURFFeature(surfData);
 
-                extractFeatureImgBox.Image = drawKeyPointImg;
+                extractFeatureImgBox.Image = drawKeyPointImg.Resize(320, 240, INTER.CV_INTER_LINEAR);
             }
         }
 
@@ -90,7 +90,7 @@ namespace GoodsFeatureLearningApp
 
         private void SaveSURFFeatureFile(SURFFeatureData surf)
         {
-            string saveSURFDataPath = dir.Parent.Parent.Parent.FullName + @"\SURFFeatureData";
+            string saveSURFDataPath = dir.Parent.Parent.Parent.FullName + @"\GoodsSURFFeatureData";
             if (File.Exists(saveSURFDataPath))
                 MessageBox.Show("路徑錯誤");
             // Displays a SaveFileDialog so the user can save the Image

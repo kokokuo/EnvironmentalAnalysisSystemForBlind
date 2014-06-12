@@ -12,7 +12,7 @@ using Emgu.Util;
 using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
-namespace FeatureRecognitionSystem.ToolKits
+namespace RecognitionSys.ToolKits
 {
     /// <summary>
     /// 值方圖相關運算

@@ -59,16 +59,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="GoodsFeatureLearningForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="GoodsFeatureLearningForm.Designer.cs">
+      <DependentUpon>GoodsFeatureLearningForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="GoodsFeatureLearningForm.resx">
+      <DependentUpon>GoodsFeatureLearningForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -94,13 +94,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GoodsRecognitionSystem.FeatureLearning\FeatureRecognitionSystem.FeatureLearning.csproj">
+    <ProjectReference Include="..\GoodsRecognitionSystem.FeatureLearning\RecognitionSys.FeatureLearning.csproj">
       <Project>{220aa9ba-d74f-4c57-911e-dae1d8f48aed}</Project>
-      <Name>FeatureRecognitionSystem.FeatureLearning</Name>
+      <Name>RecognitionSys.FeatureLearning</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GoodsRecognitionSystem.ToolKits\FeatureRecognitionSystem.ToolKits.csproj">
+    <ProjectReference Include="..\GoodsRecognitionSystem.ToolKits\RecognitionSys.ToolKits.csproj">
       <Project>{c78bf934-59a7-493b-b9ea-cdadf7b10209}</Project>
-      <Name>FeatureRecognitionSystem.ToolKits</Name>
+      <Name>RecognitionSys.ToolKits</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

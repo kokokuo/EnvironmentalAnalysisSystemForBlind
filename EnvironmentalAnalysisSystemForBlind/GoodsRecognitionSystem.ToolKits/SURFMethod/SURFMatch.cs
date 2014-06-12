@@ -16,7 +16,7 @@ using Emgu.CV.Features2D;
 using Emgu.CV.Flann;
 //VectorOfKeyPoint
 using Emgu.CV.Util;
-namespace FeatureRecognitionSystem.ToolKits.SURFMethod
+namespace RecognitionSys.ToolKits.SURFMethod
 {
     /// <summary>
     /// SURF運算相關類別,可用來計算特徵或匹配特徵
@@ -34,13 +34,19 @@ namespace FeatureRecognitionSystem.ToolKits.SURFMethod
             SURFDetector surfCPU = new SURFDetector(surfParam);
             VectorOfKeyPoint keyPoints;
             Matrix<float> descriptors = null;
-
+            Stopwatch watch;
+            watch = Stopwatch.StartNew();
             using (Image<Gray, Byte> grayImg = srcImage.Convert<Gray, Byte>())
             {
                 keyPoints = surfCPU.DetectKeyPointsRaw(grayImg, null);
                 descriptors = surfCPU.ComputeDescriptorsRaw(grayImg, null, keyPoints);
 
             }
+            watch.Stop();
+            Console.WriteLine("\nExtract SURF time=> " + watch.ElapsedMilliseconds.ToString() + "ms");
+
+            //抽取出的特徵點數量
+            Console.WriteLine("keypoint size" + keyPoints.Size); 
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
         /// <summary>
@@ -53,11 +59,18 @@ namespace FeatureRecognitionSystem.ToolKits.SURFMethod
             SURFDetector surfCPU = new SURFDetector(new MCvSURFParams(1200, false)); //預設500
             VectorOfKeyPoint keyPoints;
             Matrix<float> descriptors = null;
+            Stopwatch watch;
+            watch = Stopwatch.StartNew();
             using (Image<Gray, Byte> grayImg = srcImage.Convert<Gray, Byte>())
             {
                 keyPoints = surfCPU.DetectKeyPointsRaw(grayImg, null);
                 descriptors = surfCPU.ComputeDescriptorsRaw(grayImg, null, keyPoints);
             }
+            watch.Stop();
+            Console.WriteLine("\nExtract SURF time=> " + watch.ElapsedMilliseconds.ToString() + "ms");
+
+            //抽取出的特徵點數量
+            Console.WriteLine("keypoint size" + keyPoints.Size); 
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
 
@@ -205,9 +218,14 @@ namespace FeatureRecognitionSystem.ToolKits.SURFMethod
         /// <returns>回傳匹配的資料類別</returns>
         public static SURFMatchedData MatchSURFFeatureByBruteForce(SURFFeatureData template, SURFFeatureData observedScene)
         {
+            //This matrix indicates which row is valid for the matches.
             Matrix<byte> mask;
+            //Number of nearest neighbors to search for
             int k = 2;
+            //The distance different ratio which a match is consider unique, a good number will be 0.8 , NNDR match
             double uniquenessThreshold = 0.5; //default:0.8
+
+            //The resulting n*k matrix of descriptor index from the training descriptors
             Matrix<int> indices;
             HomographyMatrix homography = null;
             Stopwatch watch;
@@ -220,21 +238,25 @@ namespace FeatureRecognitionSystem.ToolKits.SURFMethod
                 matcher.Add(template.GetDescriptors());
 
                 indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
+                //The resulting n*k matrix of distance value from the training descriptors
                 using (Matrix<float> dist = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
                 {
                     matcher.KnnMatch(observedScene.GetDescriptors(), indices, dist, k, null);
                     mask = new Matrix<byte>(dist.Rows, 1);
-                    mask.SetValue(255);
+                    mask.SetValue(255); //mask is 拉式信號
+                    //http://stackoverflow.com/questions/21932861/how-does-features2dtoolbox-voteforuniqueness-work
+                    //how the VoteForUniqueness work...
                     Features2DToolbox.VoteForUniqueness(dist, uniquenessThreshold, mask);
                 }
 
-                int nonZeroCount = CvInvoke.cvCountNonZero(mask);
+                int nonZeroCount = CvInvoke.cvCountNonZero(mask); //means good match
                 Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                 if (nonZeroCount >= 4)
                 {
+                    //50 is model and mathing image rotation similarity ex: m1 = 60 m2 = 50 => 60 - 50 <=50 so is similar
                     nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50); //default:1.5 , 10
                     Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
-                    if (nonZeroCount >= 15) //defalut :4
+                    if (nonZeroCount >= 15) //defalut :4 ,set 15
                         homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5);
                 }
                 #endregion

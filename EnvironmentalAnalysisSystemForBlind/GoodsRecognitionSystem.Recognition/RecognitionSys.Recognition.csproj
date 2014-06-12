@@ -7,8 +7,8 @@
     <ProjectGuid>{EFE0AE58-CF74-451F-9385-07B70A005549}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FeatureRecognitionSystem.Recognition</RootNamespace>
-    <AssemblyName>FeatureRecognitionSystem.Recognition</AssemblyName>
+    <RootNamespace>RecognitionSys.Recognition</RootNamespace>
+    <AssemblyName>RecognitionSys.Recognition</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -20,7 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\Library bin\Debug\FeatureRecognitionSystem.Recognition.xml</DocumentationFile>
+    <DocumentationFile>..\Library bin\Debug\RecognitionSys.Recognition.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -65,9 +65,9 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GoodsRecognitionSystem.ToolKits\FeatureRecognitionSystem.ToolKits.csproj">
+    <ProjectReference Include="..\GoodsRecognitionSystem.ToolKits\RecognitionSys.ToolKits.csproj">
       <Project>{c78bf934-59a7-493b-b9ea-cdadf7b10209}</Project>
-      <Name>FeatureRecognitionSystem.ToolKits</Name>
+      <Name>RecognitionSys.ToolKits</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

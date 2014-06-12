@@ -13,9 +13,10 @@ using Emgu.CV.Util;
 using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
-using FeatureRecognitionSystem.ToolKits;
-using FeatureRecognitionSystem.ToolKits.SURFMethod;
-namespace FeatureRecognitionSystem.FeatureLearning
+using RecognitionSys.ToolKits;
+using RecognitionSys.ToolKits.SURFMethod;
+using Emgu.CV.Features2D;
+namespace RecognitionSys.FeatureLearning
 {
     /// <summary>
     /// 學習用的類別
@@ -24,10 +25,18 @@ namespace FeatureRecognitionSystem.FeatureLearning
     {
         Image<Bgr, Byte> templateImg;
         
+        /// <summary>
+        /// 初始化特徵學習系統,傳入圖片檔案路徑
+        /// </summary>
+        /// <param name="fileName"></param>
         public FeatureLearning(string fileName)
         {
             this.templateImg = new Image<Bgr, byte>(fileName);
         }
+        /// <summary>
+        /// 初始化特徵學習系統,傳入圖片
+        /// </summary>
+        /// <param name="wantExtractFeatureImg"></param>
         public FeatureLearning(Image<Bgr, byte> wantExtractFeatureImg)
         {
             this.templateImg = wantExtractFeatureImg.Copy();
@@ -89,13 +98,27 @@ namespace FeatureRecognitionSystem.FeatureLearning
         {
             return SURFMatch.CalSURFFeature(templateImg);
         }
+
+        /// <summary>
+        /// 畫上特徵點到圖上
+        /// </summary>
+        /// <param name="surf">SURF特徵類別</param>
+        /// <returns>回傳畫好特徵點的影像</returns>
+        public Image<Bgr, byte> DrawSURFFeature(SURFFeatureData surf)
+        {
+            VectorOfKeyPoint keyPoints = surf.GetKeyPoints();
+            //繪製特徵
+            Image<Bgr, byte> result = Features2DToolbox.DrawKeypoints(surf.GetImg(), surf.GetKeyPoints(), new Bgr(255, 255, 255), Features2DToolbox.KeypointDrawType.DEFAULT);
+            return result;
+        }
+
         /// <summary>
         /// 畫上特徵點到圖上
         /// </summary>
         /// <param name="surf">SURF特徵類別</param>
         /// <param name="drawImg">要畫到的影像上</param>
         /// <returns>回傳畫好特徵點的影像</returns>
-        public Image<Bgr, Byte> DrawSURFFeature(SURFFeatureData surf, Image<Bgr, Byte> drawImg)
+        public Image<Bgr, byte> DrawSURFFeatureToWPF(SURFFeatureData surf, Image<Bgr, Byte> drawImg)
         {
             VectorOfKeyPoint keyPoints = surf.GetKeyPoints();
             Bitmap imgForDraw = drawImg.Copy().ToBitmap();
@@ -109,7 +132,7 @@ namespace FeatureRecognitionSystem.FeatureLearning
                 }
                 g.Dispose();
             }
-            return new Image<Bgr, Byte>(imgForDraw).Resize(320, 240, INTER.CV_INTER_LINEAR);
+            return new Image<Bgr, byte>(imgForDraw);
         }
         /// <summary>
         /// 儲存值方圖資料

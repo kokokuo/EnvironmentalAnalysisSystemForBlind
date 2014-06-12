@@ -12,7 +12,7 @@ using Emgu.CV.Features2D;
 
 //VectorOfKeyPoint
 using Emgu.CV.Util;
-namespace FeatureRecognitionSystem.ToolKits.SURFMethod
+namespace RecognitionSys.ToolKits.SURFMethod
 {
     /// <summary>
     /// 紀錄SURF特徵點的類別
@@ -25,6 +25,12 @@ namespace FeatureRecognitionSystem.ToolKits.SURFMethod
         private VectorOfKeyPoint surfKeyPoints;
         private Matrix<float> surfDescriptors = null;
         private Image<Bgr, Byte> srcImage;
+        /// <summary>
+        /// 建構子
+        /// </summary>
+        /// <param name="src">圖片</param>
+        /// <param name="keyPoints">特徵點</param>
+        /// <param name="descriptors">特徵描述子</param>
         public SURFFeatureData(Image<Bgr, Byte> src, VectorOfKeyPoint keyPoints, Matrix<float> descriptors)
         {
             this.srcImage = src;
@@ -32,6 +38,10 @@ namespace FeatureRecognitionSystem.ToolKits.SURFMethod
             surfDescriptors = descriptors;
 
         }
+        /// <summary>
+        /// 取得圖片
+        /// </summary>
+        /// <returns></returns>
         public Image<Bgr, Byte> GetImg()
         {
             return srcImage;

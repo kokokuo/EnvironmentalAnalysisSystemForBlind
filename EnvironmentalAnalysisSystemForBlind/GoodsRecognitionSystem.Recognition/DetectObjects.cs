@@ -19,8 +19,8 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Features2D;
 //使用ToolKit dll
-using FeatureRecognitionSystem.ToolKits;
-namespace FeatureRecognitionSystem
+using RecognitionSys.ToolKits;
+namespace RecognitionSys
 {
     /// <summary>
     /// 偵測出可能的物體

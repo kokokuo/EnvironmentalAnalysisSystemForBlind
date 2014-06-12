@@ -16,9 +16,9 @@ using Emgu.Util;
 using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
-using FeatureRecognitionSystem.ToolKits.SURFMethod;
+using RecognitionSys.ToolKits.SURFMethod;
 
-namespace FeatureRecognitionSystem.ToolKits
+namespace RecognitionSys.ToolKits
 {
     /// <summary>
     /// 特徵與值方圖的檔案讀寫工具類別

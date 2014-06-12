@@ -12,7 +12,7 @@ using Emgu.CV.Util;
 using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
-namespace FeatureRecognitionSystem.ToolKits
+namespace RecognitionSys.ToolKits
 {
     /// <summary>
     /// Emgucv與Emgucv中的openCV格式轉換

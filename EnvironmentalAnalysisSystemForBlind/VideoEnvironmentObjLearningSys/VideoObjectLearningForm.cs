@@ -15,11 +15,11 @@ using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.Features2D;
 using Emgu.CV.CvEnum;
-using FeatureRecognitionSystem.FeatureLearning;
-using FeatureRecognitionSystem.ToolKits.SURFMethod;
-namespace VideoEnvironmentObjLearningSys
+using RecognitionSys.FeatureLearning;
+using RecognitionSys.ToolKits.SURFMethod;
+namespace VideoObjectLearningApp
 {
-    public partial class Form1 : Form
+    public partial class VideoObjectLearningForm : Form
     {
         //取得專案執行黨所在的目錄=>System.Windows.Forms.Application.StartupPath
         //使用DirectoryInfo移動至上層
@@ -37,14 +37,11 @@ namespace VideoEnvironmentObjLearningSys
         bool isPressed;
         Rectangle extractFeatureMaskROI;
         Image<Bgr, byte> wantExtractFeatureImage;
-        Image<Bgr, byte> senceImage;
-        SURFFeatureData trainingExtractSurfData;
-        int oneSecFrameIndex;
+        SURFFeatureData surfData;
 
         FeatureLearning learningSys;
-        Image<Bgr, byte> loadImg;
 
-        public Form1()
+        public VideoObjectLearningForm()
         {
             InitializeComponent();
             trainingVideoTimer = new Timer();
@@ -63,9 +60,7 @@ namespace VideoEnvironmentObjLearningSys
                 trainingVideoTotalFrame = (int)videoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_COUNT); //Get total frame number
 
                 //第一張做影片的封面
-                queryFrame = videoCapture.QueryFrame();
-                queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
-                videoFrameBox.Image = queryFrame.Copy().ToBitmap();
+                QueryFrameAndShow();
                 //設定刻度
                 videoTrackBar.TickStyle = TickStyle.Both;
                 videoTrackBar.Minimum = 0;
@@ -79,6 +74,7 @@ namespace VideoEnvironmentObjLearningSys
             }
         }
 
+        #region 影片播放狀態按鈕
         private void playButton_Click(object sender, EventArgs e)
         {
             isPlay = true;
@@ -89,15 +85,17 @@ namespace VideoEnvironmentObjLearningSys
         {
             isPlay = isStop = false;
             isSuspend = true;
+
         }
 
         private void stopButton_Click(object sender, EventArgs e)
         {
             isStop = true;
             isPlay = isSuspend = false;
-
         }
+        #endregion
 
+        #region 擷取與存放特徵
         private void extractFeatureButton_Click(object sender, EventArgs e)
         {
             if (wantExtractFeatureImage != null)
@@ -107,19 +105,22 @@ namespace VideoEnvironmentObjLearningSys
                 else
                     learningSys = new FeatureLearning(wantExtractFeatureImage);
 
-                trainingExtractSurfData = learningSys.CalSURFFeature();
+                surfData = learningSys.CalSURFFeature();
                 //Draw Feature
-                Image<Bgr, Byte> drawKeyPointImg = learningSys.DrawSURFFeature(trainingExtractSurfData, loadImg);
-                candidateExtractImgBox.Image = drawKeyPointImg;
-
-
+                Image<Bgr, byte> drawKeyPointImg = learningSys.DrawSURFFeature(surfData);
+                new ImageViewer(drawKeyPointImg, "擷取特徵點結果").Show();
             }
         }
 
         private void saveFeatureButton_Click(object sender, EventArgs e)
         {
-            SaveSURFFeatureFile(trainingExtractSurfData);
+            if (surfData != null)
+            {
+                SaveSURFFeatureFile(surfData);
+            }
         }
+        #endregion
+    
 
         private void videoTrackBar_ValueChanged(object sender, EventArgs e)
         {
@@ -127,7 +128,25 @@ namespace VideoEnvironmentObjLearningSys
             isScroll = true;
         }
 
-        void trainingVideoTimer_Tick(object sender, EventArgs e)
+        //顯示Frame
+        private void QueryFrameAndShow() {
+            //顯示
+            queryFrame = videoCapture.QueryFrame();
+            queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+            videoFrameBox.Image = queryFrame.ToBitmap();
+        }
+
+        //重置影片
+        private void ResetVideo() {
+            //重置，回到一開始畫面
+            videoCapture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_AVI_RATIO, 0);
+            trainingScrollValue = videoTrackBar.Value = 0;
+            isScroll = false;
+            QueryFrameAndShow();
+        }
+        
+        //影片的Timer
+        private void trainingVideoTimer_Tick(object sender, EventArgs e)
         {
             //如果有影片
             if (videoCapture != null)
@@ -146,34 +165,34 @@ namespace VideoEnvironmentObjLearningSys
                         //如果Frame的index沒有差過影片的最大index
                         if (videoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES) < trainingVideoTotalFrame)
                         {
-                            //顯示
-                            queryFrame = videoCapture.QueryFrame();
-                            queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
-                            videoFrameBox.Image = queryFrame.ToBitmap();
+                            QueryFrameAndShow();
+                        }
+                        else
+                        {
+                            ResetVideo();
                         }
                     }
 
                 }
                 else if (isSuspend)
                 {
-                    //擷取想要的區塊 做SURF
                     g = videoFrameBox.CreateGraphics();
-
                 }
                 else if (isStop)
                 {
                     //關閉，回到一開始畫面
-                    videoCapture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_AVI_RATIO, 0);
+                    ResetVideo();   
                 }
             }
         }
+
         #region 開檔讀檔
         private string OpenVideo()
         {
             OpenFileDialog dlg = new OpenFileDialog();
             //移動上層在指定下層路徑
             dlg.RestoreDirectory = true;
-            dlg.InitialDirectory = dir.Parent.Parent.FullName + @"\TrainingVideo";
+            //dlg.InitialDirectory = dir.Parent.Parent.FullName + @"\TrainingVideo";
             dlg.Title = "Open Video File";
 
             // Set filter for file extension and default file extension
@@ -196,7 +215,7 @@ namespace VideoEnvironmentObjLearningSys
 
         private void SaveSURFFeatureFile(SURFFeatureData surf)
         {
-            string saveSURFDataPath = dir.Parent.Parent.Parent.FullName + @"\SURFFeatureData";
+            string saveSURFDataPath = dir.Parent.Parent.Parent.FullName + @"\SignBoardSURFFeatureData";
             if (File.Exists(saveSURFDataPath))
                 MessageBox.Show("路徑錯誤");
             // Displays a SaveFileDialog so the user can save the Image
@@ -215,13 +234,12 @@ namespace VideoEnvironmentObjLearningSys
             }
         }
         #endregion
-        
 
+        #region 暫停影片時的圈選事件
         private void videoFrameBox_MouseUp(object sender, MouseEventArgs e)
         {
             isPressed = false;
         }
-
         private void videoFrameBox_MouseMove(object sender, MouseEventArgs e)
         {
             //繪製要擷取的ROI
@@ -270,5 +288,7 @@ namespace VideoEnvironmentObjLearningSys
                 videoFrameBox.Image = queryFrame.Copy().ToBitmap();
             }
         }
+        #endregion
+       
     }
 }
