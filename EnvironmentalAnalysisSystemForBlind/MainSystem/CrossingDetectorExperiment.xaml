@@ -1,26 +1,39 @@
-﻿<UserControl x:Class="MainSystem.CrossingDetectorExperiment"
+﻿<UserControl 
+    x:Class="MainSystem.CrossingDetectorExperiment"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:emui="clr-namespace:Emgu.CV.UI;assembly=Emgu.CV.UI"
-             mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="800" >
+             mc:Ignorable="d" Height="760" Width="800" >
+    
     <Grid Background="White">
-        <Button Content="1.載入圖片" HorizontalAlignment="Left" Margin="49,45,0,0" VerticalAlignment="Top" Width="89" Height="30"/>
-        <Button Content="2.剪裁下半部" HorizontalAlignment="Left" Margin="155,45,0,0" VerticalAlignment="Top" Width="84" Height="30"/>
-        <WindowsFormsHost Margin="49,99,561,419" Width="320" Height="240">
-            <emui:ImageBox />
-        </WindowsFormsHost>
-        <Button Content="3.灰階" HorizontalAlignment="Left" Margin="49,371,0,0" VerticalAlignment="Top" Width="89" Height="30"/>
-        <Button Content="4.Mask白色" HorizontalAlignment="Left" Margin="155,371,0,0" VerticalAlignment="Top" Width="84" Height="30"/>
-        <Button Content="6.偵測HoughLine" HorizontalAlignment="Left" Margin="415,45,0,0" VerticalAlignment="Top" Width="118" Height="30"/>
-        <Button Content="7.修復線段" HorizontalAlignment="Left" Margin="415,99,0,0" VerticalAlignment="Top" Width="118" Height="28"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Button Content="1.載入圖片" HorizontalAlignment="Left" Margin="49,45,0,0" VerticalAlignment="Top" Width="89" Height="30" Name="loadImgButton" Click="loadImgButton_Click"/>
+            <Button Content="2.剪裁下半部" HorizontalAlignment="Left" Margin="155,45,0,0" VerticalAlignment="Top" Width="84" Height="30" Name="cropImgButton" Click="cropImgButton_Click"/>
+            <WindowsFormsHost Margin="49,99,831,415.4" Width="320" Height="240">
+                <emui:ImageBox x:Name="loadImgBox"/>
+            </WindowsFormsHost>
+            <Button Content="3.灰階" HorizontalAlignment="Left" Margin="49,371,0,0" VerticalAlignment="Top" Width="89" Height="30" Name="toGrayButton" Click="toGrayButton_Click"/>
+            <Button Content="4.Mask白色" HorizontalAlignment="Left" Margin="155,371,0,0" VerticalAlignment="Top" Width="84" Height="30" Name="maskWhiteButton" Click="maskWhiteButton_Click"/>
+            <Button Content="5.去胡椒雜訊" HorizontalAlignment="Left" Margin="259,371,0,0" VerticalAlignment="Top" Width="83" Height="30" Name="pepperfilter" Click="pepperfilter_Click"/>
+            <WindowsFormsHost Margin="49,434,831,80.4" Width="320" Height="240">
+                <emui:ImageBox x:Name="processingImgBox"/>
+            </WindowsFormsHost>
+        </Grid>
         
-      
-        <Button Content="5.去胡椒雜訊" HorizontalAlignment="Left" Margin="259,371,0,0" VerticalAlignment="Top" Width="83" Height="30"/>
-        <Button Content="步驟化修復線段" HorizontalAlignment="Left" Margin="562,99,0,0" VerticalAlignment="Top" Width="110" Height="28"/>
-        <Button Content="8.過濾線段" HorizontalAlignment="Left" Margin="415,151,0,0" VerticalAlignment="Top" Width="118" Height="30"/>
-        <Button Content="9.分析黑白紋路" HorizontalAlignment="Left" Margin="415,208,0,0" VerticalAlignment="Top" Width="118" Height="33"/>
+        <Grid Grid.Column="1">
+            <Button Content="6.偵測HoughLine" HorizontalAlignment="Left" Margin="20,45,0,0" VerticalAlignment="Top" Width="118" Height="30" Name="detectHoughLineButton" Click="detectHoughLineButton_Click"/>
+            <Button Content="7.修復線段" HorizontalAlignment="Left" Margin="20,99,0,0" VerticalAlignment="Top" Width="118" Height="28" Name="repairLinesButton" Click="repairLinesButton_Click"/>
+            <Button Content="8.過濾線段" HorizontalAlignment="Left" Margin="20,151,0,0" VerticalAlignment="Top" Width="118" Height="30" Name="filterLinesButton" Click="filterLinesButton_Click"/>
+            <Button Content="9.分析黑白紋路" HorizontalAlignment="Left" Margin="20,208,0,0" VerticalAlignment="Top" Width="118" Height="33" Name="AnalyzeBlackWhiteButton" Click="AnalyzeBlackWhiteButton_Click"/>
+            <Button Content="步驟化修復線段" HorizontalAlignment="Left" Margin="170,99,0,0" VerticalAlignment="Top" Width="118" Height="28" x:Name="stepRepairLinesButton_Copy" Click="stepRepairLinesButton_Click"/>
+        </Grid>
+       
+        
     </Grid>
 </UserControl>

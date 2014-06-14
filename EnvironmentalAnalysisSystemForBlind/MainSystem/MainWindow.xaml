@@ -1,9 +1,24 @@
 ﻿<Window x:Class="MainSystem.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local ="clr-namespace:MainSystem"
         xmlns:emui="clr-namespace:Emgu.CV.UI;assembly=Emgu.CV.UI"
-        Title="MainWindow" Height="600" Width="800">
+        Title="MainWindow" Height="800" Width="1200">
     <Grid>
         
+        <TabControl>
+            <TabItem Header="主系統">
+                
+            </TabItem>
+            <TabItem Header="環境招牌實驗">
+
+            </TabItem>
+            <TabItem Header="物品辨識實驗">
+
+            </TabItem>
+            <TabItem Header="斑馬線偵測實驗">
+                <local:CrossingDetectorExperiment HorizontalAlignment="Left"/>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>
