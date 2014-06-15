@@ -13,9 +13,9 @@
         </Grid.ColumnDefinitions>
         
         <Grid Grid.Column="0">
-            <Button Content="開啟攝影機" HorizontalAlignment="Left" Margin="28,28,0,0" VerticalAlignment="Top" Width="75"/>
+            <Button Content="開啟攝影機" HorizontalAlignment="Left" Margin="28,28,0,0" VerticalAlignment="Top" Width="75" Name="openCameraButton" Click="openCameraButton_Click"/>
             <WindowsFormsHost Width="320" Height="240" Margin="28,72,52,448" >
-                <emui:ImageBox x:Name="camFrame"/>
+                <emui:ImageBox x:Name="camFrameBox"/>
             </WindowsFormsHost>
         </Grid>
     </Grid>

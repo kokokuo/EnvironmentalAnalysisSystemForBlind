@@ -24,5 +24,10 @@ namespace MainSystem
         {
             InitializeComponent();
         }
+
+        private void openCameraButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
