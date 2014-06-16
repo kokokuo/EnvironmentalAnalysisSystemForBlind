@@ -13,9 +13,13 @@
         </Grid.ColumnDefinitions>
         
         <Grid Grid.Column="0">
-            <Button Content="開啟攝影機" HorizontalAlignment="Left" Margin="28,28,0,0" VerticalAlignment="Top" Width="75" Name="openCameraButton" Click="openCameraButton_Click"/>
+            <Button Content="開啟攝影機" HorizontalAlignment="Left" Margin="28,28,0,0" VerticalAlignment="Top" Width="84" Name="openCameraButton" Click="openCameraButton_Click" Height="22"/>
             <WindowsFormsHost Width="320" Height="240" Margin="28,72,52,448" >
                 <emui:ImageBox x:Name="camFrameBox"/>
+            </WindowsFormsHost>
+            <Button Content="載入要辨識的圖片" HorizontalAlignment="Left" Margin="28,342,0,0" VerticalAlignment="Top" Width="116" x:Name="openImgButton" Click="openImgButton_Click" Height="25"/>
+            <WindowsFormsHost Width="320" Height="240" Margin="28,389,52,131" >
+                <emui:ImageBox x:Name="loadImgBox"/>
             </WindowsFormsHost>
         </Grid>
     </Grid>

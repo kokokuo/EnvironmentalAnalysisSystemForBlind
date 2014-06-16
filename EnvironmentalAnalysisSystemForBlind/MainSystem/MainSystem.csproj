@@ -90,6 +90,7 @@
     <Compile Include="CrossingDetectorExperiment.xaml.cs">
       <DependentUpon>CrossingDetectorExperiment.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GoodsRecognition.cs" />
     <Compile Include="GoodsRecognitionExperiment.xaml.cs">
       <DependentUpon>GoodsRecognitionExperiment.xaml</DependentUpon>
     </Compile>
@@ -129,6 +130,14 @@
     <ProjectReference Include="..\CrossingDetector\CrossingDetector.csproj">
       <Project>{00651f7a-1775-4f09-82a5-c79603bb5b70}</Project>
       <Name>CrossingDetector</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GoodsRecognitionSystem.Recognition\RecognitionSys.Recognition.csproj">
+      <Project>{efe0ae58-cf74-451f-9385-07b70a005549}</Project>
+      <Name>RecognitionSys.Recognition</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GoodsRecognitionSystem.ToolKits\RecognitionSys.ToolKits.csproj">
+      <Project>{c78bf934-59a7-493b-b9ea-cdadf7b10209}</Project>
+      <Name>RecognitionSys.ToolKits</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

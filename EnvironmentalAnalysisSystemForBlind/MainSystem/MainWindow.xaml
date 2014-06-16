@@ -14,7 +14,7 @@
 
             </TabItem>
             <TabItem Header="物品辨識實驗">
-
+                <local:GoodsRecognitionExperiment HorizontalAlignment="Left" />
             </TabItem>
             <TabItem Header="斑馬線偵測實驗">
                 <local:CrossingDetectorExperiment HorizontalAlignment="Left"/>
