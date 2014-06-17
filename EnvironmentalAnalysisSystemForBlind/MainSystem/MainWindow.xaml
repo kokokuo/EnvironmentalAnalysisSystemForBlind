@@ -11,7 +11,7 @@
                 
             </TabItem>
             <TabItem Header="環境招牌實驗">
-
+                <local:VideoObjsRecognitionExperiment HorizontalAlignment="Left"/>
             </TabItem>
             <TabItem Header="物品辨識實驗">
                 <local:GoodsRecognitionExperiment HorizontalAlignment="Left" />

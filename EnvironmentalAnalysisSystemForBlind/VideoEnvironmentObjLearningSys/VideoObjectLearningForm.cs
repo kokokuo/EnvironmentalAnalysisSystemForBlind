@@ -64,7 +64,6 @@ namespace VideoObjectLearningApp
                 //設定刻度
                 videoTrackBar.TickStyle = TickStyle.Both;
                 videoTrackBar.Minimum = 0;
-                videoTrackBar.TickFrequency = 1;
                 videoTrackBar.Maximum = trainingVideoTotalFrame;
 
                 //設定播放用的Timer

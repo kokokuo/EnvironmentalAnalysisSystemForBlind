@@ -74,84 +74,6 @@ namespace RecognitionSys.ToolKits.SURFMethod
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
 
-        #region Features2DTracker use but have some problem
-        /*
-        public static int MatchSURFFeatureByFLANN2(SURFFeatureData template, SURFFeatureData observedScene, bool isDraw)
-        {
-            List<KeyValuePair<int, int>> ptPairs = new List<KeyValuePair<int, int>>();
-            ImageFeature<float>[] modelFeature = ImageFeature<float>.ConvertFromRaw(template.GetKeyPoints(), template.GetDescriptors());
-            ImageFeature<float>[] observedFeature = ImageFeature<float>.ConvertFromRaw(observedScene.GetKeyPoints(), observedScene.GetDescriptors());
-            int goodMatchCount = 0;
-            Stopwatch watch;
-            watch = Stopwatch.StartNew();
-            goodMatchCount = FlannFindPairs(modelFeature, observedFeature, ref ptPairs);
-            watch.Stop();
-            Console.WriteLine("\nCal SURF Match time=======\n=> " + watch.ElapsedMilliseconds.ToString() + "ms\nCal SURF Match time=======");
-            return goodMatchCount;
-        }
-        */
-        #endregion
-
-        //FLANN匹配驗算法
-        private static int FlannFindPairs(ImageFeature<float>[] modelDescriptors, ImageFeature<float>[] imageDescriptors, ref List<KeyValuePair<int, int>> ptPairs)
-        {
-            //Check if we have some valid model descriptors
-            if (modelDescriptors.Length == 0)
-                return -1;
-
-            int length = modelDescriptors[0].Descriptor.Length;
-
-            //Create matrix object and matrix image
-            var matrixModel = new Matrix<float>(modelDescriptors.Length, length);
-            var matrixImage = new Matrix<float>(imageDescriptors.Length, length);
-
-            //copy model descriptors into matrixModel
-            int row = 0;
-            foreach (var modelDescriptor in modelDescriptors)
-            {
-                for (int i = 0; i < modelDescriptor.Descriptor.Length; i++)
-                {
-                    matrixModel[row, i] = modelDescriptor.Descriptor[i];
-                }
-
-                row++;
-            }
-
-            //copy image descriptors into matrixImage
-            row = 0;
-            foreach (var imageDescriptor in imageDescriptors)
-            {
-                for (int i = 0; i < imageDescriptor.Descriptor.Length; i++)
-                {
-                    matrixImage[row, i] = imageDescriptor.Descriptor[i];
-                }
-
-                row++;
-            }
-
-            //create return matrices for KnnSearch
-            var indices = new Matrix<int>(modelDescriptors.Length, 2);
-            var dists = new Matrix<float>(modelDescriptors.Length, 2);
-
-            //create our flannIndex
-            var flannIndex = new Index(matrixImage);
-
-            //do the search
-            flannIndex.KnnSearch(matrixModel, indices, dists, 2, 2);
-
-            //filter out all unnecessary pairs based on distance between pairs
-            int pairCount = 0;
-            for (int i = 0; i < indices.Rows; i++)
-            {
-                if (dists.Data[i, 0] < 0.6 * dists.Data[i, 1])
-                {
-                    ptPairs.Add(new KeyValuePair<int, int>(i, indices.Data[i, 0]));
-                    pairCount++;
-                }
-            }
-            //return the pair count
-            return pairCount;
-        }
         
         /// <summary>
         /// 匹配較快速但精確度較低
@@ -211,12 +133,12 @@ namespace RecognitionSys.ToolKits.SURFMethod
         }
 
         /// <summary>
-        /// 使用BruteForce匹配(較精確但較慢)
+        /// 商品辨識使用BruteForce匹配(較精確但較慢)
         /// </summary>
         /// <param name="template">樣板的特徵點類別</param>
         /// <param name="observedScene">被觀察的場景匹配的特徵點</param>
         /// <returns>回傳匹配的資料類別</returns>
-        public static SURFMatchedData MatchSURFFeatureByBruteForce(SURFFeatureData template, SURFFeatureData observedScene)
+        public static SURFMatchedData MatchSURFFeatureByBruteForceForGoods(SURFFeatureData template, SURFFeatureData observedScene)
         {
             //This matrix indicates which row is valid for the matches.
             Matrix<byte> mask;
@@ -271,6 +193,84 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 return null;
             }
         }
+
+        /// <summary>
+        /// 環境看板辨識使用BruteForce匹配(較精確但較慢)
+        /// </summary>
+        /// <param name="template">樣板的特徵點類別</param>
+        /// <param name="observedScene">被觀察的場景匹配的特徵點</param>
+        /// <returns>回傳匹配的資料類別</returns>
+        public static SURFMatchedData MatchSURFFeatureByBruteForceForObjs(SURFFeatureData template, SURFFeatureData observedScene)
+        {
+            //This matrix indicates which row is valid for the matches.
+            Matrix<byte> mask;
+            //Number of nearest neighbors to search for
+            int k = 5;
+            //The distance different ratio which a match is consider unique, a good number will be 0.8 , NNDR match
+            double uniquenessThreshold = 0.5;  //default 0.8
+
+            //The resulting n*k matrix of descriptor index from the training descriptors
+            Matrix<int> trainIdx;
+            HomographyMatrix homography = null;
+            Stopwatch watch;
+
+            try
+            {
+                watch = Stopwatch.StartNew();
+                #region Surf for CPU
+                //match 
+                BruteForceMatcher<float> matcher = new BruteForceMatcher<float>(DistanceType.L2Sqr);
+                matcher.Add(template.GetDescriptors());
+
+                trainIdx = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
+                //The resulting n*k matrix of distance value from the training descriptors
+                using (Matrix<float> distance = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
+                {
+                    matcher.KnnMatch(observedScene.GetDescriptors(), trainIdx, distance, k, null);
+                    mask = new Matrix<byte>(distance.Rows, 1);
+                    mask.SetValue(255); //Mask is 拉式信號匹配 
+                    //http://stackoverflow.com/questions/21932861/how-does-features2dtoolbox-voteforuniqueness-work
+                    //how the VoteForUniqueness work...
+                    Features2DToolbox.VoteForUniqueness(distance, uniquenessThreshold, mask);
+
+                }
+
+                Image<Bgr, byte> result = null;
+
+                int nonZeroCount = CvInvoke.cvCountNonZero(mask); //means good match
+                Console.WriteLine("VoteForUniqueness nonZeroCount=> " + nonZeroCount.ToString());
+                if (nonZeroCount >= (template.GetKeyPoints().Size * 0.2)) //set 10
+                {
+                    //50 is model and mathing image rotation similarity ex: m1 = 60 m2 = 50 => 60 - 50 <=50 so is similar
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 1.2, 30);  //default 1.5,10
+                    Console.WriteLine("VoteForSizeAndOrientation nonZeroCount=> " + nonZeroCount.ToString());
+                    if (nonZeroCount >= (template.GetKeyPoints().Size * 0.5)) //default 4 ,set 15
+                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 5);
+
+                    PointF[] matchPts = GetMatchBoundingBox(homography, template);
+
+                    //Draw the matched keypoints
+                    result = Features2DToolbox.DrawMatches(template.GetImg(), template.GetKeyPoints(), observedScene.GetImg(), observedScene.GetKeyPoints(),
+                        trainIdx, new Bgr(255, 255, 255), new Bgr(255, 255, 255), mask, Features2DToolbox.KeypointDrawType.NOT_DRAW_SINGLE_POINTS);
+                    if (matchPts != null)
+                    {
+                        result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);
+                    }
+                }
+                #endregion
+                watch.Stop();
+                Console.WriteLine("\nCal SURF Match time=======\n=> " + watch.ElapsedTicks.ToString() + "ms\nCal SURF Match time=======");
+
+
+                return new SURFMatchedData(trainIdx, homography, mask, nonZeroCount, template);
+            }
+            catch (CvException ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.ErrorMessage);
+                return null;
+            }
+        }
+
         /// <summary>
         /// 取得對應出物體的ROI座標點
         /// </summary>
@@ -299,7 +299,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
         /// </summary>
         /// <param name="matchData">匹配後回傳的資料類別</param>
         /// <param name="observedScene">觀察景象特徵資料</param>
-        public static void ShowSURFMatchForm(SURFMatchedData matchData, SURFFeatureData observedScene) 
+        public static void ShowSURFMatchForm(SURFMatchedData matchData, SURFFeatureData observedScene,ImageViewer viewer) 
         {
             PointF[] matchPts = GetMatchBoundingBox(matchData.GetHomography(), matchData.GetTemplateSURFData());
             //Draw the matched keypoints
@@ -309,7 +309,8 @@ namespace RecognitionSys.ToolKits.SURFMethod
             {
                 result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);
             }
-            new ImageViewer(result, "顯示匹配圖像").Show();
+            viewer.Image = result;
+            viewer.Show();
         }
     }
 }

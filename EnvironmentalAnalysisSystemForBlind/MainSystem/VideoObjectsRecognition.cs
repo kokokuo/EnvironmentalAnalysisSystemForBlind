@@ -16,17 +16,16 @@ using RecognitionSys.ToolKits;
 using RecognitionSys.ToolKits.SURFMethod;
 namespace MainSystem
 {
-    /// <summary>
-    /// 商品辨識的類別,請直接使用此類別作為執行商品辨識的接口
-    /// </summary>
-    public class GoodsRecognition
+    public class VideoObjectsRecognition
     {
         Image<Bgr, Byte> observedImg;
+        ImageViewer viewer;
         List<string> surfFiles;
-        Dictionary<string, string> goodsData = new Dictionary<string, string>();
-        public GoodsRecognition(Image<Bgr, Byte> observedSrcImg)
+        Dictionary<string, string> objectsData = new Dictionary<string, string>();
+        public VideoObjectsRecognition(Image<Bgr, Byte> observedSrcImg)
         {
-            SetUpGoodsData();
+            viewer = new ImageViewer();
+            SetUpSignBoardSURFFeatureData();
             observedImg = observedSrcImg.Copy();
             //要有深度過濾才行使用此code
             //Image<Bgr, Byte> dst = SkinFilter(observedImg);
@@ -39,9 +38,9 @@ namespace MainSystem
             //讀取surf檔案的目錄下所有檔案名稱
             Console.WriteLine("\nPath=>" + projectPath + "\n");
             //隨著此類別存放的位置不同,要重新設定檔案路徑
-            if (Directory.Exists(projectPath + @"\GoodsSURFFeatureData"))
+            if (Directory.Exists(projectPath + @"\SignBoardSURFFeatureData"))
             {
-                surfFiles = Directory.GetFiles(projectPath + @"\GoodsSURFFeatureData").ToList();
+                surfFiles = Directory.GetFiles(projectPath + @"\SignBoardSURFFeatureData").ToList();
             }
             
         }
@@ -54,7 +53,7 @@ namespace MainSystem
             observedImg = observedSrcImg.Copy();
             //要有深度過濾才行使用此code
             //Image<Bgr, Byte> dst = SkinFilter(observedImg);
-            //objectImg = GetObjectBoundingBoxImg(dst);
+           // objectImg = GetObjectBoundingBoxImg(dst);
         }
 
         #region 取出物體所在的ROI影像
@@ -144,54 +143,53 @@ namespace MainSystem
         }
         ////////////////////////////////////////////////////////////////////////////
 	    #endregion
+
         /// <summary>
         /// 執行辨識
         /// </summary>
         /// <param name="isDrawResultToShowOnDialog">是否要顯示出辨識的結果</param>
-        /// <returns>回傳商品資訊, 格式=>"商品名稱,商品售價" ;請記得做字串切割,若無比對到或有任何問題則會回傳null</returns>
+        /// <returns>回傳看板資訊, 格式=>"看板名稱" ;請記得做字串切割,若無比對到或有任何問題則會回傳null</returns>
         public string RunRecognition(bool isDrawResultToShowOnDialog)
         {
             if (surfFiles.Count != 0)
             {
                 //匹配特徵並取回匹配到的特徵
-                KeyValuePair<String, SURFMatchedData> mathedGoodsData = MatchRecognition.MatchSURFFeatureForGoods(surfFiles, observedImg, true);
-                if (mathedGoodsData.Key != null && mathedGoodsData.Value != null)
+                KeyValuePair<String, SURFMatchedData> mathedObjectsData = MatchRecognition.MatchSURFFeatureForVideoObjs(surfFiles, observedImg, viewer);
+                if (mathedObjectsData.Key != null && mathedObjectsData.Value != null)
                 {
-                    //透過樣板檔案名稱取出匹配到的商品資訊
-                    string matchedFileName = mathedGoodsData.Key;
-                    //切割出商品檔案ID=> 特徵檔案名稱命名規則:(商品ID+特徵點編號),因為一種商品可能需要多張畫面的特徵點
+                    //透過樣板檔案名稱取出匹配到的看板資訊
+                    string matchedFileName = mathedObjectsData.Key;
+                    //切割出商品檔案ID=> 特徵檔案名稱命名規則:(看板ID+特徵點編號),因為一種看板可能需要多張畫面的特徵點
                     string[] split = matchedFileName.Split('-');
-                    string goodsMsg;
+                    string ibjectsMsg;
                     //特徵檔案名稱使否有存在此商品
-                    if (goodsData.TryGetValue(split[0], out goodsMsg))
+                    if (objectsData.TryGetValue(split[0], out ibjectsMsg))
                     {
-                        return goodsMsg;
+                        return ibjectsMsg;
                     }
                     else 
                     {
-                        System.Windows.MessageBox.Show("特徵檔案並無存在可對應的商品資料!");
+                        //System.Windows.MessageBox.Show("特徵檔案並無存在可對應的商品資料!");
                         return null;
                     }
                 }
                 else 
                 {
-                    System.Windows.MessageBox.Show("沒有對應到的商品或是不存在此商品");
+                    //System.Windows.MessageBox.Show("沒有對應到的商品或是不存在此商品");
                     return null;
                 }
             }
             else 
             {
-                System.Windows.MessageBox.Show("沒有特徵資料");
+                //System.Windows.MessageBox.Show("沒有特徵資料");
                 return null;
             }
         }
-        //目前寫死,要加入的商品資訊(切記,要有對應到的特徵檔案)
-        private void SetUpGoodsData() 
+        //目前寫死,要加入的看板資訊(切記,要有對應到的特徵檔案)
+        private void SetUpSignBoardSURFFeatureData() 
         {
-            this.goodsData.Add("TW000000","Pocky巧克力棒,35元");
-            this.goodsData.Add("TW000001","小瓜呆脆笛酥巧克力口味,34元");
-            this.goodsData.Add("TW000002", "檸檬熱飲,28元");
-            this.goodsData.Add("TW000003", "AB無糖優酪乳,28元");
+            this.objectsData.Add("TW000000","喜樂牙醫");
+            
         }
     }
 }

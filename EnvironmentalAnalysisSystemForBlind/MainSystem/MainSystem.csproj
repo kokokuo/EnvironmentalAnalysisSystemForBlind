@@ -71,6 +71,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="VideoObjectsRecognition.cs" />
+    <Compile Include="VideoObjsRecognitionExperiment.xaml.cs">
+      <DependentUpon>VideoObjsRecognitionExperiment.xaml</DependentUpon>
+    </Compile>
     <Page Include="CrossingDetectorExperiment.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -98,6 +102,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="VideoObjsRecognitionExperiment.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
