@@ -74,7 +74,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
 
-        
+        #region FLANN
         /// <summary>
         /// 匹配較快速但精確度較低
         /// </summary>
@@ -108,7 +108,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 }
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask);
                 Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
-                if (nonZeroCount >=4) //原先是4
+                if (nonZeroCount >= 4) //原先是4
                 {
                     nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 30);
                     Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
@@ -123,7 +123,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
 
 
-                return new SURFMatchedData(indices, homography, mask, nonZeroCount,template) ;
+                return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
             }
             catch (CvException ex)
             {
@@ -131,7 +131,9 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 return null;
             }
         }
+        #endregion
 
+        #region 商品辨識用
         /// <summary>
         /// 商品辨識使用BruteForce匹配(較精確但較慢)
         /// </summary>
@@ -185,7 +187,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 watch.Stop();
                 Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
 
-                return new SURFMatchedData(indices, homography, mask, nonZeroCount,template);
+                return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
             }
             catch (CvException ex)
             {
@@ -193,7 +195,9 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 return null;
             }
         }
+        #endregion
 
+        #region 商家看板辨識
         /// <summary>
         /// 環境看板辨識使用BruteForce匹配(較精確但較慢)
         /// </summary>
@@ -236,7 +240,6 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 }
 
                 Image<Bgr, byte> result = null;
-
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask); //means good match
                 Console.WriteLine("VoteForUniqueness nonZeroCount=> " + nonZeroCount.ToString());
                 if (nonZeroCount >= (template.GetKeyPoints().Size * 0.2)) //set 10
@@ -270,6 +273,8 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 return null;
             }
         }
+        #endregion
+      
 
         /// <summary>
         /// 取得對應出物體的ROI座標點
