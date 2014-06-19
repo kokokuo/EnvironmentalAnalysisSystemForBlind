@@ -40,13 +40,12 @@ namespace RecognitionSys.ToolKits.SURFMethod
             {
                 keyPoints = surfCPU.DetectKeyPointsRaw(grayImg, null);
                 descriptors = surfCPU.ComputeDescriptorsRaw(grayImg, null, keyPoints);
-
             }
             watch.Stop();
             Console.WriteLine("\nExtract SURF time=> " + watch.ElapsedMilliseconds.ToString() + "ms");
 
             //抽取出的特徵點數量
-            Console.WriteLine("keypoint size" + keyPoints.Size); 
+            Console.WriteLine("keypoint size:" + keyPoints.Size); 
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
         /// <summary>
@@ -70,7 +69,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
             Console.WriteLine("\nExtract SURF time=> " + watch.ElapsedMilliseconds.ToString() + "ms");
 
             //抽取出的特徵點數量
-            Console.WriteLine("keypoint size" + keyPoints.Size); 
+            Console.WriteLine("keypoint size:" + keyPoints.Size); 
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
 
@@ -81,11 +80,11 @@ namespace RecognitionSys.ToolKits.SURFMethod
         /// <param name="template">樣板的特徵點類別</param>
         /// <param name="observedScene">被觀察的場景匹配的特徵點</param>
         /// <returns>回傳匹配的資料類別</returns>
-        public static SURFMatchedData MatchSURFFeatureByFLANN(SURFFeatureData template, SURFFeatureData observedScene)
+        public static SURFMatchedData MatchSURFFeatureByFLANNForGoods(SURFFeatureData template, SURFFeatureData observedScene)
         {
             Matrix<byte> mask;
             int k = 2;
-            double uniquenessThreshold = 0.3;
+            double uniquenessThreshold = 0.8;
             Matrix<int> indices;
             HomographyMatrix homography = null;
             Stopwatch watch;
@@ -147,7 +146,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
             //Number of nearest neighbors to search for
             int k = 2;
             //The distance different ratio which a match is consider unique, a good number will be 0.8 , NNDR match
-            double uniquenessThreshold = 0.5; //default:0.8
+            double uniquenessThreshold = 0.8; //default:0.8
 
             //The resulting n*k matrix of descriptor index from the training descriptors
             Matrix<int> indices;
@@ -158,19 +157,41 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 watch = Stopwatch.StartNew();
                 #region bruteForce match for CPU
                 //match 
-                BruteForceMatcher<float> matcher = new BruteForceMatcher<float>(DistanceType.L2Sqr); //default:L2
+                BruteForceMatcher<float> matcher = new BruteForceMatcher<float>(DistanceType.L2); //default:L2
                 matcher.Add(template.GetDescriptors());
-
+                
                 indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
                 //The resulting n*k matrix of distance value from the training descriptors
                 using (Matrix<float> dist = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
                 {
                     matcher.KnnMatch(observedScene.GetDescriptors(), indices, dist, k, null);
+                    #region Test Output
+                    for (int i = 0; i < indices.Rows; i++)
+                    {
+                        for (int j = 0; j < indices.Cols; j++)
+                        {
+                            Console.Write(indices[i, j] + " ");
+                        }
+                        Console.Write("\n");
+                    }
+                    Console.WriteLine("\n distance");
+                    for (int i = 0; i < dist.Rows; i++)
+                    {
+                        for (int j = 0; j < dist.Cols; j++)
+                        {
+                            Console.Write(dist[i, j] + " ");
+                        }
+                        Console.Write("\n");
+                    }
+                    Console.WriteLine("\n");  
+                    #endregion
+                 
                     mask = new Matrix<byte>(dist.Rows, 1);
                     mask.SetValue(255); //mask is 拉式信號
                     //http://stackoverflow.com/questions/21932861/how-does-features2dtoolbox-voteforuniqueness-work
                     //how the VoteForUniqueness work...
                     Features2DToolbox.VoteForUniqueness(dist, uniquenessThreshold, mask);
+                   
                 }
 
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask); //means good match
@@ -178,7 +199,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 if (nonZeroCount >= 4)
                 {
                     //50 is model and mathing image rotation similarity ex: m1 = 60 m2 = 50 => 60 - 50 <=50 so is similar
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50); //default:1.5 , 10
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.5, 10); //default:1.5 , 10
                     Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                     if (nonZeroCount >= 15) //defalut :4 ,set 15
                         homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5);
@@ -198,6 +219,66 @@ namespace RecognitionSys.ToolKits.SURFMethod
         #endregion
 
         #region 商家看板辨識
+
+        /// <summary>
+        /// 匹配較快速但精確度較低
+        /// </summary>
+        /// <param name="template">樣板的特徵點類別</param>
+        /// <param name="observedScene">被觀察的場景匹配的特徵點</param>
+        /// <returns>回傳匹配的資料類別</returns>
+        public static SURFMatchedData MatchSURFFeatureByFLANNForObjs(SURFFeatureData template, SURFFeatureData observedScene)
+        {
+            Matrix<byte> mask;
+            int k = 2;
+            double uniquenessThreshold = 0.8;
+            //The resulting n*k matrix of descriptor index from the training descriptors
+            Matrix<int> indices;
+            HomographyMatrix homography = null;
+            Stopwatch watch;
+            //distance
+            Matrix<float> dists;
+
+            try
+            {
+                watch = Stopwatch.StartNew();
+                #region FLANN Match CPU
+                //match 
+                Index flann = new Index(template.GetDescriptors(), 4);
+
+                indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
+                using (dists = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
+                {
+                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 2);
+                    mask = new Matrix<byte>(dists.Rows, 1);
+                    mask.SetValue(255);
+                    Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
+                }
+                int nonZeroCount = CvInvoke.cvCountNonZero(mask);
+                Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                if (nonZeroCount >= 4) //原先是4
+                {
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 30);
+                    Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                    //filter out all unnecessary pairs based on distance between pairs
+
+                    if (nonZeroCount >= 30) //原先是4
+                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
+
+                }
+                #endregion
+                watch.Stop();
+                Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
+
+
+                return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
+            }
+            catch (CvException ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.ErrorMessage);
+                return null;
+            }
+        }
+
         /// <summary>
         /// 環境看板辨識使用BruteForce匹配(較精確但較慢)
         /// </summary>
