@@ -67,7 +67,7 @@ namespace RecognitionSys
             {
                 templateSURFData = MatchRecognition.ReadSURFFeature(fileName);
                 Console.WriteLine("SurfData: fileName =>" + Path.GetFileName(fileName));
-                matchedData = SURFMatch.MatchSURFFeatureByFLANNForGoods(templateSURFData, observed);
+                matchedData = SURFMatch.MatchSURFFeatureByBruteForceForGoods(templateSURFData, observed);
                 //如果Homography !=null 表示有匹配到(條件容忍與允許)
                 if(matchedData.GetHomography()!=null)
                 {
@@ -142,7 +142,7 @@ namespace RecognitionSys
             {
                 templateSURFData = MatchRecognition.ReadSURFFeature(fileName);
                 Console.WriteLine("SurfData: fileName =>" + Path.GetFileName(fileName));
-                matchedData = SURFMatch.MatchSURFFeatureByFLANNForObjs(templateSURFData, observed);
+                matchedData = SURFMatch.MatchSURFFeatureByBruteForceForObjs(templateSURFData, observed);
                 //如果Homography !=null 表示有匹配到(條件容忍與允許)
                 if (matchedData.GetHomography() != null)
                 {

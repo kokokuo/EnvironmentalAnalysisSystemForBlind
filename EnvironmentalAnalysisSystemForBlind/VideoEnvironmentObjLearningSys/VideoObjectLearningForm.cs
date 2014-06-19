@@ -38,9 +38,11 @@ namespace VideoObjectLearningApp
         Rectangle extractFeatureMaskROI;
         Image<Bgr, byte> wantExtractFeatureImage;
         SURFFeatureData surfData;
-
+        DenseHistogram templateHist;
+        ImageViewer templateHistImgBox;
+        Image<Bgr, byte> showTemplateHistImg;
         FeatureLearning learningSys;
-
+        int HistDim;
         public VideoObjectLearningForm()
         {
             InitializeComponent();
@@ -49,12 +51,15 @@ namespace VideoObjectLearningApp
             trainingVideoTotalFrame = 0;
             isScroll = isPlay = isSuspend = isStop = false;
             isPressed = false;
+            HistDim = 1;
+            templateHistImgBox = new ImageViewer();
+            templateHistImgBox.FormClosing += histImgBox_FormClosing;
         }
 
         private void loadVideoButton_Click(object sender, EventArgs e)
         {
             string videoFilename = OpenVideo();
-            if (videoFilename != string.Empty)
+            if (videoFilename != null)
             {
                 videoCapture = new Capture(videoFilename);
                 trainingVideoTotalFrame = (int)videoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_COUNT); //Get total frame number
@@ -119,7 +124,7 @@ namespace VideoObjectLearningApp
             }
         }
         #endregion
-    
+
 
         private void videoTrackBar_ValueChanged(object sender, EventArgs e)
         {
@@ -128,7 +133,8 @@ namespace VideoObjectLearningApp
         }
 
         //顯示Frame
-        private void QueryFrameAndShow() {
+        private void QueryFrameAndShow()
+        {
             //顯示
             queryFrame = videoCapture.QueryFrame();
             queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
@@ -136,14 +142,15 @@ namespace VideoObjectLearningApp
         }
 
         //重置影片
-        private void ResetVideo() {
+        private void ResetVideo()
+        {
             //重置，回到一開始畫面
             videoCapture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_AVI_RATIO, 0);
             trainingScrollValue = videoTrackBar.Value = 0;
             isScroll = false;
             QueryFrameAndShow();
         }
-        
+
         //影片的Timer
         private void trainingVideoTimer_Tick(object sender, EventArgs e)
         {
@@ -180,7 +187,7 @@ namespace VideoObjectLearningApp
                 else if (isStop)
                 {
                     //關閉，回到一開始畫面
-                    ResetVideo();   
+                    ResetVideo();
                 }
             }
         }
@@ -210,7 +217,28 @@ namespace VideoObjectLearningApp
                 return null;
             }
         }
+        private void SaveHistogramFile()
+        {
+            // Displays a SaveFileDialog so the user can save the Image
 
+            //wpf->Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog(); //WPF
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "XML Files (*.xml)|*.xml";
+            dlg.Title = "Save Histogram to File";
+
+            //dir.Parent.Parent.FullName取得對路徑目錄
+            //InitialDirectory要設置對路徑目錄
+            dlg.InitialDirectory = dir.Parent.Parent.Parent.FullName + @"\SigbBoardHistData";
+            dlg.RestoreDirectory = true;
+
+            // If the file name is not an empty string open it for saving.
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && dlg.FileName != "")
+            {
+                bool isOk = learningSys.SaveHistogram(dlg.FileName,templateHist);
+                if (isOk) MessageBox.Show("SaveHistogramFile Ok");
+                else MessageBox.Show("SaveHistogramFile Faild");
+            }
+        }
 
         private void SaveSURFFeatureFile(SURFFeatureData surf)
         {
@@ -288,6 +316,93 @@ namespace VideoObjectLearningApp
             }
         }
         #endregion
-       
+
+
+        #region 直方圖視窗 方法
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        private void ShowHistViewer(ImageViewer Box, Image<Bgr, Byte> img, string message)
+        {
+            Box.Width = img.Width + 50;
+            Box.Height = img.Height + 50;
+            Box.Image = img;
+            Box.Text = "直方圖顏色分布區域 : " + message;
+            Box.Show();
+            Box.Focus();
+        }
+
+        private void histImgBox_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //如果close掉視窗,資源會被釋放而無法開啟
+            e.Cancel = true; //關閉視窗時取消
+            templateHistImgBox.Hide(); //隱藏式窗,下次再show出
+
+        }
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        #endregion
+
+        #region 學習步驟二 : HSV直方圖計算與儲存
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        private void HRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            SBinTextBox.Text = String.Empty;
+            SBinTextBox.Enabled = false;
+            HistDim = 1;
+            HBinTextBox.Text = Convert.ToString(50);
+        }
+
+        private void HSRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            SBinTextBox.Enabled = true;
+
+            HBinTextBox.Text = Convert.ToString(30);
+            SBinTextBox.Text = Convert.ToString(32);
+            HistDim = 2;
+        }
+        private void HsvHistButton_Click(object sender, EventArgs e)
+        {
+            int HBins = 50;
+            int SBins = 0;
+            int VBins = 0;
+            bool isCorrectValue = false;
+            if (HistDim == 1 && int.TryParse(HBinTextBox.Text, out HBins))
+            {
+                isCorrectValue = true;
+            }
+            else if (HistDim == 2 && int.TryParse(HBinTextBox.Text, out HBins) && int.TryParse(SBinTextBox.Text, out SBins))
+            {
+                isCorrectValue = true;
+            }
+            else
+            {
+                MessageBox.Show("數值不對");
+            }
+            if (wantExtractFeatureImage != null && isCorrectValue)
+            {
+                if (learningSys != null)
+                    learningSys.SetLearningImage(wantExtractFeatureImage);
+                else
+                    learningSys = new FeatureLearning(wantExtractFeatureImage);
+
+                templateHist = learningSys.CalHist(HistDim, HBins, SBins, VBins);
+                if (HistDim <= 2)
+                {
+                    showTemplateHistImg = learningSys.DrawHsvHistogram(templateHist);
+                    ShowHistViewer(templateHistImgBox, showTemplateHistImg, "樣板影像");
+                }
+                else
+                    MessageBox.Show("Dim = " + HistDim + ",can;t draw");
+            }
+            else
+            {
+                MessageBox.Show("圖片未載入");
+            }
+        }
+        private void saveHistogramButton_Click(object sender, EventArgs e)
+        {
+            if (showTemplateHistImg != null) SaveHistogramFile();
+            else MessageBox.Show("沒有產生值方圖!");
+        }
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        #endregion
     }
 }

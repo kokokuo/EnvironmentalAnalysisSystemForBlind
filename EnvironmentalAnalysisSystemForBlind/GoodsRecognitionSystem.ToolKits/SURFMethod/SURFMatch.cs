@@ -73,65 +73,6 @@ namespace RecognitionSys.ToolKits.SURFMethod
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
 
-        #region FLANN
-        /// <summary>
-        /// 匹配較快速但精確度較低
-        /// </summary>
-        /// <param name="template">樣板的特徵點類別</param>
-        /// <param name="observedScene">被觀察的場景匹配的特徵點</param>
-        /// <returns>回傳匹配的資料類別</returns>
-        public static SURFMatchedData MatchSURFFeatureByFLANNForGoods(SURFFeatureData template, SURFFeatureData observedScene)
-        {
-            Matrix<byte> mask;
-            int k = 2;
-            double uniquenessThreshold = 0.8;
-            Matrix<int> indices;
-            HomographyMatrix homography = null;
-            Stopwatch watch;
-            Matrix<float> dists;
-
-            try
-            {
-                watch = Stopwatch.StartNew();
-                #region FLANN Match CPU
-                //match 
-                Index flann = new Index(template.GetDescriptors(), 4);
-
-                indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
-                using (dists = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
-                {
-                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 2);
-                    mask = new Matrix<byte>(dists.Rows, 1);
-                    mask.SetValue(255);
-                    Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
-                }
-                int nonZeroCount = CvInvoke.cvCountNonZero(mask);
-                Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
-                if (nonZeroCount >= 4) //原先是4
-                {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 30);
-                    Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
-                    //filter out all unnecessary pairs based on distance between pairs
-
-                    if (nonZeroCount >= 30) //原先是4
-                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
-
-                }
-                #endregion
-                watch.Stop();
-                Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
-
-
-                return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
-            }
-            catch (CvException ex)
-            {
-                System.Windows.Forms.MessageBox.Show(ex.ErrorMessage);
-                return null;
-            }
-        }
-        #endregion
-
         #region 商品辨識用
         /// <summary>
         /// 商品辨識使用BruteForce匹配(較精確但較慢)
@@ -157,7 +98,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 watch = Stopwatch.StartNew();
                 #region bruteForce match for CPU
                 //match 
-                BruteForceMatcher<float> matcher = new BruteForceMatcher<float>(DistanceType.L2); //default:L2
+                BruteForceMatcher<float> matcher = new BruteForceMatcher<float>(DistanceType.L2Sqr); //default:L2
                 matcher.Add(template.GetDescriptors());
                 
                 indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
@@ -199,7 +140,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 if (nonZeroCount >= 4)
                 {
                     //50 is model and mathing image rotation similarity ex: m1 = 60 m2 = 50 => 60 - 50 <=50 so is similar
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.5, 10); //default:1.5 , 10
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.5, 50); //default:1.5 , 10
                     Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                     if (nonZeroCount >= 15) //defalut :4 ,set 15
                         homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5);
@@ -220,6 +161,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
 
         #region 商家看板辨識
 
+        #region FLANN
         /// <summary>
         /// 匹配較快速但精確度較低
         /// </summary>
@@ -230,7 +172,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
         {
             Matrix<byte> mask;
             int k = 2;
-            double uniquenessThreshold = 0.8;
+            double uniquenessThreshold = 0.5;
             //The resulting n*k matrix of descriptor index from the training descriptors
             Matrix<int> indices;
             HomographyMatrix homography = null;
@@ -248,7 +190,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
                 using (dists = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
                 {
-                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 2);
+                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 6);
                     mask = new Matrix<byte>(dists.Rows, 1);
                     mask.SetValue(255);
                     Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
@@ -257,7 +199,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                 if (nonZeroCount >= 4) //原先是4
                 {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 30);
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
                     Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                     //filter out all unnecessary pairs based on distance between pairs
 
@@ -278,7 +220,8 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 return null;
             }
         }
-
+        #endregion
+    
         /// <summary>
         /// 環境看板辨識使用BruteForce匹配(較精確但較慢)
         /// </summary>
@@ -326,7 +269,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 if (nonZeroCount >= (template.GetKeyPoints().Size * 0.2)) //set 10
                 {
                     //50 is model and mathing image rotation similarity ex: m1 = 60 m2 = 50 => 60 - 50 <=50 so is similar
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 1.2, 30);  //default 1.5,10
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 1.2, 50);  //default 1.5,10
                     Console.WriteLine("VoteForSizeAndOrientation nonZeroCount=> " + nonZeroCount.ToString());
                     if (nonZeroCount >= (template.GetKeyPoints().Size * 0.5)) //default 4 ,set 15
                         homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), trainIdx, mask, 5);
