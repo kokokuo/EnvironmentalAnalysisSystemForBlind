@@ -148,10 +148,6 @@ namespace MainSystem
             }
         }
 
-
-
-
-
         private void videoTrackBar_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
         {
             videoScrollValue = (int)videoTrackBar.Value;

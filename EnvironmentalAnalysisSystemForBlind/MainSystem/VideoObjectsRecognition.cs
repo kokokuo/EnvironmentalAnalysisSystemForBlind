@@ -21,6 +21,7 @@ namespace MainSystem
         Image<Bgr, Byte> observedImg;
         ImageViewer viewer;
         List<string> surfFiles;
+        List<string> histFiles;
         Dictionary<string, string> objectsData = new Dictionary<string, string>();
         public VideoObjectsRecognition(Image<Bgr, Byte> observedSrcImg)
         {
@@ -35,6 +36,26 @@ namespace MainSystem
             //使用DirectoryInfo移動至上層
             DirectoryInfo dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
             string projectPath = dir.Parent.Parent.Parent.FullName;
+
+            LoadHistogramDataFiles(projectPath);
+
+            LoadSurfDataFiles(projectPath);
+            
+        }
+
+        private void LoadHistogramDataFiles(string projectPath)
+        {
+            //讀取Histogram檔案的目錄下所有檔案名稱
+            Console.WriteLine("\nPath=>" + projectPath + "\n");
+            //隨著此類別存放的位置不同,要重新設定檔案路徑
+            if (Directory.Exists(projectPath + @"\SigbBoardHistData"))
+            {
+                histFiles = Directory.GetFiles(projectPath + @"\SigbBoardHistData").ToList();
+            }
+        }
+
+        private void LoadSurfDataFiles(string projectPath)
+        {
             //讀取surf檔案的目錄下所有檔案名稱
             Console.WriteLine("\nPath=>" + projectPath + "\n");
             //隨著此類別存放的位置不同,要重新設定檔案路徑
@@ -42,8 +63,8 @@ namespace MainSystem
             {
                 surfFiles = Directory.GetFiles(projectPath + @"\SignBoardSURFFeatureData").ToList();
             }
-            
         }
+
         /// <summary>
         /// 設置要作為辨識的輸入影像
         /// </summary>
@@ -151,8 +172,14 @@ namespace MainSystem
         /// <returns>回傳看板資訊, 格式=>"看板名稱" ;請記得做字串切割,若無比對到或有任何問題則會回傳null</returns>
         public string RunRecognition(bool isDrawResultToShowOnDialog)
         {
-            if (surfFiles.Count != 0)
+            if (surfFiles.Count != 0 /*&& histFiles.Count !=0*/)
             {
+                ////偵測物體
+                //foreach (string histFilename in histFiles) {
+                //    DenseHistogram hist = DetectObjects.ReadHistogram(histFilename, true);
+                
+                //}
+
                 //匹配特徵並取回匹配到的特徵
                 KeyValuePair<String, SURFMatchedData> mathedObjectsData = MatchRecognition.MatchSURFFeatureForVideoObjs(surfFiles, observedImg, viewer);
                 if (mathedObjectsData.Key != null && mathedObjectsData.Value != null)
