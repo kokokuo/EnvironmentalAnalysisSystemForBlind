@@ -197,23 +197,44 @@ namespace RecognitionSys
             //Contour<Point> objectContours = srcImg.FindContours();
             return objectContours;
         }
-        /// <summary>
-        /// 取得輪廓資料中的最大輪廓,若要取得最大輪廓的BoundingBox,使用contours.BoundingBox
-        /// </summary>
-        /// <param name="contours">輸入從圖像中取得的所有輪廓</param>
-        /// <returns>回傳最大面積的輪廓</returns>
-        public static Contour<Point> GetMaxContours(Contour<Point> contours)
+       /// <summary>
+        ///  取得排序後的輪廓資料,若要取得最大輪廓的BoundingBox,使用索引指定contours[i].BoundingBox
+       /// </summary>
+       /// <param name="srcImg">要取得輪廓的原影像</param>
+       /// <returns></returns>
+        public static List<Contour<Point>> GetOrderMaxContours(Image<Gray, Byte> srcImg)
         {
-            Contour<Point> MaxContour = contours;
-            while (contours.HNext != null)
+            Contour<Point> objectContours = srcImg.FindContours(CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE, RETR_TYPE.CV_RETR_LIST);
+            List<double> allArea = new List<double>();
+            //取出所有面積排序
+            while (objectContours.HNext != null)
             {
-                if (MaxContour.Area < contours.Area)
-                {
-                    MaxContour = contours;
-                }
-                contours = contours.HNext;
+                allArea.Add(objectContours.Area);
+                objectContours = objectContours.HNext;
             }
-            return MaxContour;
+            //排序
+            var sorted = from area in allArea orderby area descending select area;
+            foreach (double area in sorted)
+            {
+                Console.Write(area + " ");
+            }
+            Console.WriteLine();
+            List<Contour<Point>> topContours = new List<Contour<Point>>();
+
+            foreach (double area in sorted)
+            {
+                Contour<Point> contours = srcImg.FindContours(CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE, RETR_TYPE.CV_RETR_LIST);
+                while (contours.HNext != null)
+                {
+                    if ((int)contours.Area == (int)area)
+                    {
+                        topContours.Add(contours);
+                    }
+                    contours = contours.HNext;
+                }
+            }
+
+            return topContours;
         }
         /// <summary>
         /// 從影像上取得輪廓的BoundingBox(影像ROI)
