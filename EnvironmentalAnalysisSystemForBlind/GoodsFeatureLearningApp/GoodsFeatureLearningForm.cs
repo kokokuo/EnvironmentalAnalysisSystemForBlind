@@ -52,7 +52,7 @@ namespace GoodsFeatureLearningApp
             if (learningSys != null)
             {
                 surfData = learningSys.CalSURFFeature();
-                Image<Bgr, byte> drawKeyPointImg = learningSys.DrawSURFFeature(surfData);
+                Image<Bgr, byte> drawKeyPointImg = SystemToolBox.DrawSURFFeature(surfData);
 
                 extractFeatureImgBox.Image = drawKeyPointImg.Resize(320, 240, INTER.CV_INTER_LINEAR);
             }

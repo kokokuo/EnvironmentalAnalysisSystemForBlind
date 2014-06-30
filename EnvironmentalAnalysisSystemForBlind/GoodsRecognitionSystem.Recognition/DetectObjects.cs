@@ -29,7 +29,14 @@ namespace RecognitionSys
     {
         private const int DEFAULT_ERODE_INTERATIONS = 1;
         private const int DEFAULT_DILATE_INTERATIONS = 11;
-       
+
+        public static Bgr[] LineColors = new Bgr[]{
+                new Bgr(Color.SkyBlue),
+                new Bgr(Color.YellowGreen),
+                new Bgr(Color.Red),
+            };
+
+
         #region 反投影
         //////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -204,37 +211,41 @@ namespace RecognitionSys
        /// <returns></returns>
         public static List<Contour<Point>> GetOrderMaxContours(Image<Gray, Byte> srcImg)
         {
-            Contour<Point> objectContours = srcImg.FindContours(CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE, RETR_TYPE.CV_RETR_LIST);
-            List<double> allArea = new List<double>();
+            Contour<Point> contours = srcImg.FindContours(CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE, RETR_TYPE.CV_RETR_LIST);
+            List<Contour<Point>> listContours = new List<Contour<Point>>();
             //取出所有面積排序
-            while (objectContours.HNext != null)
+            while (contours.HNext != null)
             {
-                allArea.Add(objectContours.Area);
-                objectContours = objectContours.HNext;
+                listContours.Add(contours);
+                contours = contours.HNext;
             }
             //排序
-            var sorted = from area in allArea orderby area descending select area;
-            foreach (double area in sorted)
+            var sorted = from c in listContours orderby c.Area descending select c;
+            
+            foreach (Contour<Point> c in sorted)
             {
-                Console.Write(area + " ");
+                Console.Write(c.Area + " ");
             }
-            Console.WriteLine();
-            List<Contour<Point>> topContours = new List<Contour<Point>>();
-
-            foreach (double area in sorted)
+            List<Contour<Point>> orderContour = sorted.ToList<Contour<Point>>();
+            return orderContour;
+        }
+        /// <summary>
+        /// 取得輪廓資料中的最大輪廓,若要取得最大輪廓的BoundingBox,使用contours.BoundingBox
+        /// </summary>
+        /// <param name="contours">輸入從圖像中取得的所有輪廓</param>
+        /// <returns>回傳最大面積的輪廓</returns>
+        public static Contour<Point> GetMaxContours(Contour<Point> contours)
+        {
+            Contour<Point> MaxContour = contours;
+            while (contours.HNext != null)
             {
-                Contour<Point> contours = srcImg.FindContours(CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE, RETR_TYPE.CV_RETR_LIST);
-                while (contours.HNext != null)
+                if (MaxContour.Area < contours.HNext.Area)
                 {
-                    if ((int)contours.Area == (int)area)
-                    {
-                        topContours.Add(contours);
-                    }
-                    contours = contours.HNext;
+                    MaxContour = contours.HNext;
                 }
+                contours = contours.HNext;
             }
-
-            return topContours;
+            return MaxContour;
         }
         /// <summary>
         /// 從影像上取得輪廓的BoundingBox(影像ROI)
@@ -280,7 +291,27 @@ namespace RecognitionSys
             drawImg.Draw(maxContour.BoundingRectangle, new Bgr(Color.Red), 2);
             return drawImg;
         }
-
+        /// <summary>
+        /// 畫上前三個最大輪廓的BoundimgBox
+        /// </summary>
+        /// <param name="topContours">排序好的輪廓資料集合</param>
+        /// <param name="drawImg">要畫到的圖像上</param>
+        /// <returns>回傳畫上最大輪廓的BoundingBox的圖像</returns>
+        public static Image<Bgr, Byte> DrawContoursTopThreeBoundingBoxOnImg(List<Contour<Point>> topContours, Image<Bgr, Byte> drawImg)
+        {
+           
+            int i = 0;
+            foreach (Contour<Point> c in topContours) {
+                if (i == 3)
+                    break;
+                drawImg.Draw(c.BoundingRectangle, LineColors[i], 3);
+                i++;
+               
+            }
+           
+          
+            return drawImg;
+        }
         //////////////////////////////////////////////////////////////////////////////////////////////
         #endregion
 
@@ -291,10 +322,10 @@ namespace RecognitionSys
         /// </summary>
         /// <param name="template">樣板值方圖</param>
         /// <param name="observedSrcImg">要比對的圖像</param>
+        /// <param name="observedHist">觀察影像的直方圖</param>
         /// <returns>匹配率越低表示匹配度越高</returns>
-        public static double CompareHistogram(DenseHistogram template, Image<Bgr, Byte> observedSrcImg)
+        public static double CompareHistogram(DenseHistogram template, Image<Bgr, Byte> observedSrcImg, out DenseHistogram observedHist)
         {
-            DenseHistogram observedHist;
             //計算影像的值方圖
             if (template.Dimension == 1)
                 observedHist = HistogramOperation.CalHsvHistogram(observedSrcImg.Ptr, template.Dimension, template.BinDimension[0].Size);

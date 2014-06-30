@@ -31,6 +31,7 @@ namespace MainSystem
     /// </summary>
     public partial class VideoObjsRecognitionExperiment : System.Windows.Controls.UserControl
     {
+        //Video
         Timer testVideoTimer;
         Capture testVideoCapture;
         DirectoryInfo dir;
@@ -42,6 +43,24 @@ namespace MainSystem
         int videoScrollValue;
         VideoObjectsRecognition videoObjRecogSys;
 
+        //Image
+        Image<Bgr, byte> loadTestImg;
+        DenseHistogram templateHist;
+       
+        Image<Gray, byte> backProjectImg;
+        Image<Gray, byte> binaryImg;
+        Image<Gray, byte> morphologyImg;
+        Image<Bgr, byte> contoursImg;
+        List<Contour<System.Drawing.Point>> topContours;
+        ImageViewer templateHistImgBox;
+        ImageViewer observedHistImgBox;
+        Image<Bgr, byte> showTemplateHistImg;
+        Image<Bgr, byte> showObservedHistImg;
+        string templateHistFilePathName;
+        string templateSURFPathFileName;
+        SURFFeatureData templateSurfFeature;
+        SURFFeatureData observedSurfFeature;
+
         public VideoObjsRecognitionExperiment()
         {
             InitializeComponent();
@@ -49,10 +68,47 @@ namespace MainSystem
             dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
             videoTotalFrame = 0;
             isScroll = isPlay = isSuspend = isStop = false;
+
+            //Image
+            templateHistImgBox = new ImageViewer();
+            observedHistImgBox = new ImageViewer();
+            templateHistImgBox.FormClosing += histImgBox_FormClosing;
+            observedHistImgBox.FormClosing += observedHistImgBox_FormClosing;
+            templateSURFPathFileName = templateHistFilePathName = null;
+
+           
         }
 
+        #region 直方圖視窗 方法
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        private void ShowHistViewer(ImageViewer Box, Image<Bgr, Byte> img, string message)
+        {
+            Box.Width = img.Width + 50;
+            Box.Height = img.Height + 50;
+            Box.Image = img;
+            Box.Text = "直方圖顏色分布區域 : " + message;
+            Box.Show();
+            Box.Focus();
+        }
+        private void observedHistImgBox_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true; //關閉視窗時取消
+            observedHistImgBox.Hide(); //隱藏式窗,下次再show出
+        }
+        private void histImgBox_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //如果close掉視窗,資源會被釋放而無法開啟
+            e.Cancel = true; //關閉視窗時取消
+            templateHistImgBox.Hide(); //隱藏式窗,下次再show出
+
+        }
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        #endregion
+
+        #region 載入Video的部分－實驗
+        //////////////////////////////////////////////////////////////////////////////////////////////
         //顯示Frame
-        private Image<Bgr,byte> QueryFrameAndShow()
+        private Image<Bgr, byte> QueryFrameAndShow()
         {
             //顯示
             queryFrame = testVideoCapture.QueryFrame();
@@ -75,7 +131,8 @@ namespace MainSystem
         private void loadTestVideoButton_Click(object sender, RoutedEventArgs e)
         {
             string filename = OpenVideo();
-            if (filename != null) {
+            if (filename != null)
+            {
                 testVideoCapture = new Capture(filename);
                 videoTotalFrame = (int)testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_COUNT); //Get total frame number
 
@@ -101,7 +158,7 @@ namespace MainSystem
                 {
                     lock (this)
                     {
-                        
+
                         //如果Frame的index沒有差過影片的最大index
                         if (testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES) < videoTotalFrame)
                         {
@@ -116,7 +173,7 @@ namespace MainSystem
                             }
                             else
                             {
-                                //處理辨識
+                                //處理辨識===========================================================
                                 if (currentFrame != null)
                                 {
                                     if (videoObjRecogSys != null)
@@ -127,7 +184,7 @@ namespace MainSystem
                                     string objData = videoObjRecogSys.RunRecognition(true);
                                 }
                             }
-                            
+
                         }
                         else
                         {
@@ -138,7 +195,7 @@ namespace MainSystem
                 }
                 else if (isSuspend)
                 {
-                   
+
                 }
                 else if (isStop)
                 {
@@ -173,7 +230,9 @@ namespace MainSystem
             isPlay = isSuspend = false;
         }
         #endregion
-
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        #endregion
+      
         #region 開檔
         private string OpenVideo()
         {
@@ -198,6 +257,219 @@ namespace MainSystem
                 return null;
             }
         }
+
+        private string OpenImgFile()
+        {
+            string loadImgPath = dir.Parent.Parent.Parent.FullName + @"\SignBoardTestData";
+            if (File.Exists(loadImgPath))
+                System.Windows.MessageBox.Show("路徑錯誤");
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            //移動上層在指定下層路徑
+            dlg.RestoreDirectory = true;
+            dlg.InitialDirectory = loadImgPath;
+            dlg.Title = "Open Image File";
+            dlg.Filter = "JPeg Image|*.jpg|Bitmap Image|*.bmp|Gif Image|*.gif|Png Image|*.png|All Files (*.*)|*.*";
+            Nullable<bool> result = dlg.ShowDialog();
+            // Display OpenFileDialog by calling ShowDialog method ->ShowDialog()
+            // Get the selected file name and display in a TextBox
+            if (result == true && dlg.FileName != "")
+            {
+                // Open document
+                string filename = dlg.FileName;
+                return filename;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        #region 直方圖與特徵點
+        private string OpenLearnedDescriptorDataFile()
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            //移動上層在指定下層路徑
+            dlg.RestoreDirectory = true;
+            dlg.InitialDirectory = dir.Parent.Parent.Parent.FullName + @"\SignBoardSURFFeatureData";
+            // Set filter for file extension and default file extension
+            dlg.Filter = "XML Files (*.xml)|*.xml";
+            dlg.Title = "Open DescriptorData File";
+            // Display OpenFileDialog by calling ShowDialog method ->ShowDialog()
+            Nullable<bool> result = dlg.ShowDialog();
+            // Get the selected file name and display in a TextBox
+            if (result == true && dlg.FileName != "")
+            {
+                // Open document
+                string filename = dlg.FileName;
+                return filename;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        private string OpenLearnedHistogramDataFile()
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            //移動上層在指定下層路徑
+            dlg.RestoreDirectory = true;
+            dlg.InitialDirectory = dir.Parent.Parent.Parent.FullName + @"\SigbBoardHistData";
+            // Set filter for file extension and default file extension
+            dlg.Filter = "XML Files (*.xml)|*.xml";
+            dlg.Title = "Open HistogramData File";
+            // Display OpenFileDialog by calling ShowDialog method ->ShowDialog()
+            Nullable<bool> result = dlg.ShowDialog();
+            // Get the selected file name and display in a TextBox
+            if (result == true && dlg.FileName != "")
+            {
+                // Open document
+                string filename = dlg.FileName;
+                return filename;
+            }
+            else
+            {
+                return null;
+            }
+        }
         #endregion
+
+        #endregion
+
+        #region 載入圖片的部分－實驗
+
+        private void loadTestImgButton_Click(object sender, RoutedEventArgs e)
+        {
+            string filename = OpenImgFile();
+            if (filename != null) {
+                loadTestImg = new Image<Bgr, byte>(filename);
+                loadImgBox.Image = loadTestImg.Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+            }
+        }
+
+        private void loadHistFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            templateHistFilePathName = OpenLearnedHistogramDataFile();
+            if (templateHistFilePathName != null)
+            {
+                templateHist = DetectObjects.ReadHistogram(templateHistFilePathName, true);
+               
+                if (templateHist.Dimension < 3)
+                {
+                    showTemplateHistImg = SystemToolBox.DrawHsvHistogram(templateHist);
+                    ShowHistViewer(templateHistImgBox, showTemplateHistImg, "樣板影像");
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Dim = " + templateHist.Dimension.ToString() + ",can;t draw");
+                }
+
+               
+            }
+        }
+
+        private void backProjectButton_Click(object sender, RoutedEventArgs e)
+        {
+            backProjectImg = DetectObjects.DoBackProject(templateHist, loadTestImg);
+            backProjectImgBox.Image = backProjectImg.Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+        }
+
+        private void binaryThresButton_Click(object sender, RoutedEventArgs e)
+        {
+            binaryImg = DetectObjects.DoBinaryThreshold(backProjectImg, 200);
+            morphologyImgBox.Image = binaryImg.Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+        }
+
+        private void erodeButton_Click(object sender, RoutedEventArgs e)
+        {
+            morphologyImg = DetectObjects.DoErode(binaryImg,Convert.ToInt32(erodeTextBox.Text));
+            morphologyImgBox.Image = morphologyImg.Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+        }
+
+        private void dialteButton_Click(object sender, RoutedEventArgs e)
+        {
+            morphologyImg = DetectObjects.DoDilate(morphologyImg,Convert.ToInt32(dialteTextBox.Text));
+            morphologyImgBox.Image = morphologyImg.Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+        }
+
+        private void drawContoursButton_Click(object sender, RoutedEventArgs e)
+        {
+            contoursImg = morphologyImg.Convert<Bgr, byte>();
+            contoursImgBox.Image = DetectObjects.DrawAllContoursOnImg(DetectObjects.DoContours(morphologyImg), contoursImg).Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+        }
+
+        private void findTopThreeContourButton_Click(object sender, RoutedEventArgs e)
+        {
+            contoursImg = morphologyImg.Convert<Bgr, byte>();
+            topContours = DetectObjects.GetOrderMaxContours(morphologyImg);
+            contoursImgBox.Image = DetectObjects.DrawContoursTopThreeBoundingBoxOnImg(topContours, contoursImg).Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+        }
+
+        private void compareHistButton_Click(object sender, RoutedEventArgs e)
+        {
+            int i = 0;
+            ShowHistViewer(templateHistImgBox, showTemplateHistImg, "樣板影像");
+            foreach (Contour<System.Drawing.Point> c in topContours)
+            {
+                if (i == 3)
+                    break;
+                DenseHistogram observedRectHist;
+                Image<Bgr, byte> observedContourRectImg = DetectObjects.GetBoundingBoxImage(c, loadTestImg);
+                double compareRate = DetectObjects.CompareHistogram(templateHist, observedContourRectImg, out observedRectHist);
+                showObservedHistImg = SystemToolBox.DrawHsvHistogram(observedRectHist);
+                ShowHistViewer(new ImageViewer(), showObservedHistImg, "觀察影像" + i);
+                System.Windows.MessageBox.Show("compareRate is =" + compareRate.ToString());
+                i++;
+               
+            }
+        }
+        private string GetMappingDescriptorDataFile(string histogramFileId)
+        {
+            string path = dir.Parent.Parent.Parent.FullName + @"\SigbBoardHistData";
+            string filename;
+            if (Directory.Exists(path))
+            {
+                filename = path;
+                return filename;
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("沒有對應的特徵檔案!");
+                return null;
+            }
+        }
+        private void getMappingFeatureButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (templateHistFilePathName != null)
+            {
+                string templateHistFileName = System.IO.Path.GetFileName(templateHistFilePathName); //取得路徑的檔案名稱
+                templateSURFPathFileName = GetMappingDescriptorDataFile(templateHistFileName);
+                if (templateSURFPathFileName != null)
+                {
+                    templateSurfFeature = MatchRecognition.ReadSURFFeature(templateSURFPathFileName);
+
+                    SystemToolBox.DrawSURFFeature(templateSurfFeature);
+                }
+
+            }
+        }
+
+        private void matchFeatureButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (templateSurfFeature != null)
+            {
+                foreach (Contour<System.Drawing.Point> c in topContours)
+                {
+                    DenseHistogram observedRectHist;
+                    Image<Bgr, byte> observedContourRectImg = DetectObjects.GetBoundingBoxImage(c, loadTestImg);
+                    double compareRate = DetectObjects.CompareHistogram(templateHist, observedContourRectImg,out observedRectHist);
+                    MatchRecognition.MatchSURFFeature(templateSurfFeature, observedContourRectImg,true); //先使用原影像
+                }
+            }
+        }
+
+        #endregion
+
+       
+
+       
     }
 }

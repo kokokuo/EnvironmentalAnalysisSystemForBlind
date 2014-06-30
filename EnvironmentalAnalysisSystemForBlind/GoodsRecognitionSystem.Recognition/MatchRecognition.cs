@@ -42,8 +42,22 @@ namespace RecognitionSys
         //////////////////////////////////////////////////////////////////////////////////////////////
         #endregion
 
+
+
         #region 匹配特徵點
         //////////////////////////////////////////////////////////////////////////////////////////////
+        public static SURFMatchedData MatchSURFFeature(SURFFeatureData template, Image<Bgr, Byte> observedImg,bool isShowResult)
+        {
+            //縮放到一樣大小 (系統修改成可讀圖片時才能加入)
+            //observedImg = observedImg.Resize(3, INTER.CV_INTER_LINEAR);
+
+            SURFFeatureData observed = SURFMatch.CalSURFFeature(observedImg);
+            SURFMatchedData matchedData  = SURFMatch.MatchSURFFeatureByBruteForceForObjs(template, observed);
+            if(isShowResult)
+                SURFMatch.ShowSURFMatchForm(matchedData, observed, new ImageViewer());
+            return matchedData;
+        }
+        
         /// <summary>
         /// 比配特徵,對所有檔案匹配並找出最好的匹配檔
         /// </summary>

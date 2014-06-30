@@ -157,6 +157,69 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 return null;
             }
         }
+
+        #region FLANN
+        /// <summary>
+        /// 匹配較快速但精確度較低
+        /// </summary>
+        /// <param name="template">樣板的特徵點類別</param>
+        /// <param name="observedScene">被觀察的場景匹配的特徵點</param>
+        /// <returns>回傳匹配的資料類別</returns>
+        public static SURFMatchedData MatchSURFFeatureByFLANNForGoods(SURFFeatureData template, SURFFeatureData observedScene)
+        {
+            Matrix<byte> mask;
+            int k = 2;
+            double uniquenessThreshold = 0.5;
+            //The resulting n*k matrix of descriptor index from the training descriptors
+            Matrix<int> indices;
+            HomographyMatrix homography = null;
+            Stopwatch watch;
+            //distance
+            Matrix<float> dists;
+
+            try
+            {
+                watch = Stopwatch.StartNew();
+                #region FLANN Match CPU
+                //match 
+                Index flann = new Index(template.GetDescriptors(), 4);
+
+                indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
+                using (dists = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
+                {
+                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 6);
+                    mask = new Matrix<byte>(dists.Rows, 1);
+                    mask.SetValue(255);
+                    Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
+                }
+                int nonZeroCount = CvInvoke.cvCountNonZero(mask);
+                Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                if (nonZeroCount >= 4) //原先是4
+                {
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
+                    Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                    //filter out all unnecessary pairs based on distance between pairs
+
+                    if (nonZeroCount >= 30) //原先是4
+                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
+
+                }
+                #endregion
+                watch.Stop();
+                Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
+
+
+                return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
+            }
+            catch (CvException ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.ErrorMessage);
+                return null;
+            }
+        }
+        #endregion
+
+
         #endregion
 
         #region 商家看板辨識

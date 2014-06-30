@@ -13,6 +13,7 @@ using Emgu.CV.Util;
 using Emgu.CV.UI;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Features2D;
 using RecognitionSys.ToolKits.SURFMethod;
 namespace RecognitionSys.ToolKits
 {
@@ -79,28 +80,7 @@ namespace RecognitionSys.ToolKits
             }
         }
 
-        /// <summary>
-        /// 繪製特徵點到圖像上
-        /// </summary>
-        /// <param name="surf">特徵資料</param>
-        /// <param name="drawImg">要繪製的圖像</param>
-        /// <returns>回傳已繪製特徵點的圖像</returns>
-        public static Image<Bgr, Byte> DrawSURFFeature(SURFFeatureData surf,Image<Bgr,Byte> drawImg)
-        {
-            VectorOfKeyPoint keyPoints = surf.GetKeyPoints();
-            Bitmap imgForDraw = drawImg.ToBitmap();
-            //使用Graphics繪製
-            using (Graphics g = Graphics.FromImage(imgForDraw))
-            {
-                for (int i = 0; i < keyPoints.Size; i++)
-                {
-
-                    g.DrawEllipse(new Pen(new SolidBrush(Color.White), 2), (int)keyPoints[i].Point.X, (int)keyPoints[i].Point.Y, 15, 15);
-                }
-                g.Dispose();
-            }
-            return new Image<Bgr, Byte>(imgForDraw).Resize(320, 240, INTER.CV_INTER_LINEAR);
-        }
+      
         /// <summary>
         /// 畫出直方圖到圖上,會依據你選擇的計算維度畫出相對應維度的直方圖(只能提供一維與二維)
         /// </summary>
@@ -114,6 +94,42 @@ namespace RecognitionSys.ToolKits
                 return HistogramOperation.Generate2DHistogramImgForDraw(hsvHist);
             else
                 return null;
+        }
+
+        /// <summary>
+        /// 畫上特徵點到圖上
+        /// </summary>
+        /// <param name="surf">SURF特徵類別</param>
+        /// <returns>回傳畫好特徵點的影像</returns>
+        public static Image<Bgr, byte> DrawSURFFeature(SURFFeatureData surf)
+        {
+            VectorOfKeyPoint keyPoints = surf.GetKeyPoints();
+            //繪製特徵
+            Image<Bgr, byte> result = Features2DToolbox.DrawKeypoints(surf.GetImg(), surf.GetKeyPoints(), new Bgr(255, 255, 255), Features2DToolbox.KeypointDrawType.DEFAULT);
+            return result;
+        }
+
+        /// <summary>
+        /// 畫上特徵點到圖上
+        /// </summary>
+        /// <param name="surf">SURF特徵類別</param>
+        /// <param name="drawImg">要畫到的影像上</param>
+        /// <returns>回傳畫好特徵點的影像</returns>
+        public Image<Bgr, byte> DrawSURFFeatureToWPF(SURFFeatureData surf, Image<Bgr, Byte> drawImg)
+        {
+            VectorOfKeyPoint keyPoints = surf.GetKeyPoints();
+            Bitmap imgForDraw = drawImg.Copy().ToBitmap();
+            //使用Graphics繪製
+            using (Graphics g = Graphics.FromImage(imgForDraw))
+            {
+                for (int i = 0; i < keyPoints.Size; i++)
+                {
+
+                    g.DrawEllipse(new Pen(new SolidBrush(Color.White), 2), (int)keyPoints[i].Point.X, (int)keyPoints[i].Point.Y, 15, 15);
+                }
+                g.Dispose();
+            }
+            return new Image<Bgr, byte>(imgForDraw);
         }
     }
 }

@@ -17,6 +17,7 @@ using Emgu.CV.Features2D;
 using Emgu.CV.CvEnum;
 using RecognitionSys.FeatureLearning;
 using RecognitionSys.ToolKits.SURFMethod;
+using RecognitionSys.ToolKits;
 namespace VideoObjectLearningApp
 {
     public partial class VideoObjectLearningForm : Form
@@ -111,7 +112,7 @@ namespace VideoObjectLearningApp
 
                 surfData = learningSys.CalSURFFeature();
                 //Draw Feature
-                Image<Bgr, byte> drawKeyPointImg = learningSys.DrawSURFFeature(surfData);
+                Image<Bgr, byte> drawKeyPointImg = SystemToolBox.DrawSURFFeature(surfData);
                 new ImageViewer(drawKeyPointImg, "擷取特徵點結果").Show();
             }
         }
@@ -168,6 +169,9 @@ namespace VideoObjectLearningApp
                             videoCapture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES, trainingScrollValue);
                             isScroll = false;
                         }
+                        //else {
+                        //    videoTrackBar.Value = (int)videoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES);
+                        //}
                         //如果Frame的index沒有差過影片的最大index
                         if (videoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES) < trainingVideoTotalFrame)
                         {
@@ -177,6 +181,7 @@ namespace VideoObjectLearningApp
                         {
                             ResetVideo();
                         }
+
                     }
 
                 }
@@ -386,7 +391,7 @@ namespace VideoObjectLearningApp
                 templateHist = learningSys.CalHist(HistDim, HBins, SBins, VBins);
                 if (HistDim <= 2)
                 {
-                    showTemplateHistImg = learningSys.DrawHsvHistogram(templateHist);
+                    showTemplateHistImg = SystemToolBox.DrawHsvHistogram(templateHist);
                     ShowHistViewer(templateHistImgBox, showTemplateHistImg, "樣板影像");
                 }
                 else
