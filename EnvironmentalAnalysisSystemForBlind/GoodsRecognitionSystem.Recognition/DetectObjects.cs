@@ -222,10 +222,6 @@ namespace RecognitionSys
             //排序
             var sorted = from c in listContours orderby c.Area descending select c;
             
-            foreach (Contour<Point> c in sorted)
-            {
-                Console.Write(c.Area + " ");
-            }
             List<Contour<Point>> orderContour = sorted.ToList<Contour<Point>>();
             return orderContour;
         }

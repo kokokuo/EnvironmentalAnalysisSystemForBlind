@@ -45,32 +45,23 @@ namespace RecognitionSys
 
 
         #region 匹配特徵點
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        public static SURFMatchedData MatchSURFFeature(SURFFeatureData template, Image<Bgr, Byte> observedImg,bool isShowResult)
-        {
-            //縮放到一樣大小 (系統修改成可讀圖片時才能加入)
-            //observedImg = observedImg.Resize(3, INTER.CV_INTER_LINEAR);
+       
 
-            SURFFeatureData observed = SURFMatch.CalSURFFeature(observedImg);
-            SURFMatchedData matchedData  = SURFMatch.MatchSURFFeatureByBruteForceForObjs(template, observed);
-            if(isShowResult)
-                SURFMatch.ShowSURFMatchForm(matchedData, observed, new ImageViewer());
-            return matchedData;
-        }
-        
+        #region 物品辨識
+        //////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// 比配特徵,對所有檔案匹配並找出最好的匹配檔
         /// </summary>
         /// <param name="surfFiles">載入所有可能作為匹配的特徵資料</param>
         /// <param name="observedImg">要比對觀察的影像</param>
-        /// <param name="isDrawMatchForm">是否要顯示出匹配結果</param>
+        /// <param name="isShowResult">是否要顯示出匹配結果</param>
         /// <returns>回傳匹配到的相關資訊類別,String是檔案名稱,如果未匹配到,則Key與Values皆會回傳null,因此要先做檢查</returns>
-        public static KeyValuePair<string, SURFMatchedData> MatchSURFFeatureForGoods(List<string> surfFiles, Image<Bgr, Byte> observedImg,bool isShowResult)
+        public static KeyValuePair<string, SURFMatchedData> MatchSURFFeatureForGoods(List<string> surfFiles, Image<Bgr, Byte> observedImg, bool isShowResult)
         {
-            Dictionary<string,SURFMatchedData> matchList = new Dictionary<string,SURFMatchedData>();
+            Dictionary<string, SURFMatchedData> matchList = new Dictionary<string, SURFMatchedData>();
             SURFFeatureData templateSURFData;
             SURFMatchedData matchedData;
-            
+
             //縮放到一樣大小 (系統修改成可讀圖片時才能加入)
             //observedImg = observedImg.Resize(3, INTER.CV_INTER_LINEAR);
 
@@ -83,9 +74,9 @@ namespace RecognitionSys
                 Console.WriteLine("SurfData: fileName =>" + Path.GetFileName(fileName));
                 matchedData = SURFMatch.MatchSURFFeatureByBruteForceForGoods(templateSURFData, observed);
                 //如果Homography !=null 表示有匹配到(條件容忍與允許)
-                if(matchedData.GetHomography()!=null)
+                if (matchedData.GetHomography() != null)
                 {
-                    matchList.Add(Path.GetFileName(fileName),matchedData);
+                    matchList.Add(Path.GetFileName(fileName), matchedData);
                 }
                 Console.WriteLine("match num:" + matchedData.GetMatchedCount().ToString() + "\n-----------------");
             }
@@ -113,26 +104,38 @@ namespace RecognitionSys
                 }
                 Console.WriteLine("\n**** Matched fileName=" + bestTemplateId + ", match num:" + bestMatched.ToString() + " ****");
                 if (isShowResult)
-                    SURFMatch.ShowSURFMatchForm(matchList[bestTemplateId], observed,new ImageViewer());
+                    SURFMatch.ShowSURFMatchForm(matchList[bestTemplateId], observed, new ImageViewer());
                 Console.WriteLine("============================\n### Matched Finish.......\n");
                 //回傳匹配到的類別
                 return new KeyValuePair<string, SURFMatchedData>(bestTemplateId, matchList[bestTemplateId]);
             }
-            else 
+            else
             {
                 Console.WriteLine("\n**** No Matched fileName !");
                 Console.WriteLine("============================\n### Matched Finish.......\n");
                 return new KeyValuePair<string, SURFMatchedData>(null, null);
             }
-            
-           
+
+
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
+        #endregion 
+    
+        #region 商家看板辨識
         //////////////////////////////////////////////////////////////////////////////////////////////
+        public static SURFMatchedData MatchSURFFeature(SURFFeatureData template, Image<Bgr, Byte> observedImg, bool isShowResult)
+        {
+            //縮放到一樣大小 (系統修改成可讀圖片時才能加入)
+            //observedImg = observedImg.Resize(3, INTER.CV_INTER_LINEAR);
+            SURFFeatureData observed = SURFMatch.CalSURFFeature(observedImg);
+            SURFMatchedData matchedData = SURFMatch.MatchSURFFeatureByFLANNForObjs(template, observed);
+            if (isShowResult)
+                SURFMatch.ShowSURFMatchForm(matchedData, observed, new ImageViewer());
+            return matchedData;
+        }
+        
         /// <summary>
         /// 比配特徵,對所有檔案匹配並找出最好的匹配檔
         /// </summary>
@@ -140,7 +143,7 @@ namespace RecognitionSys
         /// <param name="observedImg">要比對觀察的影像</param>
         /// <param name="viewer">顯示出匹配結果的物件</param>
         /// <returns>回傳匹配到的相關資訊類別,String是檔案名稱,如果未匹配到,則Key與Values皆會回傳null,因此要先做檢查</returns>
-        public static KeyValuePair<string, SURFMatchedData> MatchSURFFeatureForVideoObjs(List<string> surfFiles, Image<Bgr, Byte> observedImg,ImageViewer viewer)
+        public static KeyValuePair<string, SURFMatchedData> MatchSURFFeatureForVideoObjs(List<string> surfFiles, Image<Bgr, Byte> observedImg, ImageViewer viewer)
         {
             Dictionary<string, SURFMatchedData> matchList = new Dictionary<string, SURFMatchedData>();
             SURFFeatureData templateSURFData;
@@ -204,6 +207,8 @@ namespace RecognitionSys
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////
+        #endregion
+
         #endregion
     }
 }

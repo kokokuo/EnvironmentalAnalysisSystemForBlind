@@ -60,6 +60,8 @@ namespace MainSystem
         string templateSURFPathFileName;
         SURFFeatureData templateSurfFeature;
         SURFFeatureData observedSurfFeature;
+        int matchIndex;
+        double histMatchRate;
 
         public VideoObjsRecognitionExperiment()
         {
@@ -347,9 +349,10 @@ namespace MainSystem
 
         private void loadHistFileButton_Click(object sender, RoutedEventArgs e)
         {
-            templateHistFilePathName = OpenLearnedHistogramDataFile();
-            if (templateHistFilePathName != null)
+            string filename = OpenLearnedHistogramDataFile();
+            if (filename != null)
             {
+                templateHistFilePathName = filename;
                 templateHist = DetectObjects.ReadHistogram(templateHistFilePathName, true);
                
                 if (templateHist.Dimension < 3)
@@ -406,6 +409,9 @@ namespace MainSystem
         private void compareHistButton_Click(object sender, RoutedEventArgs e)
         {
             int i = 0;
+            //值方圖匹配的參數預設
+            histMatchRate = 1;
+            matchIndex = -1;
             ShowHistViewer(templateHistImgBox, showTemplateHistImg, "樣板影像");
             foreach (Contour<System.Drawing.Point> c in topContours)
             {
@@ -414,6 +420,11 @@ namespace MainSystem
                 DenseHistogram observedRectHist;
                 Image<Bgr, byte> observedContourRectImg = DetectObjects.GetBoundingBoxImage(c, loadTestImg);
                 double compareRate = DetectObjects.CompareHistogram(templateHist, observedContourRectImg, out observedRectHist);
+                if (compareRate < histMatchRate)
+                {
+                    histMatchRate = compareRate;
+                    matchIndex = i;
+                }
                 showObservedHistImg = SystemToolBox.DrawHsvHistogram(observedRectHist);
                 ShowHistViewer(new ImageViewer(), showObservedHistImg, "觀察影像" + i);
                 System.Windows.MessageBox.Show("compareRate is =" + compareRate.ToString());
@@ -421,13 +432,13 @@ namespace MainSystem
                
             }
         }
-        private string GetMappingDescriptorDataFile(string histogramFileId)
+        private string GetMappingDescriptorDataFile(string histFileName)
         {
-            string path = dir.Parent.Parent.Parent.FullName + @"\SigbBoardHistData";
+            string path = dir.Parent.Parent.Parent.FullName + @"\SignBoardSURFFeatureData\";
             string filename;
-            if (Directory.Exists(path))
+            if (Directory.Exists(path) && File.Exists(path + histFileName))
             {
-                filename = path;
+                filename = (path + histFileName);
                 return filename;
             }
             else
@@ -438,6 +449,7 @@ namespace MainSystem
         }
         private void getMappingFeatureButton_Click(object sender, RoutedEventArgs e)
         {
+
             if (templateHistFilePathName != null)
             {
                 string templateHistFileName = System.IO.Path.GetFileName(templateHistFilePathName); //取得路徑的檔案名稱
@@ -445,8 +457,8 @@ namespace MainSystem
                 if (templateSURFPathFileName != null)
                 {
                     templateSurfFeature = MatchRecognition.ReadSURFFeature(templateSURFPathFileName);
-
-                    SystemToolBox.DrawSURFFeature(templateSurfFeature);
+                    Image<Bgr,byte> showFeatureImg =  SystemToolBox.DrawSURFFeature(templateSurfFeature);
+                    new ImageViewer(showFeatureImg,"取得樣板特徵圖像").Show();
                 }
 
             }
@@ -455,14 +467,11 @@ namespace MainSystem
         private void matchFeatureButton_Click(object sender, RoutedEventArgs e)
         {
             if (templateSurfFeature != null)
-            {
-                foreach (Contour<System.Drawing.Point> c in topContours)
-                {
-                    DenseHistogram observedRectHist;
-                    Image<Bgr, byte> observedContourRectImg = DetectObjects.GetBoundingBoxImage(c, loadTestImg);
-                    double compareRate = DetectObjects.CompareHistogram(templateHist, observedContourRectImg,out observedRectHist);
-                    MatchRecognition.MatchSURFFeature(templateSurfFeature, observedContourRectImg,true); //先使用原影像
-                }
+            {              
+                DenseHistogram observedRectHist;
+                Image<Bgr, byte> observedContourRectImg = DetectObjects.GetBoundingBoxImage(topContours[matchIndex], loadTestImg);
+                MatchRecognition.MatchSURFFeature(templateSurfFeature, observedContourRectImg,true); //先使用原影像
+             
             }
         }
 

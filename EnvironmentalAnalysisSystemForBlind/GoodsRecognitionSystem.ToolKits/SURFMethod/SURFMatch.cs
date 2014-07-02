@@ -23,6 +23,8 @@ namespace RecognitionSys.ToolKits.SURFMethod
     /// </summary>
     public class SURFMatch
     {
+        #region 擷取特徵
+
         /// <summary>
         /// 計算特徵點
         /// </summary>
@@ -45,7 +47,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
             Console.WriteLine("\nExtract SURF time=> " + watch.ElapsedMilliseconds.ToString() + "ms");
 
             //抽取出的特徵點數量
-            Console.WriteLine("keypoint size:" + keyPoints.Size); 
+            Console.WriteLine("keypoint size:" + keyPoints.Size);
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
         /// <summary>
@@ -69,9 +71,10 @@ namespace RecognitionSys.ToolKits.SURFMethod
             Console.WriteLine("\nExtract SURF time=> " + watch.ElapsedMilliseconds.ToString() + "ms");
 
             //抽取出的特徵點數量
-            Console.WriteLine("keypoint size:" + keyPoints.Size); 
+            Console.WriteLine("keypoint size:" + keyPoints.Size);
             return new SURFFeatureData(srcImage.Copy(), keyPoints, descriptors);
         }
+        #endregion
 
         #region 商品辨識用
         /// <summary>
@@ -107,24 +110,24 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 {
                     matcher.KnnMatch(observedScene.GetDescriptors(), indices, dist, k, null);
                     #region Test Output
-                    for (int i = 0; i < indices.Rows; i++)
-                    {
-                        for (int j = 0; j < indices.Cols; j++)
-                        {
-                            Console.Write(indices[i, j] + " ");
-                        }
-                        Console.Write("\n");
-                    }
-                    Console.WriteLine("\n distance");
-                    for (int i = 0; i < dist.Rows; i++)
-                    {
-                        for (int j = 0; j < dist.Cols; j++)
-                        {
-                            Console.Write(dist[i, j] + " ");
-                        }
-                        Console.Write("\n");
-                    }
-                    Console.WriteLine("\n");  
+                    //for (int i = 0; i < indices.Rows; i++)
+                    //{
+                    //    for (int j = 0; j < indices.Cols; j++)
+                    //    {
+                    //        Console.Write(indices[i, j] + " ");
+                    //    }
+                    //    Console.Write("\n");
+                    //}
+                    //Console.WriteLine("\n distance");
+                    //for (int i = 0; i < dist.Rows; i++)
+                    //{
+                    //    for (int j = 0; j < dist.Cols; j++)
+                    //    {
+                    //        Console.Write(dist[i, j] + " ");
+                    //    }
+                    //    Console.Write("\n");
+                    //}
+                    //Console.WriteLine("\n");  
                     #endregion
                  
                     mask = new Matrix<byte>(dist.Rows, 1);
@@ -168,9 +171,9 @@ namespace RecognitionSys.ToolKits.SURFMethod
         public static SURFMatchedData MatchSURFFeatureByFLANNForGoods(SURFFeatureData template, SURFFeatureData observedScene)
         {
             Matrix<byte> mask;
-            int k = 2;
-            double uniquenessThreshold = 0.5;
-            //The resulting n*k matrix of descriptor index from the training descriptors
+            int k = 1;
+            double uniquenessThreshold = 0.8;//NNDR
+            //The resulting n*k matrix of descriptor index from the training descriptors,存放找到的NN索引
             Matrix<int> indices;
             HomographyMatrix homography = null;
             Stopwatch watch;
@@ -182,26 +185,85 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 watch = Stopwatch.StartNew();
                 #region FLANN Match CPU
                 //match 
-                Index flann = new Index(template.GetDescriptors(), 4);
+                Index flann = new Index(template.GetDescriptors(), 12);
 
                 indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
+                //dists是對應indices索引的距離值
                 using (dists = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
                 {
-                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 6);
+                    //找出最好的NN
+                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 12);
+                    #region Test Output
+                    //for (int i = 0; i < indices.Rows; i++)
+                    //{
+                    //    for (int j = 0; j < indices.Cols; j++)
+                    //    {
+                    //        Console.Write(indices[i, j] + " ");
+                    //    }
+                    //    Console.Write("\n");
+                    //}
+                    //Console.WriteLine("\n distance");
+                    //for (int i = 0; i < dists.Rows; i++)
+                    //{
+                    //    for (int j = 0; j < dists.Cols; j++)
+                    //    {
+                    //        Console.Write(dists[i, j] + " ");
+                    //    }
+                    //    Console.Write("\n");
+                    //}
+                    //Console.WriteLine("\n");
+                    #endregion
+
                     mask = new Matrix<byte>(dists.Rows, 1);
-                    mask.SetValue(255);
-                    Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
+                    mask.SetValue(0);
+
+                    //此emgucv是NNDR,已實驗過,如果要使用VoteForUniqueness 請把mask改回255,mask存放的是樣板與觀察對應的特徵點是否相似0表不是,255表一樣
+                    // Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
+                    //如下,數值會一樣
+                    //for (int i = 0; i < indices.Rows; i++)
+                    //{
+                    //    Console.WriteLine("距離比：" + (dists.Data[i, 0] / dists.Data[i, 1]));
+                    //    if ((dists.Data[i, 0] / dists.Data[i, 1]) < 0.8)
+                    //    {
+                    //        mask.Data[i, 0] = 255;
+                    //    }
+                    //}
+
+                    double min_dist = 100;
+                    double max_dist = 0;
+
+                    //FLANN 取自http://docs.opencv.org/doc/tutorials/features2d/feature_flann_matcher/feature_flann_matcher.html#feature-flann-matcher
+                    //很微妙的是這個方法匹配效果更加...
+                    for (int i = 0; i < indices.Rows; i++)
+                    {
+                        if (dists.Data[i, 0] < min_dist) min_dist = dists.Data[i, 0];
+                        if (dists.Data[i, 0] > max_dist) max_dist = dists.Data[i, 0];
+                    }
+                    for (int i = 0; i < indices.Rows; i++)
+                    {
+
+                        if (dists.Data[i, 0] <= Math.Max(2 * min_dist, 0.02))
+                        {
+                            mask.Data[i, 0] = 255;
+                        }
+                    }
+
+                    //for (int i = 0; i < mask.Rows; i++)
+                    //{
+                    //    Console.WriteLine(mask.Data[i, 0]);
+                    //}
                 }
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask);
-                Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                Console.WriteLine("good Match number:" + nonZeroCount);
+                //Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                 if (nonZeroCount >= 4) //原先是4
                 {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
-                    Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                    //nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
+                    //Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                     //filter out all unnecessary pairs based on distance between pairs
 
-                    if (nonZeroCount >= 30) //原先是4
-                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
+                    //if (nonZeroCount >= 30) //原先是4
+                    homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
 
                 }
                 #endregion
@@ -233,11 +295,12 @@ namespace RecognitionSys.ToolKits.SURFMethod
         /// <returns>回傳匹配的資料類別</returns>
         public static SURFMatchedData MatchSURFFeatureByFLANNForObjs(SURFFeatureData template, SURFFeatureData observedScene)
         {
+
             Matrix<byte> mask;
-            int k = 2;
-            double uniquenessThreshold = 0.5;
-            //The resulting n*k matrix of descriptor index from the training descriptors
-            Matrix<int> indices;
+            int k = 1;
+            double uniquenessThreshold = 0.8;//NNDR
+            //The resulting n*k matrix of descriptor index from the training descriptors,存放找到的NN索引
+            Matrix<int> indices; 
             HomographyMatrix homography = null;
             Stopwatch watch;
             //distance
@@ -248,26 +311,85 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 watch = Stopwatch.StartNew();
                 #region FLANN Match CPU
                 //match 
-                Index flann = new Index(template.GetDescriptors(), 4);
+                Index flann = new Index(template.GetDescriptors(), 12);
 
                 indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
+                //dists是對應indices索引的距離值
                 using (dists = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
                 {
-                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 6);
+                    //找出最好的NN
+                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 12);
+                    #region Test Output
+                    //for (int i = 0; i < indices.Rows; i++)
+                    //{
+                    //    for (int j = 0; j < indices.Cols; j++)
+                    //    {
+                    //        Console.Write(indices[i, j] + " ");
+                    //    }
+                    //    Console.Write("\n");
+                    //}
+                    //Console.WriteLine("\n distance");
+                    //for (int i = 0; i < dists.Rows; i++)
+                    //{
+                    //    for (int j = 0; j < dists.Cols; j++)
+                    //    {
+                    //        Console.Write(dists[i, j] + " ");
+                    //    }
+                    //    Console.Write("\n");
+                    //}
+                    //Console.WriteLine("\n");
+                    #endregion
+                  
                     mask = new Matrix<byte>(dists.Rows, 1);
-                    mask.SetValue(255);
-                    Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
+                    mask.SetValue(0);
+                    
+                    //此emgucv是NNDR,已實驗過,如果要使用VoteForUniqueness 請把mask改回255,mask存放的是樣板與觀察對應的特徵點是否相似0表不是,255表一樣
+                    // Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
+                    //如下,數值會一樣
+                    //for (int i = 0; i < indices.Rows; i++)
+                    //{
+                    //    Console.WriteLine("距離比：" + (dists.Data[i, 0] / dists.Data[i, 1]));
+                    //    if ((dists.Data[i, 0] / dists.Data[i, 1]) < 0.8)
+                    //    {
+                    //        mask.Data[i, 0] = 255;
+                    //    }
+                    //}
+                    
+                    double min_dist = 100;
+                    double max_dist = 0;
+                   
+                    //FLANN 取自http://docs.opencv.org/doc/tutorials/features2d/feature_flann_matcher/feature_flann_matcher.html#feature-flann-matcher
+                    //很微妙的是這個方法匹配效果更加...
+                    for (int i = 0; i < indices.Rows; i++)
+                    {
+                        if (dists.Data[i, 0] < min_dist) min_dist = dists.Data[i, 0];
+                        if (dists.Data[i, 0] > max_dist) max_dist = dists.Data[i, 0];
+                    }
+                    for (int i = 0; i < indices.Rows; i++)
+                    {
+
+                        if (dists.Data[i, 0] <= Math.Max(2 * min_dist, 0.02))
+                        {
+                            mask.Data[i, 0] = 255;
+                        }
+                    }
+
+                    //for (int i = 0; i < mask.Rows; i++)
+                    //{
+                    //    Console.WriteLine(mask.Data[i, 0]);
+                    //}
                 }
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask);
-                Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                Console.WriteLine("good Match number:" + nonZeroCount);
+                //Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                 if (nonZeroCount >= 4) //原先是4
                 {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
-                    Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                    //nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
+                    //Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                     //filter out all unnecessary pairs based on distance between pairs
-
-                    if (nonZeroCount >= 30) //原先是4
-                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
+                 
+                    //if (nonZeroCount >= 30) //原先是4
+                    homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
 
                 }
                 #endregion
