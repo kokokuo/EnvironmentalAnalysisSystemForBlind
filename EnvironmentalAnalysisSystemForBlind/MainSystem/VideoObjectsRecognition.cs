@@ -170,47 +170,77 @@ namespace MainSystem
         /// </summary>
         /// <param name="isDrawResultToShowOnDialog">是否要顯示出辨識的結果</param>
         /// <returns>回傳看板資訊, 格式=>"看板名稱" ;請記得做字串切割,若無比對到或有任何問題則會回傳null</returns>
-        public string RunRecognition(bool isDrawResultToShowOnDialog)
+        public void RunRecognition(bool isDrawResultToShowOnDialog)
         {
             if (surfFiles.Count != 0 /*&& histFiles.Count !=0*/)
             {
                 ////偵測物體
-                //foreach (string histFilename in histFiles) {
-                //    DenseHistogram hist = DetectObjects.ReadHistogram(histFilename, true);
-                
-                //}
+                foreach (string histFilename in histFiles)
+                {
+                    DenseHistogram hist = DetectObjects.ReadHistogram(histFilename, true);
+                    //反投影
+                    Image<Gray, byte> backProjectImg = DetectObjects.DoBackProject(hist, observedImg);
+                    Image<Gray, byte> binaryImg = DetectObjects.DoBinaryThreshold(backProjectImg, 200);
+                    Image<Gray, byte> morphologyImg = DetectObjects.DoErode(binaryImg, 2);
+                    morphologyImg = DetectObjects.DoDilate(morphologyImg, 1);
+                    List<Contour<System.Drawing.Point>> topContours = DetectObjects.GetOrderMaxContours(morphologyImg);
+                    int i = 0;
+                    double histMatchRate = 0;
+                    int matchIndex = -1;
+                    foreach (Contour<System.Drawing.Point> c in topContours)
+                    {
+                        if (i == 3)
+                            break;
+                        DenseHistogram observedRectHist;
+                        Image<Bgr, byte> observedContourRectImg = DetectObjects.GetBoundingBoxImage(c, observedImg);
+                        double compareRate = DetectObjects.CompareHistogram(hist, observedContourRectImg, out observedRectHist);
+                        if (compareRate < histMatchRate)
+                        {
+                            histMatchRate = compareRate;
+                            matchIndex = i;
+                        }
+                        i++;
+                    }
+                    if (histMatchRate < 0.5)
+                    {
+                        //匹配特徵並取回匹配到的特徵
+                        KeyValuePair<String, SURFMatchedData> mathedObjectsData = MatchRecognition.MatchSURFFeatureForVideoObjs(surfFiles, observedImg, viewer);
+                        if (mathedObjectsData.Key != null && mathedObjectsData.Value != null)
+                        {
+                            //透過樣板檔案名稱取出匹配到的看板資訊
+                            string matchedFileName = mathedObjectsData.Key;
+                            //切割出商品檔案ID=> 特徵檔案名稱命名規則:(看板ID+特徵點編號),因為一種看板可能需要多張畫面的特徵點
+                            string[] split = matchedFileName.Split('-');
+                            string ibjectsMsg;
+                            //特徵檔案名稱使否有存在此商品
+                            if (objectsData.TryGetValue(split[0], out ibjectsMsg))
+                            {
+                                //return ibjectsMsg;
+                            }
+                            else
+                            {
+                                //System.Windows.MessageBox.Show("特徵檔案並無存在可對應的商品資料!");
+                                //return null;
+                            }
+                        }
+                        else
+                        {
+                            //System.Windows.MessageBox.Show("沒有對應到的商品或是不存在此商品");
+                            //return null;
+                        }
+                    }
 
-                //匹配特徵並取回匹配到的特徵
-                KeyValuePair<String, SURFMatchedData> mathedObjectsData = MatchRecognition.MatchSURFFeatureForVideoObjs(surfFiles, observedImg, viewer);
-                if (mathedObjectsData.Key != null && mathedObjectsData.Value != null)
-                {
-                    //透過樣板檔案名稱取出匹配到的看板資訊
-                    string matchedFileName = mathedObjectsData.Key;
-                    //切割出商品檔案ID=> 特徵檔案名稱命名規則:(看板ID+特徵點編號),因為一種看板可能需要多張畫面的特徵點
-                    string[] split = matchedFileName.Split('-');
-                    string ibjectsMsg;
-                    //特徵檔案名稱使否有存在此商品
-                    if (objectsData.TryGetValue(split[0], out ibjectsMsg))
-                    {
-                        return ibjectsMsg;
-                    }
-                    else 
-                    {
-                        //System.Windows.MessageBox.Show("特徵檔案並無存在可對應的商品資料!");
-                        return null;
-                    }
-                }
-                else 
-                {
-                    //System.Windows.MessageBox.Show("沒有對應到的商品或是不存在此商品");
-                    return null;
+
+                    
                 }
             }
-            else 
+            else
             {
                 //System.Windows.MessageBox.Show("沒有特徵資料");
-                return null;
+                //return null;
             }
+                
+                
         }
         //目前寫死,要加入的看板資訊(切記,要有對應到的特徵檔案)
         private void SetUpSignBoardSURFFeatureData() 

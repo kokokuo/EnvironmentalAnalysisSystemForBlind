@@ -183,7 +183,7 @@ namespace MainSystem
                                     else
                                         videoObjRecogSys = new VideoObjectsRecognition(currentFrame);
 
-                                    string objData = videoObjRecogSys.RunRecognition(true);
+                                    //string objData = videoObjRecogSys.RunRecognition(true);
                                 }
                             }
 
@@ -455,7 +455,7 @@ namespace MainSystem
                 string templateHistFileName = System.IO.Path.GetFileName(templateHistFilePathName); //取得路徑的檔案名稱
                 templateSURFPathFileName = GetMappingDescriptorDataFile(templateHistFileName);
                 if (templateSURFPathFileName != null)
-                {
+                {                
                     templateSurfFeature = MatchRecognition.ReadSURFFeature(templateSURFPathFileName);
                     Image<Bgr,byte> showFeatureImg =  SystemToolBox.DrawSURFFeature(templateSurfFeature);
                     new ImageViewer(showFeatureImg,"取得樣板特徵圖像").Show();
@@ -468,8 +468,10 @@ namespace MainSystem
         {
             if (templateSurfFeature != null)
             {              
-                DenseHistogram observedRectHist;
                 Image<Bgr, byte> observedContourRectImg = DetectObjects.GetBoundingBoxImage(topContours[matchIndex], loadTestImg);
+               
+                observedContourRectImg.Resize(templateSurfFeature.GetImg().Width, templateSurfFeature.GetImg().Height, INTER.CV_INTER_LINEAR);
+
                 MatchRecognition.MatchSURFFeature(templateSurfFeature, observedContourRectImg,true); //先使用原影像
              
             }

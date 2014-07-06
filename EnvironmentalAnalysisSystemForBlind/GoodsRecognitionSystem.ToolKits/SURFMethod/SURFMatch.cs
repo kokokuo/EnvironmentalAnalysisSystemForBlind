@@ -298,7 +298,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
 
             Matrix<byte> mask;
             int k = 1;
-            double uniquenessThreshold = 0.8;//NNDR
+            double uniquenessThreshold = 0.3;//NNDR
             //The resulting n*k matrix of descriptor index from the training descriptors,存放找到的NN索引
             Matrix<int> indices; 
             HomographyMatrix homography = null;
@@ -344,7 +344,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                     mask.SetValue(0);
                     
                     //此emgucv是NNDR,已實驗過,如果要使用VoteForUniqueness 請把mask改回255,mask存放的是樣板與觀察對應的特徵點是否相似0表不是,255表一樣
-                    // Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
+                     Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
                     //如下,數值會一樣
                     //for (int i = 0; i < indices.Rows; i++)
                     //{
@@ -374,13 +374,13 @@ namespace RecognitionSys.ToolKits.SURFMethod
                         }
                     }
 
-                    //for (int i = 0; i < mask.Rows; i++)
-                    //{
-                    //    Console.WriteLine(mask.Data[i, 0]);
-                    //}
+                    for (int i = 0; i < mask.Rows; i++)
+                    {
+                        Console.WriteLine(mask.Data[i, 0]);
+                    }
                 }
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask);
-                Console.WriteLine("good Match number:" + nonZeroCount);
+                Console.WriteLine("good Match number:" + nonZeroCount+",template keypoint number = "+ template.GetKeyPoints().Size);
                 //Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                 if (nonZeroCount >= 4) //原先是4
                 {
@@ -515,16 +515,23 @@ namespace RecognitionSys.ToolKits.SURFMethod
         /// <param name="observedScene">觀察景象特徵資料</param>
         public static void ShowSURFMatchForm(SURFMatchedData matchData, SURFFeatureData observedScene,ImageViewer viewer) 
         {
-            PointF[] matchPts = GetMatchBoundingBox(matchData.GetHomography(), matchData.GetTemplateSURFData());
-            //Draw the matched keypoints
-            Image<Bgr, Byte> result = Features2DToolbox.DrawMatches(matchData.GetTemplateSURFData().GetImg(), matchData.GetTemplateSURFData().GetKeyPoints(), observedScene.GetImg(), observedScene.GetKeyPoints(),
-                matchData.GetIndices(), new Bgr(255, 255, 255), new Bgr(255, 255, 255), matchData.GetMask(), Features2DToolbox.KeypointDrawType.DEFAULT);
-            if (matchPts != null)
-            {
-                result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);
-            }
-            viewer.Image = result;
-            viewer.Show();
+           
+                //Draw the matched keypoints
+                Image<Bgr, Byte> result = Features2DToolbox.DrawMatches(matchData.GetTemplateSURFData().GetImg(), matchData.GetTemplateSURFData().GetKeyPoints(), observedScene.GetImg(), observedScene.GetKeyPoints(),
+                    matchData.GetIndices(), new Bgr(255, 255, 255), new Bgr(255, 255, 255), matchData.GetMask(), Features2DToolbox.KeypointDrawType.DEFAULT);
+
+                if (matchData.GetHomography() != null) //Get RoI box
+                {
+                    PointF[] matchPts = GetMatchBoundingBox(matchData.GetHomography(), matchData.GetTemplateSURFData());
+                    if (matchPts != null)
+                    {
+                        result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);
+                    }
+                }
+            
+                viewer.Image = result;
+                viewer.Show();
+            
         }
     }
 }

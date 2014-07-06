@@ -594,31 +594,31 @@ namespace CrossingDetector
             float mainDirectionRatio = 0;
             //過濾線段
             int total = candidateHoughLineEquations.Count;
-            Console.WriteLine("Total Lines = " + total);
+            //Console.WriteLine("Total Lines = " + total);
             foreach(LineQuantification quantification in Enum.GetValues(typeof(LineQuantification)) ){
                 if (linesHistogram.ContainsKey(quantification))
                 {
-                    Console.WriteLine("line[" + quantification.ToString() + "]:" + linesHistogram[quantification].Count);
+                    //Console.WriteLine("line[" + quantification.ToString() + "]:" + linesHistogram[quantification].Count);
                     float ratio = (linesHistogram[quantification].Count / (float)total);
                     if (mainDirectionRatio < ratio)
                     {
                         mainDirectionRatio = ratio;
                         mainDirectionLineGroupId = (int)quantification;
                     }
-                    Console.WriteLine("佔全部線段的比例 =>" + ratio);
+                   // Console.WriteLine("佔全部線段的比例 =>" + ratio);
                 }
-                else
-                    Console.WriteLine("line[" + quantification.ToString() + "]:" + 0);
+               // else
+                   // Console.WriteLine("line[" + quantification.ToString() + "]:" + 0);
             }
                 
          
-            Console.WriteLine("主方向群為:" + mainDirectionLineGroupId + "佔全部線段的比例 =>" + mainDirectionRatio);
+            //Console.WriteLine("主方向群為:" + mainDirectionLineGroupId + "佔全部線段的比例 =>" + mainDirectionRatio);
 
             //過濾過短的線段
             //1.找最大
             var maxLengthLine = (from selectLine in linesHistogram[(LineQuantification)mainDirectionLineGroupId]
                                  select selectLine).Max(line => line.Line.Length);
-            Console.WriteLine("最長的線段為:" + maxLengthLine);
+            //Console.WriteLine("最長的線段為:" + maxLengthLine);
             //2.依照比例把過段的濾掉
             LinkedListNode<LineEquation> node = linesHistogram[(LineQuantification)mainDirectionLineGroupId].First;
             while (node != null)
@@ -626,7 +626,7 @@ namespace CrossingDetector
                 if (node.Value.Line.Length < (maxLengthLine / 3))
                 {
                     linesHistogram[(LineQuantification)mainDirectionLineGroupId].Remove(node);
-                    Console.WriteLine("移除的線段為:\nLength:" + node.Value.Line.Length + ",p1:" + node.Value.Line.P1 + ",p2:" + node.Value.Line.P2);
+                    //Console.WriteLine("移除的線段為:\nLength:" + node.Value.Line.Length + ",p1:" + node.Value.Line.P1 + ",p2:" + node.Value.Line.P2);
                 }
                 node = node.Next;
             }
@@ -700,7 +700,7 @@ namespace CrossingDetector
 
             if (isBlackWhiteCrossing && linesHistogram[(LineQuantification)mainDirectionLineGroupId].Count > 3)
             {
-                Console.WriteLine("共有" + linesHistogram[(LineQuantification)mainDirectionLineGroupId].Count + "相似斜率線段");
+                //Console.WriteLine("共有" + linesHistogram[(LineQuantification)mainDirectionLineGroupId].Count + "相似斜率線段");
                 return true;
             }
             else
@@ -757,7 +757,7 @@ namespace CrossingDetector
             //有連續5個同樣像素及判斷為是此紋路
             if (pixelSum == 4)
             {
-                Console.WriteLine("---------------\nIntensity: " + intensity + " has accumulated!");
+                //Console.WriteLine("---------------\nIntensity: " + intensity + " has accumulated!");
                 //如果是第一次判斷紋路或是前一個紋路與線段的紋路不相同,紀錄
                 if (previousCheckIntentisty != intensity || previousCheckIntentisty == -1)
                 {
@@ -773,7 +773,7 @@ namespace CrossingDetector
                         previousCheckIntentisty = 0;
                     }
                 }
-                Console.WriteLine("Previous intensity = " + previousCheckIntentisty + "\n---------------");
+                //Console.WriteLine("Previous intensity = " + previousCheckIntentisty + "\n---------------");
 
                 pixelSum = 0;
             }
@@ -832,7 +832,7 @@ namespace CrossingDetector
 
             ////顯示所有check的狀況
             Console.WriteLine(checkBlackWhiteCrossingPoint);
-            if (checkBlackWhiteCrossingPoint.Contains("010101") || checkBlackWhiteCrossingPoint.Contains("101010"))
+            if (checkBlackWhiteCrossingPoint.Contains("01010") || checkBlackWhiteCrossingPoint.Contains("10101"))
             {
                 Console.WriteLine("有交錯");
                 return true;

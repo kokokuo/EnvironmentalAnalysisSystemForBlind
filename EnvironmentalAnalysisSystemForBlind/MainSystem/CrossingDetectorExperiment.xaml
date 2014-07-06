@@ -5,33 +5,43 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:emui="clr-namespace:Emgu.CV.UI;assembly=Emgu.CV.UI"
-             mc:Ignorable="d" Height="760" Width="800" >
+             mc:Ignorable="d" Height="760" Width="1200" >
     
     <Grid Background="White">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0">
-            <Button Content="1.載入圖片" HorizontalAlignment="Left" Margin="49,45,0,0" VerticalAlignment="Top" Width="89" Height="30" Name="loadImgButton" Click="loadImgButton_Click"/>
-            <Button Content="2.剪裁下半部" HorizontalAlignment="Left" Margin="155,45,0,0" VerticalAlignment="Top" Width="84" Height="30" Name="cropImgButton" Click="cropImgButton_Click"/>
-            <WindowsFormsHost Margin="49,99,831,415.4" Width="320" Height="240">
-                <emui:ImageBox x:Name="loadImgBox"/>
-            </WindowsFormsHost>
-            <Button Content="3.灰階" HorizontalAlignment="Left" Margin="49,371,0,0" VerticalAlignment="Top" Width="89" Height="30" Name="toGrayButton" Click="toGrayButton_Click"/>
-            <Button Content="4.Mask白色" HorizontalAlignment="Left" Margin="155,371,0,0" VerticalAlignment="Top" Width="84" Height="30" Name="maskWhiteButton" Click="maskWhiteButton_Click"/>
-            <Button Content="5.去胡椒雜訊" HorizontalAlignment="Left" Margin="259,371,0,0" VerticalAlignment="Top" Width="83" Height="30" Name="pepperfilter" Click="pepperfilter_Click"/>
-            <WindowsFormsHost Margin="49,434,831,80.4" Width="320" Height="240">
-                <emui:ImageBox x:Name="processingImgBox"/>
-            </WindowsFormsHost>
-        </Grid>
-        
+        <Border  BorderBrush="Gray" BorderThickness="0,0,2,0" >
+            <Grid Grid.Column="0" >
+                <Button Content="1.載入圖片" HorizontalAlignment="Left" Margin="49,45,0,0" VerticalAlignment="Top" Width="89" Height="30" Name="loadImgButton" Click="loadImgButton_Click"/>
+                <Button Content="2.剪裁下半部" HorizontalAlignment="Left" Margin="285,45,0,0" VerticalAlignment="Top" Width="84" Height="30" Name="cropImgButton" Click="cropImgButton_Click"/>
+                <WindowsFormsHost Margin="49,80,429.4,440" Width="320" Height="240">
+                    <emui:ImageBox x:Name="loadImgBox"/>
+                </WindowsFormsHost>
+                <Button Content="3.灰階" HorizontalAlignment="Right" Margin="0,46,314.4,0" VerticalAlignment="Top" Width="89" Height="30" Name="toGrayButton" Click="toGrayButton_Click"/>
+                <Button Content="4.Mask白色" HorizontalAlignment="Left" Margin="519,45,0,0" VerticalAlignment="Top" Width="84" Height="30" Name="maskWhiteButton" Click="maskWhiteButton_Click"/>
+                <Button Content="5.去胡椒雜訊" HorizontalAlignment="Left" Margin="632,45,0,0" VerticalAlignment="Top" Width="83" Height="30" Name="pepperfilter" Click="pepperfilter_Click"/>
+                <WindowsFormsHost Margin="395,81,83.4,439" Width="320" Height="240">
+                    <emui:ImageBox x:Name="processingImgBox"/>
+                </WindowsFormsHost>
+                <Button Content="6.偵測HoughLine" HorizontalAlignment="Left" Margin="49,363,0,0" VerticalAlignment="Top" Width="118" Height="30" Name="detectHoughLineButton" Click="detectHoughLineButton_Click"/>
+                <Button Content="7.修復線段" HorizontalAlignment="Left" Margin="181,363,0,0" VerticalAlignment="Top" Width="118" Height="28" Name="repairLinesButton" Click="repairLinesButton_Click"/>
+                <Button Content="8.過濾線段" HorizontalAlignment="Left" Margin="320,361,0,0" VerticalAlignment="Top" Width="118" Height="30" Name="filterLinesButton" Click="filterLinesButton_Click"/>
+                <Button Content="9.分析黑白紋路" HorizontalAlignment="Left" Margin="453,360,0,0" VerticalAlignment="Top" Width="118" Height="33" Name="AnalyzeBlackWhiteButton" Click="AnalyzeBlackWhiteButton_Click"/>
+                <Button Content="步驟化修復線段" HorizontalAlignment="Left" Margin="181,396,0,0" VerticalAlignment="Top" Width="118" Height="28" x:Name="stepRepairLinesButton_Copy" Click="stepRepairLinesButton_Click"/>
+                <TextBlock HorizontalAlignment="Left" Margin="49,10,0,0" TextWrapping="Wrap" Text="斑馬線實驗步驟" VerticalAlignment="Top" FontSize="24" FontWeight="Bold"/>
+                <TextBlock HorizontalAlignment="Left" Margin="819,10,-169.6,0" TextWrapping="Wrap" Text="斑馬線偵測" VerticalAlignment="Top" FontSize="24" FontWeight="Bold" Width="149"/>
+            </Grid>
+        </Border>
         <Grid Grid.Column="1">
-            <Button Content="6.偵測HoughLine" HorizontalAlignment="Left" Margin="20,45,0,0" VerticalAlignment="Top" Width="118" Height="30" Name="detectHoughLineButton" Click="detectHoughLineButton_Click"/>
-            <Button Content="7.修復線段" HorizontalAlignment="Left" Margin="20,99,0,0" VerticalAlignment="Top" Width="118" Height="28" Name="repairLinesButton" Click="repairLinesButton_Click"/>
-            <Button Content="8.過濾線段" HorizontalAlignment="Left" Margin="20,151,0,0" VerticalAlignment="Top" Width="118" Height="30" Name="filterLinesButton" Click="filterLinesButton_Click"/>
-            <Button Content="9.分析黑白紋路" HorizontalAlignment="Left" Margin="20,208,0,0" VerticalAlignment="Top" Width="118" Height="33" Name="AnalyzeBlackWhiteButton" Click="AnalyzeBlackWhiteButton_Click"/>
-            <Button Content="步驟化修復線段" HorizontalAlignment="Left" Margin="170,99,0,0" VerticalAlignment="Top" Width="118" Height="28" x:Name="stepRepairLinesButton_Copy" Click="stepRepairLinesButton_Click"/>
+            
+            <Button Content="載入影片" HorizontalAlignment="Left" Margin="251,53,0,0" VerticalAlignment="Top" Width="89" Height="30" x:Name="loadVideoButton" Click="loadVideoButton_Click"/>
+            <WindowsFormsHost Margin="20,88,460,472" Width="320" Height="240">
+                <emui:ImageBox x:Name="videoFrameBox"/>
+            </WindowsFormsHost>
+            <Button Content="撥放" HorizontalAlignment="Left" Margin="20,342,0,0" VerticalAlignment="Top" Width="75" x:Name="playButton" Click="playButton_Click"/>
+            <Button Content="停止" HorizontalAlignment="Left" Margin="265,343,0,0" VerticalAlignment="Top" Width="75" x:Name="stopButton" Click="stopButton_Click"/>
         </Grid>
        
         

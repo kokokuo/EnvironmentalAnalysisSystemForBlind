@@ -22,35 +22,36 @@
             <Button Content="停止" HorizontalAlignment="Left" Margin="273,388,0,0" VerticalAlignment="Top" Width="75" x:Name="stopButton" Click="stopButton_Click"/>
 
         </Grid>
-        <Grid Grid.Column="0">
-            <Button Content="載入圖片" HorizontalAlignment="Left" Margin="28,36,0,0" VerticalAlignment="Top" Width="75" x:Name="loadTestImgButton" Click="loadTestImgButton_Click"/>
-            <WindowsFormsHost Width="320" Height="240" Margin="28,60,452,460" >
-                <emui:ImageBox x:Name="loadImgBox"/>
-            </WindowsFormsHost>
+        <Border BorderBrush="Gray" BorderThickness="0,0,2,0">
+            <Grid Grid.Column="0">
+                <Button Content="載入圖片" HorizontalAlignment="Left" Margin="28,36,0,0" VerticalAlignment="Top" Width="75" x:Name="loadTestImgButton" Click="loadTestImgButton_Click"/>
+                <WindowsFormsHost Width="320" Height="240" Margin="28,60,452,460" >
+                    <emui:ImageBox x:Name="loadImgBox"/>
+                </WindowsFormsHost>
             
-            <Button Content="1.載入直方圖" HorizontalAlignment="Left" Margin="33,331,0,0" VerticalAlignment="Top" Width="75" x:Name="loadHistFileButton" Click="loadHistFileButton_Click"/>
-            <Button Content="2.反投影" HorizontalAlignment="Left" Margin="126,331,0,0" VerticalAlignment="Top" Width="75" x:Name="backProjectButton" Click="backProjectButton_Click"/>
-            <WindowsFormsHost Width="320" Height="240" Margin="28,369,452,151" >
-                <emui:ImageBox x:Name="backProjectImgBox"/>
-            </WindowsFormsHost>
-            <Button Content="3.二值化" HorizontalAlignment="Left" Margin="423,12,0,0" VerticalAlignment="Top" Width="75" x:Name="binaryThresButton" Click="binaryThresButton_Click"/>
-            <Button Content="4.侵蝕" HorizontalAlignment="Left" Margin="423,36,0,0" VerticalAlignment="Top" Width="75" x:Name="erodeButton" Click="erodeButton_Click"/>
-            <TextBox HorizontalAlignment="Left" Height="19" Margin="503,36,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="69" Name="erodeTextBox"/>
-            <Button Content="5.膨脹" HorizontalAlignment="Left" Margin="586,36,0,0" VerticalAlignment="Top" Width="75" x:Name="dialteButton" Click="dialteButton_Click"/>
-            <TextBox HorizontalAlignment="Left" Height="19" Margin="666,36,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="73" Name="dialteTextBox"/>
-            <WindowsFormsHost Width="320" Height="240" Margin="425,60,55,460" >
-                <emui:ImageBox x:Name="morphologyImgBox"/>
-            </WindowsFormsHost>
-            <Button Content="6.畫輪廓" HorizontalAlignment="Left" Margin="423,331,0,0" VerticalAlignment="Top" Width="75" x:Name="drawContoursButton" Click="drawContoursButton_Click"/>
-            <Button Content="7.框出最大輪廓" HorizontalAlignment="Left" Margin="516,331,0,0" VerticalAlignment="Top" Width="96" x:Name="findTopThreeContourButton" Click="findTopThreeContourButton_Click"/>
-            <WindowsFormsHost Width="320" Height="240" Margin="419,369,61,151" >
-                <emui:ImageBox x:Name="contoursImgBox"/>
-            </WindowsFormsHost>
-            <Button Content="8.直方圖相似率" HorizontalAlignment="Left" Margin="33,644,0,0" VerticalAlignment="Top" Width="96" x:Name="compareHistButton" Click="compareHistButton_Click"/>
-            <Button Content="9.載入取得對應到的特徵圖" HorizontalAlignment="Left" Margin="165,644,0,0" VerticalAlignment="Top" Width="152" x:Name="getMappingFeatureButton" Click="getMappingFeatureButton_Click"/>
-            <Button Content="10.特徵匹配" HorizontalAlignment="Left" Margin="339,644,0,0" VerticalAlignment="Top" Width="99" x:Name="matchFeatureButton" Click="matchFeatureButton_Click"/>
+                <Button Content="1.載入直方圖" HorizontalAlignment="Left" Margin="33,331,0,0" VerticalAlignment="Top" Width="75" x:Name="loadHistFileButton" Click="loadHistFileButton_Click"/>
+                <Button Content="2.反投影" HorizontalAlignment="Left" Margin="126,331,0,0" VerticalAlignment="Top" Width="75" x:Name="backProjectButton" Click="backProjectButton_Click"/>
+                <WindowsFormsHost Width="320" Height="240" Margin="28,369,452,151" >
+                    <emui:ImageBox x:Name="backProjectImgBox"/>
+                </WindowsFormsHost>
+                <Button Content="3.二值化" HorizontalAlignment="Left" Margin="423,12,0,0" VerticalAlignment="Top" Width="75" x:Name="binaryThresButton" Click="binaryThresButton_Click"/>
+                <Button Content="4.侵蝕" HorizontalAlignment="Left" Margin="423,36,0,0" VerticalAlignment="Top" Width="75" x:Name="erodeButton" Click="erodeButton_Click"/>
+                <TextBox HorizontalAlignment="Left" Height="19" Margin="503,36,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="69" Name="erodeTextBox"/>
+                <Button Content="5.膨脹" HorizontalAlignment="Left" Margin="586,36,0,0" VerticalAlignment="Top" Width="75" x:Name="dialteButton" Click="dialteButton_Click"/>
+                <TextBox HorizontalAlignment="Left" Height="19" Margin="666,36,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="73" Name="dialteTextBox"/>
+                <WindowsFormsHost Width="320" Height="240" Margin="425,60,55,460" >
+                    <emui:ImageBox x:Name="morphologyImgBox"/>
+                </WindowsFormsHost>
+                <Button Content="6.畫輪廓" HorizontalAlignment="Left" Margin="423,331,0,0" VerticalAlignment="Top" Width="75" x:Name="drawContoursButton" Click="drawContoursButton_Click"/>
+                <Button Content="7.框出最大輪廓" HorizontalAlignment="Left" Margin="516,331,0,0" VerticalAlignment="Top" Width="96" x:Name="findTopThreeContourButton" Click="findTopThreeContourButton_Click"/>
+                <WindowsFormsHost Width="320" Height="240" Margin="425,369,55,151" >
+                    <emui:ImageBox x:Name="contoursImgBox"/>
+                </WindowsFormsHost>
+                <Button Content="8.直方圖相似率" HorizontalAlignment="Left" Margin="33,644,0,0" VerticalAlignment="Top" Width="96" x:Name="compareHistButton" Click="compareHistButton_Click"/>
+                <Button Content="9.載入取得對應到的特徵圖" HorizontalAlignment="Left" Margin="165,644,0,0" VerticalAlignment="Top" Width="152" x:Name="getMappingFeatureButton" Click="getMappingFeatureButton_Click"/>
+                <Button Content="10.特徵匹配" HorizontalAlignment="Left" Margin="339,644,0,0" VerticalAlignment="Top" Width="99" x:Name="matchFeatureButton" Click="matchFeatureButton_Click"/>
 
-        </Grid>
-     
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

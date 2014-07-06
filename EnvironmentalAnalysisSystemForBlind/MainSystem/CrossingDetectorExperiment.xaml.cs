@@ -60,6 +60,15 @@ namespace MainSystem
         Dictionary<CrossingDetector.LineQuantification, LinkedList<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
         int mainDirectionLineGroupId = 0; //紀錄主要線段的群組ID
 
+        //video
+        Timer testVideoTimer;
+        Capture testVideoCapture;
+
+        int FPS = 30;
+        int videoTotalFrame;
+        bool isPlay, isStop;
+        Image<Bgr, byte> queryFrame;
+
         public CrossingDetectorExperiment()
         {
             InitializeComponent();
@@ -96,6 +105,12 @@ namespace MainSystem
 
             linesHistogram = new Dictionary<CrossingDetector.LineQuantification, LinkedList<LineEquation>>();
 
+
+            //video
+            testVideoTimer = new Timer();
+            videoTotalFrame = 0;
+            isPlay = isStop = false;
+
         }
         void searchRepairHoughLineStepViewer_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -121,6 +136,8 @@ namespace MainSystem
             houghLineViewer.Hide(); //隱藏式窗,下次再show出
         }
 
+        #region 圖片－實驗
+        /////////////////////////////////////////////////////////////////////////////////////
         private void loadImgButton_Click(object sender, RoutedEventArgs e)
         {
             string filename = OpenImgFile();
@@ -308,12 +325,15 @@ namespace MainSystem
 
             //Show Scan Line
             new ImageViewer(drawScanLineImg, "繪製掃描線路徑").Show();
-            if(isZebra)
+            if (isZebra)
                 System.Windows.MessageBox.Show("前方有斑馬線");
         }
+        /////////////////////////////////////////////////////////////////////////////////////
+        #endregion
+
 
         #region 開檔
-         private string OpenImgFile()
+        private string OpenImgFile()
         {
             string loadImgPath = dir.Parent.Parent.Parent.FullName + @"\CrossingTemplateImg";
             if (File.Exists(loadImgPath))
@@ -338,8 +358,137 @@ namespace MainSystem
                 return null;
             }
         }
+
+        private string OpenVideo()
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            //dlg.InitialDirectory = dir.Parent.Parent.FullName + @"\TrainingVideo";
+            //移動上層在指定下層路徑
+            dlg.RestoreDirectory = true;
+            dlg.Title = "Open Video File";
+            // Set filter for file extension and default file extension
+            dlg.Filter = "AVI Video(*.avi)|*.avi|MP4(*.mp4)|*.mp4|All Files(*.*)|*.*";
+            Nullable<bool> result = dlg.ShowDialog();
+            // Display OpenFileDialog by calling ShowDialog method ->ShowDialog()
+            // Get the selected file name and display in a TextBox
+            if (result == true && dlg.FileName != "")
+            {
+                // Open document
+                string filename = dlg.FileName;
+                return filename;
+            }
+            else
+            {
+                return null;
+            }
+        }
         #endregion
 
-      
+        #region 影片 － 實驗
+        private void loadVideoButton_Click(object sender, RoutedEventArgs e)
+        {
+            string filename = OpenVideo();
+            if (filename != null)
+            {
+                testVideoCapture = new Capture(filename);
+                videoTotalFrame = (int)testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_COUNT); //Get total frame number
+
+                //第一張做影片的封面
+                QueryFrameAndShow();
+
+                //設定播放用的Timer
+                testVideoTimer.Tick += testVideoTimer_Tick;
+                testVideoTimer.Interval = 1000 / FPS;
+                testVideoTimer.Start();
+
+            }
+        }
+
+        private Image<Bgr, byte> QueryFrameAndShow()
+        {
+            //顯示
+            queryFrame = testVideoCapture.QueryFrame();
+            queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
+            videoFrameBox.Image = queryFrame;
+            return queryFrame;
+        }
+
+        //重置影片
+        private void ResetVideo()
+        {
+            //重置，回到一開始畫面
+            testVideoCapture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_AVI_RATIO, 0);
+            QueryFrameAndShow();
+        }
+
+        private void testVideoTimer_Tick(object sender, EventArgs e)
+        {
+            //如果有影片
+            if (testVideoCapture != null)
+            {
+                if (isPlay)
+                {
+                    lock (this)
+                    {
+
+                        //如果Frame的index沒有差過影片的最大index
+                        if (testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES) < videoTotalFrame)
+                        {
+                            Image<Bgr, byte> currentFrame = QueryFrameAndShow();
+
+                            //處理辨識===========================================================
+                            if (currentFrame != null)
+                            {
+                                candidateHoughLineEquations.Clear();
+
+                                oriImg = ZebraCrossingDetector.ToCrop(currentFrame);
+                                processingImg = ZebraCrossingDetector.ToGray(oriImg);
+                                processingImg = ZebraCrossingDetector.MaskWhite(processingImg);
+                                processingImg = ZebraCrossingDetector.PepperFilter(processingImg);
+                                candidateHoughLineEquations = ZebraCrossingDetector.DetectHoughLine(processingImg);
+                                candidateHoughLineEquations = ZebraCrossingDetector.RepairedLines(candidateHoughLineEquations, oriImg);
+                                linesHistogram = ZebraCrossingDetector.MainGroupLineFilter(candidateHoughLineEquations, ref mainDirectionLineGroupId);
+
+                                Image<Bgr, byte> stasticDst = new Image<Bgr, byte>(640, 480, new Bgr(System.Drawing.Color.White));
+                                Image<Bgr, byte> drawScanLineImg = oriImg.Clone();
+                                bool isZebra = ZebraCrossingDetector.AnalyzeZebraCrossingTexture(mainDirectionLineGroupId, linesHistogram, processingImg, oriImg, stasticDst, drawScanLineImg);
+
+                                if (isZebra)
+                                    Console.WriteLine("前方有斑馬線");
+                                //System.Windows.MessageBox.Show("前方有斑馬線");
+                            }
+
+
+                        }
+                        else
+                        {
+                            ResetVideo();
+                        }
+                    }
+
+                }
+                else if (isStop)
+                {
+                    //關閉，回到一開始畫面
+                    ResetVideo();
+                }
+            }
+        }
+
+        #region 影片狀態切換
+        private void playButton_Click(object sender, RoutedEventArgs e)
+        {
+            isPlay = true;
+            isStop = false;
+        }
+
+        private void stopButton_Click(object sender, RoutedEventArgs e)
+        {
+            isStop = true;
+            isPlay = false;
+        }
+        #endregion
+        #endregion
+       
     }
 }
