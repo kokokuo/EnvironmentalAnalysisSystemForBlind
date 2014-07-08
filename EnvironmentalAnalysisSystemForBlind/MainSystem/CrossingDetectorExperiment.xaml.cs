@@ -23,7 +23,8 @@ using Emgu.CV.Features2D;
 using Emgu.CV.CvEnum;
 using System.IO;
 using System.Windows.Forms;
-
+//stopWatch計算時間用
+using System.Diagnostics;
 namespace MainSystem
 {
     /// <summary>
@@ -440,7 +441,7 @@ namespace MainSystem
                             if (currentFrame != null)
                             {
                                 candidateHoughLineEquations.Clear();
-
+                                Stopwatch watch = Stopwatch.StartNew(); 
                                 oriImg = ZebraCrossingDetector.ToCrop(currentFrame);
                                 processingImg = ZebraCrossingDetector.ToGray(oriImg);
                                 processingImg = ZebraCrossingDetector.MaskWhite(processingImg);
@@ -452,6 +453,9 @@ namespace MainSystem
                                 Image<Bgr, byte> stasticDst = new Image<Bgr, byte>(640, 480, new Bgr(System.Drawing.Color.White));
                                 Image<Bgr, byte> drawScanLineImg = oriImg.Clone();
                                 bool isZebra = ZebraCrossingDetector.AnalyzeZebraCrossingTexture(mainDirectionLineGroupId, linesHistogram, processingImg, oriImg, stasticDst, drawScanLineImg);
+
+                                watch.Stop();
+                                Console.WriteLine("Crossing Analytics time = " + watch.ElapsedMilliseconds);
 
                                 if (isZebra)
                                     Console.WriteLine("前方有斑馬線");

@@ -14,6 +14,8 @@ using Emgu.Util;
 using RecognitionSys;
 using RecognitionSys.ToolKits;
 using RecognitionSys.ToolKits.SURFMethod;
+//stopWatch計算時間用
+using System.Diagnostics;
 namespace MainSystem
 {
     public class VideoObjectsRecognition
@@ -175,8 +177,11 @@ namespace MainSystem
         {
             SURFMatchedData mathedObjectsData = null;
             string matchedFileName = null;
-            if (surfFiles.Count != 0 /*&& histFiles.Count !=0*/)
+            
+            if (surfFiles.Count != 0 && histFiles.Count !=0 && surfFiles.Count == histFiles.Count)
             {
+                Stopwatch watch = Stopwatch.StartNew();
+               
                 ////偵測物體
                 foreach (string histFilename in histFiles)
                 {
@@ -206,11 +211,14 @@ namespace MainSystem
                     }
                     if (histMatchRate < 0.5)
                     {
+                        //顏色特徵相似,取出對應的特徵資料做辨識
+
                         string templateHistFileName = System.IO.Path.GetFileName(histFilename); //取得路徑的檔案名稱
                         string templateSURFPathFileName = SystemToolBox.GetMappingDescriptorDataFile(templateHistFileName, dir);
                        
                         //匹配特徵並取回匹配到的特徵
                         SURFMatchedData mathedCandidateData = MatchRecognition.MatchSURFFeatureForVideoObjs(templateSURFPathFileName, observedImg, null);
+                        //招出最好的特徵
                         if (mathedCandidateData != null)
                         {
                             if (mathedObjectsData == null)
@@ -226,6 +234,8 @@ namespace MainSystem
                         }
                     } 
                 }
+                watch.Stop();
+                Console.WriteLine("Video Analytics time = " + watch.ElapsedMilliseconds);
                 System.Windows.MessageBox.Show(System.IO.Path.GetFileName(matchedFileName));
                 SURFMatch.ShowSURFMatchForm(mathedObjectsData, SURFMatch.CalSURFFeature(observedImg), viewer);
             }

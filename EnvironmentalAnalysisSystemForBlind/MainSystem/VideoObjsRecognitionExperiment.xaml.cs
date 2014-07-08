@@ -183,7 +183,7 @@ namespace MainSystem
                                     else
                                         videoObjRecogSys = new VideoObjectsRecognition(currentFrame);
 
-                                    //string objData = videoObjRecogSys.RunRecognition(true);
+                                    videoObjRecogSys.RunRecognition(true);
                                 }
                             }
 
