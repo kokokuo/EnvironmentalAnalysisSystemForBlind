@@ -22,6 +22,7 @@ namespace MainSystem
         ImageViewer viewer;
         List<string> surfFiles;
         List<string> histFiles;
+        DirectoryInfo dir;
         Dictionary<string, string> objectsData = new Dictionary<string, string>();
         public VideoObjectsRecognition(Image<Bgr, Byte> observedSrcImg)
         {
@@ -34,7 +35,7 @@ namespace MainSystem
             
             //取得專案執行檔所在的目錄=>WPF:AppDomain.CurrentDomain.BaseDirectory
             //使用DirectoryInfo移動至上層
-            DirectoryInfo dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
             string projectPath = dir.Parent.Parent.Parent.FullName;
 
             LoadHistogramDataFiles(projectPath);
@@ -172,6 +173,8 @@ namespace MainSystem
         /// <returns>回傳看板資訊, 格式=>"看板名稱" ;請記得做字串切割,若無比對到或有任何問題則會回傳null</returns>
         public void RunRecognition(bool isDrawResultToShowOnDialog)
         {
+            SURFMatchedData mathedObjectsData = null;
+            string matchedFileName = null;
             if (surfFiles.Count != 0 /*&& histFiles.Count !=0*/)
             {
                 ////偵測物體
@@ -203,42 +206,30 @@ namespace MainSystem
                     }
                     if (histMatchRate < 0.5)
                     {
+                        string templateHistFileName = System.IO.Path.GetFileName(histFilename); //取得路徑的檔案名稱
+                        string templateSURFPathFileName = SystemToolBox.GetMappingDescriptorDataFile(templateHistFileName, dir);
+                       
                         //匹配特徵並取回匹配到的特徵
-                        KeyValuePair<String, SURFMatchedData> mathedObjectsData = MatchRecognition.MatchSURFFeatureForVideoObjs(surfFiles, observedImg, viewer);
-                        if (mathedObjectsData.Key != null && mathedObjectsData.Value != null)
+                        SURFMatchedData mathedCandidateData = MatchRecognition.MatchSURFFeatureForVideoObjs(templateSURFPathFileName, observedImg, null);
+                        if (mathedCandidateData != null)
                         {
-                            //透過樣板檔案名稱取出匹配到的看板資訊
-                            string matchedFileName = mathedObjectsData.Key;
-                            //切割出商品檔案ID=> 特徵檔案名稱命名規則:(看板ID+特徵點編號),因為一種看板可能需要多張畫面的特徵點
-                            string[] split = matchedFileName.Split('-');
-                            string ibjectsMsg;
-                            //特徵檔案名稱使否有存在此商品
-                            if (objectsData.TryGetValue(split[0], out ibjectsMsg))
+                            if (mathedObjectsData == null)
                             {
-                                //return ibjectsMsg;
+                                mathedObjectsData = mathedCandidateData;
+                                matchedFileName = templateSURFPathFileName;
                             }
-                            else
+                            else if (mathedCandidateData.GetMatchedCount() > mathedObjectsData.GetMatchedCount())
                             {
-                                //System.Windows.MessageBox.Show("特徵檔案並無存在可對應的商品資料!");
-                                //return null;
+                                mathedObjectsData = mathedCandidateData;
+                                matchedFileName = templateSURFPathFileName;
                             }
                         }
-                        else
-                        {
-                            //System.Windows.MessageBox.Show("沒有對應到的商品或是不存在此商品");
-                            //return null;
-                        }
-                    }
-
-
-                    
+                    } 
                 }
+                System.Windows.MessageBox.Show(System.IO.Path.GetFileName(matchedFileName));
+                SURFMatch.ShowSURFMatchForm(mathedObjectsData, SURFMatch.CalSURFFeature(observedImg), viewer);
             }
-            else
-            {
-                //System.Windows.MessageBox.Show("沒有特徵資料");
-                //return null;
-            }
+            
                 
                 
         }

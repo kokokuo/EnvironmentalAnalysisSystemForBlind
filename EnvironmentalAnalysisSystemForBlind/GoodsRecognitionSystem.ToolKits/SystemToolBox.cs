@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 //Marshal類別
 using System.Runtime.InteropServices;
+using System.IO;
 //EmguCV
 using Emgu.CV;
 using Emgu.Util;
@@ -15,6 +16,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Features2D;
 using RecognitionSys.ToolKits.SURFMethod;
+using System.Windows.Forms;
 namespace RecognitionSys.ToolKits
 {
     /// <summary>
@@ -115,7 +117,7 @@ namespace RecognitionSys.ToolKits
         /// <param name="surf">SURF特徵類別</param>
         /// <param name="drawImg">要畫到的影像上</param>
         /// <returns>回傳畫好特徵點的影像</returns>
-        public Image<Bgr, byte> DrawSURFFeatureToWPF(SURFFeatureData surf, Image<Bgr, Byte> drawImg)
+        public static Image<Bgr, byte> DrawSURFFeatureToWPF(SURFFeatureData surf, Image<Bgr, Byte> drawImg)
         {
             VectorOfKeyPoint keyPoints = surf.GetKeyPoints();
             Bitmap imgForDraw = drawImg.Copy().ToBitmap();
@@ -130,6 +132,23 @@ namespace RecognitionSys.ToolKits
                 g.Dispose();
             }
             return new Image<Bgr, byte>(imgForDraw);
+        }
+
+
+        public static string GetMappingDescriptorDataFile(string histFileName, DirectoryInfo dir)
+        {
+            string path = dir.Parent.Parent.Parent.FullName + @"\SignBoardSURFFeatureData\";
+            string filename;
+            if (Directory.Exists(path) && File.Exists(path + histFileName))
+            {
+                filename = (path + histFileName);
+                return filename;
+            }
+            else
+            {
+                MessageBox.Show("沒有對應的特徵檔案!");
+                return null;
+            }
         }
     }
 }

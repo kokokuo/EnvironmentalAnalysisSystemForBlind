@@ -432,28 +432,14 @@ namespace MainSystem
                
             }
         }
-        private string GetMappingDescriptorDataFile(string histFileName)
-        {
-            string path = dir.Parent.Parent.Parent.FullName + @"\SignBoardSURFFeatureData\";
-            string filename;
-            if (Directory.Exists(path) && File.Exists(path + histFileName))
-            {
-                filename = (path + histFileName);
-                return filename;
-            }
-            else
-            {
-                System.Windows.MessageBox.Show("沒有對應的特徵檔案!");
-                return null;
-            }
-        }
+        
         private void getMappingFeatureButton_Click(object sender, RoutedEventArgs e)
         {
 
             if (templateHistFilePathName != null)
             {
                 string templateHistFileName = System.IO.Path.GetFileName(templateHistFilePathName); //取得路徑的檔案名稱
-                templateSURFPathFileName = GetMappingDescriptorDataFile(templateHistFileName);
+                templateSURFPathFileName = SystemToolBox.GetMappingDescriptorDataFile(templateHistFileName,dir);
                 if (templateSURFPathFileName != null)
                 {                
                     templateSurfFeature = MatchRecognition.ReadSURFFeature(templateSURFPathFileName);

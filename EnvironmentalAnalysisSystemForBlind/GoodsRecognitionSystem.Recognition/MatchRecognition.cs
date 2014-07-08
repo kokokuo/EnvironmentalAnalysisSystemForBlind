@@ -143,66 +143,26 @@ namespace RecognitionSys
         /// <param name="observedImg">要比對觀察的影像</param>
         /// <param name="viewer">顯示出匹配結果的物件</param>
         /// <returns>回傳匹配到的相關資訊類別,String是檔案名稱,如果未匹配到,則Key與Values皆會回傳null,因此要先做檢查</returns>
-        public static KeyValuePair<string, SURFMatchedData> MatchSURFFeatureForVideoObjs(List<string> surfFiles, Image<Bgr, Byte> observedImg, ImageViewer viewer)
+        public static SURFMatchedData MatchSURFFeatureForVideoObjs(string surfFilename, Image<Bgr, Byte> observedImg, ImageViewer viewer)
         {
-            Dictionary<string, SURFMatchedData> matchList = new Dictionary<string, SURFMatchedData>();
             SURFFeatureData templateSURFData;
             SURFMatchedData matchedData;
 
             //縮放到一樣大小 (系統修改成可讀圖片時才能加入)
             //observedImg = observedImg.Resize(3, INTER.CV_INTER_LINEAR);
 
-            //1.依序比對
+           
             SURFFeatureData observed = SURFMatch.CalSURFFeature(observedImg);
             Console.WriteLine("### One-by-One Mathed Start.....\n============================");
-            foreach (string fileName in surfFiles)
-            {
-                templateSURFData = MatchRecognition.ReadSURFFeature(fileName);
-                Console.WriteLine("SurfData: fileName =>" + Path.GetFileName(fileName));
-                matchedData = SURFMatch.MatchSURFFeatureByFLANNForObjs(templateSURFData, observed);
-                //如果Homography !=null 表示有匹配到(條件容忍與允許)
-                if (matchedData.GetHomography() != null)
-                {
-                    matchList.Add(Path.GetFileName(fileName), matchedData);
-                }
-                Console.WriteLine("match num:" + matchedData.GetMatchedCount().ToString() + "\n-----------------");
-            }
-            //2.再找出count最大的
-            int bestMatched = -1;
-            string bestTemplateId = null; //樣板檔案名稱(Id)
-            if (matchList.Count != 0)
-            {
-                foreach (KeyValuePair<string, SURFMatchedData> matchedSURFData in matchList)
-                {
-                    if (bestMatched == -1 && bestTemplateId == null)
-                    {
-                        bestMatched = matchedSURFData.Value.GetMatchedCount();
-                        bestTemplateId = matchedSURFData.Key;
-                    }
-                    else
-                    {
-                        //開始找出最多匹配點的檔案名稱與匹配資訊
-                        if (bestMatched < matchedSURFData.Value.GetMatchedCount())
-                        {
-                            bestMatched = matchedSURFData.Value.GetMatchedCount();
-                            bestTemplateId = matchedSURFData.Key;
-                        }
-                    }
-                }
-                Console.WriteLine("\n**** Matched fileName=" + bestTemplateId + ", match num:" + bestMatched.ToString() + " ****");
-                if (viewer != null)
-                    SURFMatch.ShowSURFMatchForm(matchList[bestTemplateId], observed, viewer);
-                Console.WriteLine("============================\n### Matched Finish.......\n");
-                //回傳匹配到的類別
-                return new KeyValuePair<string, SURFMatchedData>(bestTemplateId, matchList[bestTemplateId]);
-            }
-            else
-            {
-                Console.WriteLine("\n**** No Matched fileName !");
-                Console.WriteLine("============================\n### Matched Finish.......\n");
-                return new KeyValuePair<string, SURFMatchedData>(null, null);
-            }
-
+            Console.WriteLine("SurfData: fileName =>" + Path.GetFileName(surfFilename));
+            templateSURFData = MatchRecognition.ReadSURFFeature(surfFilename);
+            matchedData = SURFMatch.MatchSURFFeatureByFLANNForObjs(templateSURFData, observed);
+           
+            Console.WriteLine("match num:" + matchedData.GetMatchedCount().ToString() + "\n-----------------");
+            if (viewer != null)
+                SURFMatch.ShowSURFMatchForm(matchedData, observed, viewer);
+            return matchedData;
+         
 
         }
 
