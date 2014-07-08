@@ -298,7 +298,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
 
             Matrix<byte> mask;
             int k = 1;
-            double uniquenessThreshold = 0.3;//NNDR
+            double uniquenessThreshold = 0.5;//NNDR
             //The resulting n*k matrix of descriptor index from the training descriptors,存放找到的NN索引
             Matrix<int> indices; 
             HomographyMatrix homography = null;
@@ -344,7 +344,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
                     mask.SetValue(0);
                     
                     //此emgucv是NNDR,已實驗過,如果要使用VoteForUniqueness 請把mask改回255,mask存放的是樣板與觀察對應的特徵點是否相似0表不是,255表一樣
-                     Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
+                     //Features2DToolbox.VoteForUniqueness(dists, uniquenessThreshold, mask);
                     //如下,數值會一樣
                     //for (int i = 0; i < indices.Rows; i++)
                     //{
@@ -374,30 +374,46 @@ namespace RecognitionSys.ToolKits.SURFMethod
                         }
                     }
 
-                    for (int i = 0; i < mask.Rows; i++)
-                    {
-                        Console.WriteLine(mask.Data[i, 0]);
-                    }
+                    //for (int i = 0; i < mask.Rows; i++)
+                    //{
+                    //    Console.WriteLine(mask.Data[i, 0]);
+                    //}
                 }
                 int nonZeroCount = CvInvoke.cvCountNonZero(mask);
                 Console.WriteLine("good Match number:" + nonZeroCount+",template keypoint number = "+ template.GetKeyPoints().Size);
                 //Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
-                if (nonZeroCount >= 4) //原先是4
+                //因為是小圖比大圖，可能有特徵點重複比對到觀察影像導致駔後留下的特徵做於樣板特徵，因為多數情境下，一個畫面中只需要比對出一個即可，應該不需要超過樣板特特徵...
+                if (template.GetKeyPoints().Size > nonZeroCount && nonZeroCount >= template.GetKeyPoints().Size * 0.6) //原先是4
                 {
-                    //nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
-                    //Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
+                    Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                     //filter out all unnecessary pairs based on distance between pairs
-                 
-                    //if (nonZeroCount >= 30) //原先是4
                     homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
+                    watch.Stop();
+                    Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
 
+                    if (template.GetKeyPoints().Size > nonZeroCount && nonZeroCount >= template.GetKeyPoints().Size * 0.5)
+                    {
+                        return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
+                    }
+                    else {
+                        return null;
+                    }
+                    //if (nonZeroCount >= template.GetKeyPoints().Size * 0.5) //原先是4
+                       
+                   
+                    
+                }
+                else {
+                    watch.Stop();
+                    Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
+                    return null;
                 }
                 #endregion
-                watch.Stop();
-                Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
+                
 
 
-                return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
+                
             }
             catch (CvException ex)
             {

@@ -410,7 +410,7 @@ namespace MainSystem
             //顯示
             queryFrame = testVideoCapture.QueryFrame();
             queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
-            videoFrameBox.Image = queryFrame;
+            videoFrameBox.Image = queryFrame.Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
             return queryFrame;
         }
 

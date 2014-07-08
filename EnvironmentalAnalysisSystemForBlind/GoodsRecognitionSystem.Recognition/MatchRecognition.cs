@@ -131,7 +131,7 @@ namespace RecognitionSys
             //observedImg = observedImg.Resize(3, INTER.CV_INTER_LINEAR);
             SURFFeatureData observed = SURFMatch.CalSURFFeature(observedImg);
             SURFMatchedData matchedData = SURFMatch.MatchSURFFeatureByFLANNForObjs(template, observed);
-            if (isShowResult)
+            if (matchedData != null && isShowResult)
                 SURFMatch.ShowSURFMatchForm(matchedData, observed, new ImageViewer());
             return matchedData;
         }
@@ -143,9 +143,8 @@ namespace RecognitionSys
         /// <param name="observedImg">要比對觀察的影像</param>
         /// <param name="viewer">顯示出匹配結果的物件</param>
         /// <returns>回傳匹配到的相關資訊類別,String是檔案名稱,如果未匹配到,則Key與Values皆會回傳null,因此要先做檢查</returns>
-        public static SURFMatchedData MatchSURFFeatureForVideoObjs(string surfFilename, Image<Bgr, Byte> observedImg, ImageViewer viewer)
+        public static SURFMatchedData MatchSURFFeatureForVideoObjs(SURFFeatureData templateSURFData, Image<Bgr, Byte> observedImg, ImageViewer viewer)
         {
-            SURFFeatureData templateSURFData;
             SURFMatchedData matchedData;
 
             //縮放到一樣大小 (系統修改成可讀圖片時才能加入)
@@ -154,15 +153,17 @@ namespace RecognitionSys
            
             SURFFeatureData observed = SURFMatch.CalSURFFeature(observedImg);
             Console.WriteLine("### One-by-One Mathed Start.....\n============================");
-            Console.WriteLine("SurfData: fileName =>" + Path.GetFileName(surfFilename));
-            templateSURFData = MatchRecognition.ReadSURFFeature(surfFilename);
             matchedData = SURFMatch.MatchSURFFeatureByFLANNForObjs(templateSURFData, observed);
-           
-            Console.WriteLine("match num:" + matchedData.GetMatchedCount().ToString() + "\n-----------------");
-            if (viewer != null)
-                SURFMatch.ShowSURFMatchForm(matchedData, observed, viewer);
-            return matchedData;
-         
+            if (matchedData != null)
+            {
+                Console.WriteLine("match num:" + matchedData.GetMatchedCount().ToString() + "\n-----------------");
+                if (viewer != null)
+                    SURFMatch.ShowSURFMatchForm(matchedData, observed, viewer);
+                return matchedData;
+            }
+            else{
+                return null;
+            }
 
         }
 

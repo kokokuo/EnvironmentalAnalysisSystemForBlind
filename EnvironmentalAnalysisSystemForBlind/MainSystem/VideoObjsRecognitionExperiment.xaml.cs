@@ -115,7 +115,7 @@ namespace MainSystem
             //顯示
             queryFrame = testVideoCapture.QueryFrame();
             queryFrame = queryFrame.Resize(640, 480, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
-            videoFrameBox.Image = queryFrame;
+            videoFrameBox.Image = queryFrame.Resize(320, 240, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR);
             return queryFrame;
         }
 
@@ -160,9 +160,9 @@ namespace MainSystem
                 {
                     lock (this)
                     {
-
+                        int currentFrameIndex = (int)testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES);
                         //如果Frame的index沒有差過影片的最大index
-                        if (testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES) < videoTotalFrame)
+                        if (currentFrameIndex < videoTotalFrame)
                         {
                             Image<Bgr, byte> currentFrame = QueryFrameAndShow();
                             //如果正在捲動
@@ -176,7 +176,7 @@ namespace MainSystem
                             else
                             {
                                 //處理辨識===========================================================
-                                if (currentFrame != null)
+                                if (currentFrame != null && (currentFrameIndex % 5 == 0))
                                 {
                                     if (videoObjRecogSys != null)
                                         videoObjRecogSys.SetupInputImage(currentFrame);
