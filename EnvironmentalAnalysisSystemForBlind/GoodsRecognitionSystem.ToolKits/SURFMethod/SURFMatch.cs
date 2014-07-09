@@ -293,7 +293,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
         /// <param name="template">樣板的特徵點類別</param>
         /// <param name="observedScene">被觀察的場景匹配的特徵點</param>
         /// <returns>回傳匹配的資料類別</returns>
-        public static SURFMatchedData MatchSURFFeatureByFLANNForObjs(SURFFeatureData template, SURFFeatureData observedScene)
+        public static SURFMatchedData MatchSURFFeatureByFLANNForObjs(SURFFeatureData template,SURFFeatureData observedScene)
         {
 
             Matrix<byte> mask;
@@ -383,18 +383,21 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 Console.WriteLine("good Match number:" + nonZeroCount+",template keypoint number = "+ template.GetKeyPoints().Size);
                 //Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                 //因為是小圖比大圖，可能有特徵點重複比對到觀察影像導致駔後留下的特徵做於樣板特徵，因為多數情境下，一個畫面中只需要比對出一個即可，應該不需要超過樣板特特徵...
-                if (template.GetKeyPoints().Size > nonZeroCount && nonZeroCount >= template.GetKeyPoints().Size * 0.6) //原先是4
+                if (template.GetKeyPoints().Size * 2 > nonZeroCount && nonZeroCount >= template.GetKeyPoints().Size * 1.2
+                    || template.GetKeyPoints().Size > nonZeroCount && nonZeroCount  >= template.GetKeyPoints().Size * 0.6) //原先是4
                 {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 50);
+                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 20);
                     Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                     //filter out all unnecessary pairs based on distance between pairs
                     homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
                     watch.Stop();
                     Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
 
-                    if (template.GetKeyPoints().Size > nonZeroCount && nonZeroCount >= template.GetKeyPoints().Size * 0.5)
-                    {
-                        return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
+                    if (template.GetKeyPoints().Size * 2 > nonZeroCount && nonZeroCount >= template.GetKeyPoints().Size * 1.2
+                        || template.GetKeyPoints().Size > nonZeroCount && nonZeroCount  >= template.GetKeyPoints().Size * 0.6)
+                    { 
+                      
+                            return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
                     }
                     else {
                         return null;
