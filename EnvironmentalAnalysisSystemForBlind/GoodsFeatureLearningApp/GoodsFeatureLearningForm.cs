@@ -16,6 +16,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 //File directory operation
 using System.IO;
+using Emgu.CV.UI;
 
 namespace GoodsFeatureLearningApp
 {
@@ -53,7 +54,7 @@ namespace GoodsFeatureLearningApp
             {
                 surfData = learningSys.CalSURFFeature();
                 Image<Bgr, byte> drawKeyPointImg = SystemToolBox.DrawSURFFeature(surfData);
-
+                new ImageViewer(SystemToolBox.DrawSURFFeatureToWPF(surfData, surfData.GetImg())).Show();
                 extractFeatureImgBox.Image = drawKeyPointImg.Resize(320, 240, INTER.CV_INTER_LINEAR);
             }
         }

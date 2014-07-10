@@ -221,8 +221,9 @@ namespace RecognitionSys
             }
             //排序
             var sorted = from c in listContours orderby c.Area descending select c;
-            
             List<Contour<Point>> orderContour = sorted.ToList<Contour<Point>>();
+            //foreach (Contour<Point> c in orderContour)
+            //    Console.WriteLine(c.Area +" ");
             return orderContour;
         }
         /// <summary>

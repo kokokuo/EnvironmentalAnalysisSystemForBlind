@@ -298,7 +298,7 @@ namespace RecognitionSys.ToolKits.SURFMethod
 
             Matrix<byte> mask;
             int k = 1;
-            double uniquenessThreshold = 0.5;//NNDR
+            double uniquenessThreshold = 0.8;//NNDR
             //The resulting n*k matrix of descriptor index from the training descriptors,存放找到的NN索引
             Matrix<int> indices; 
             HomographyMatrix homography = null;
@@ -311,14 +311,14 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 watch = Stopwatch.StartNew();
                 #region FLANN Match CPU
                 //match 
-                Index flann = new Index(template.GetDescriptors(), 12);
+                Index flann = new Index(template.GetDescriptors(), 4);
 
                 indices = new Matrix<int>(observedScene.GetDescriptors().Rows, k);
                 //dists是對應indices索引的距離值
                 using (dists = new Matrix<float>(observedScene.GetDescriptors().Rows, k))
                 {
                     //找出最好的NN
-                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 12);
+                    flann.KnnSearch(observedScene.GetDescriptors(), indices, dists, k, 4);
                     #region Test Output
                     //for (int i = 0; i < indices.Rows; i++)
                     //{
@@ -384,27 +384,24 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 //Console.WriteLine("-----------------\nVoteForUniqueness pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                 //因為是小圖比大圖，可能有特徵點重複比對到觀察影像導致駔後留下的特徵做於樣板特徵，因為多數情境下，一個畫面中只需要比對出一個即可，應該不需要超過樣板特特徵...
                 if (template.GetKeyPoints().Size * 2 > nonZeroCount && nonZeroCount >= template.GetKeyPoints().Size * 1.2
-                    || template.GetKeyPoints().Size > nonZeroCount && nonZeroCount  >= template.GetKeyPoints().Size * 0.6) //原先是4
+                    || template.GetKeyPoints().Size > nonZeroCount && nonZeroCount  >= template.GetKeyPoints().Size * 0.2) //原先是4
                 {
                     nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 1.2, 20);
                     Console.WriteLine("VoteForSizeAndOrientation pairCount => " + nonZeroCount.ToString() + "\n-----------------");
                     //filter out all unnecessary pairs based on distance between pairs
-                    homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5
+                    
                     watch.Stop();
                     Console.WriteLine("Cal SURF Match time => " + watch.ElapsedMilliseconds.ToString() + "\n-----------------");
 
                     if (template.GetKeyPoints().Size * 2 > nonZeroCount && nonZeroCount >= template.GetKeyPoints().Size * 1.2
-                        || template.GetKeyPoints().Size > nonZeroCount && nonZeroCount  >= template.GetKeyPoints().Size * 0.6)
-                    { 
-                      
+                        || template.GetKeyPoints().Size > nonZeroCount && nonZeroCount  >= template.GetKeyPoints().Size * 0.2)
+                    {
+                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(template.GetKeyPoints(), observedScene.GetKeyPoints(), indices, mask, 5); //原先是5  
                             return new SURFMatchedData(indices, homography, mask, nonZeroCount, template);
                     }
                     else {
                         return null;
                     }
-                    //if (nonZeroCount >= template.GetKeyPoints().Size * 0.5) //原先是4
-                       
-                   
                     
                 }
                 else {
@@ -539,14 +536,14 @@ namespace RecognitionSys.ToolKits.SURFMethod
                 Image<Bgr, Byte> result = Features2DToolbox.DrawMatches(matchData.GetTemplateSURFData().GetImg(), matchData.GetTemplateSURFData().GetKeyPoints(), observedScene.GetImg(), observedScene.GetKeyPoints(),
                     matchData.GetIndices(), new Bgr(255, 255, 255), new Bgr(255, 255, 255), matchData.GetMask(), Features2DToolbox.KeypointDrawType.DEFAULT);
 
-                if (matchData.GetHomography() != null) //Get RoI box
-                {
-                    PointF[] matchPts = GetMatchBoundingBox(matchData.GetHomography(), matchData.GetTemplateSURFData());
-                    if (matchPts != null)
-                    {
-                        result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);
-                    }
-                }
+                //if (matchData.GetHomography() != null) //Get RoI box
+                //{
+                //    PointF[] matchPts = GetMatchBoundingBox(matchData.GetHomography(), matchData.GetTemplateSURFData());
+                //    if (matchPts != null)
+                //    {
+                //        result.DrawPolyline(Array.ConvertAll<PointF, Point>(matchPts, Point.Round), true, new Bgr(Color.Red), 2);
+                //    }
+                //}
             
                 viewer.Image = result;
                 viewer.Show();

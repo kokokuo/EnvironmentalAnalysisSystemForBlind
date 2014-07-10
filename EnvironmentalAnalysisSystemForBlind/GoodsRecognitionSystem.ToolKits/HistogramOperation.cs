@@ -494,7 +494,6 @@ namespace RecognitionSys.ToolKits
                 IntPtr hsv = CvInvoke.cvCreateImage(CvInvoke.cvGetSize(observedImg), Emgu.CV.CvEnum.IPL_DEPTH.IPL_DEPTH_8U, 3);
                 IntPtr h_plane = CvInvoke.cvCreateImage(CvInvoke.cvGetSize(observedImg), Emgu.CV.CvEnum.IPL_DEPTH.IPL_DEPTH_8U, 1);
                 IntPtr s_plane = CvInvoke.cvCreateImage(CvInvoke.cvGetSize(observedImg), Emgu.CV.CvEnum.IPL_DEPTH.IPL_DEPTH_8U, 1);
-                IntPtr v_plane = CvInvoke.cvCreateImage(CvInvoke.cvGetSize(observedImg), Emgu.CV.CvEnum.IPL_DEPTH.IPL_DEPTH_8U, 1);
                 IntPtr[] observed_planes = new IntPtr[2] { h_plane, s_plane };
                 //Image<Gray, Byte> h_planeImg = IplImagePointerToEmgucvImage<Gray, Byte>(h_plane);
                 //Image<Gray, Byte> s_planeImg = IplImagePointerToEmgucvImage<Gray, Byte>(s_plane);

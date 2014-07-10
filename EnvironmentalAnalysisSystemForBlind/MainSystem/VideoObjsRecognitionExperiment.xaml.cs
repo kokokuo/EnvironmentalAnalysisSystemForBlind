@@ -176,7 +176,7 @@ namespace MainSystem
                             else
                             {
                                 //處理辨識===========================================================
-                                if (currentFrame != null && (currentFrameIndex % 5 == 0))
+                                if (currentFrame != null  && (currentFrameIndex % 5 == 0))
                                 {
                                     if (videoObjRecogSys != null)
                                         videoObjRecogSys.SetupInputImage(currentFrame);
@@ -314,7 +314,7 @@ namespace MainSystem
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             //移動上層在指定下層路徑
             dlg.RestoreDirectory = true;
-            dlg.InitialDirectory = dir.Parent.Parent.Parent.FullName + @"\SigbBoardHistData";
+            dlg.InitialDirectory = dir.Parent.Parent.Parent.FullName + @"\SigbBoardHistData-bin16-8";
             // Set filter for file extension and default file extension
             dlg.Filter = "XML Files (*.xml)|*.xml";
             dlg.Title = "Open HistogramData File";

@@ -28,11 +28,13 @@ namespace MainSystem
         Dictionary<string, DenseHistogram> histDatas;
         DirectoryInfo dir;
         Dictionary<string, string> objectsData = new Dictionary<string, string>();
+        SURFFeatureData obervedSurfData;
         public VideoObjectsRecognition(Image<Bgr, Byte> observedSrcImg)
         {
             viewer = new ImageViewer();
             SetUpSignBoardSURFFeatureData();
             observedImg = observedSrcImg.Copy();
+            obervedSurfData = null;
             //要有深度過濾才行使用此code
             //Image<Bgr, Byte> dst = SkinFilter(observedImg);
             //objectImg = GetObjectBoundingBoxImg(dst);
@@ -55,9 +57,9 @@ namespace MainSystem
             //讀取Histogram檔案的目錄下所有檔案名稱
             Console.WriteLine("\nPath=>" + projectPath + "\n");
             //隨著此類別存放的位置不同,要重新設定檔案路徑
-            if (Directory.Exists(projectPath + @"\SigbBoardHistData"))
+            if (Directory.Exists(projectPath + @"\SigbBoardHistData-bin16-8"))
             {
-                histFiles = Directory.GetFiles(projectPath + @"\SigbBoardHistData").ToList();
+                histFiles = Directory.GetFiles(projectPath + @"\SigbBoardHistData-bin16-8").ToList();
             }
         }
 
@@ -79,6 +81,7 @@ namespace MainSystem
         public void SetupInputImage(Image<Bgr, Byte> observedSrcImg) 
         {
             observedImg = observedSrcImg.Copy();
+            obervedSurfData = null;
             //要有深度過濾才行使用此code
             //Image<Bgr, Byte> dst = SkinFilter(observedImg);
            // objectImg = GetObjectBoundingBoxImg(dst);
@@ -181,7 +184,7 @@ namespace MainSystem
         {
             SURFMatchedData mathedObjectsData = null;
             string matchedFileName = null;
-            
+            Image<Bgr, byte> observedContourRectImg = null;
             if (surfFiles.Count != 0 && histFiles.Count !=0)
             {
                 Stopwatch watch = Stopwatch.StartNew();
@@ -189,6 +192,7 @@ namespace MainSystem
                 ////偵測物體
                 foreach (string histFilePath in histFiles)
                 {
+                    //1.取出直方圖資料
                     DenseHistogram hist;
                     string histFilename = System.IO.Path.GetFileName(histFilePath);
                     if (!histDatas.ContainsKey(histFilename))
@@ -199,72 +203,98 @@ namespace MainSystem
                     else {
                         hist = histDatas[histFilename];
                     }
+                    
+                    //2.取出SURF資料
+                    string templateHistFileName = System.IO.Path.GetFileName(histFilePath); //取得路徑的檔案名稱
+                    string templateSURFPathFileName = SystemToolBox.GetMappingDescriptorDataFile(templateHistFileName, dir);
 
-                    //反投影
-                    Image<Gray, byte> backProjectImg = DetectObjects.DoBackProject(hist, observedImg);
-                    Image<Gray, byte> binaryImg = DetectObjects.DoBinaryThreshold(backProjectImg, 200);
-                    Image<Gray, byte> morphologyImg = DetectObjects.DoErode(binaryImg, 2);
-                    morphologyImg = DetectObjects.DoDilate(morphologyImg, 1);
-                    List<Contour<System.Drawing.Point>> topContours = DetectObjects.GetOrderMaxContours(morphologyImg);
-                    int i = 0;
-                    double histMatchRate = 1;
-                    int matchIndex = -1;
-                    foreach (Contour<System.Drawing.Point> c in topContours)
+                    SURFFeatureData templateSurf;
+                    string surfFilename = System.IO.Path.GetFileName(templateSURFPathFileName);
+                    if (!surfDatas.ContainsKey(surfFilename))
                     {
-                        if (i == 3)
-                            break;
-                        DenseHistogram observedRectHist;
-                        Image<Bgr, byte> observedContourRectImg = DetectObjects.GetBoundingBoxImage(c, observedImg);
-                        double compareRate = DetectObjects.CompareHistogram(hist, observedContourRectImg, out observedRectHist);
-                        if (compareRate < histMatchRate)
-                        {
-                            histMatchRate = compareRate;
-                            matchIndex = i;
-                        }
-                        i++;
+                        templateSurf = MatchRecognition.ReadSURFFeature(templateSURFPathFileName);
+                        surfDatas.Add(surfFilename, templateSurf);
                     }
-                    if (histMatchRate < 0.5)
+                    else
                     {
-                        //顏色特徵相似,取出對應的特徵資料做辨識
+                        templateSurf = surfDatas[surfFilename];
+                    }
 
-                        string templateHistFileName = System.IO.Path.GetFileName(histFilePath); //取得路徑的檔案名稱
-                        string templateSURFPathFileName = SystemToolBox.GetMappingDescriptorDataFile(templateHistFileName, dir);
+                    //3.做偵測
+                    using(Image<Gray, byte> backProjectImg = DetectObjects.DoBackProject(hist, observedImg))
+                    using (Image<Gray, byte> binaryImg = DetectObjects.DoBinaryThreshold(backProjectImg, 200)) { 
+                        Image<Gray, byte> morphologyImg = DetectObjects.DoErode(binaryImg, 2);
+                        morphologyImg = DetectObjects.DoDilate(morphologyImg, 1);
+                        List<Contour<System.Drawing.Point>> topContours = DetectObjects.GetOrderMaxContours(morphologyImg);
 
-                        SURFFeatureData surf;
-                        string surfFilename = System.IO.Path.GetFileName(templateSURFPathFileName);
-                        if (!surfDatas.ContainsKey(surfFilename))
-                        {
-                            surf = MatchRecognition.ReadSURFFeature(templateSURFPathFileName);
-                            surfDatas.Add(surfFilename, surf);
-                        }
-                        else
-                        {
-                            surf = surfDatas[surfFilename];
-                        }
-                        Console.WriteLine("SurfData: fileName =>" + surfFilename);
-            
-                        //匹配特徵並取回匹配到的特徵
-                        SURFMatchedData mathedCandidateData = MatchRecognition.MatchSURFFeatureForVideoObjs(surf, observedImg, null);
-                        //招出最好的特徵
-                        if (mathedCandidateData != null)
-                        {
-                            if (mathedObjectsData == null)
-                            {
-                                mathedObjectsData = mathedCandidateData;
-                                matchedFileName = templateSURFPathFileName;
-                            }
-                            else if (mathedCandidateData.GetMatchedCount() > mathedObjectsData.GetMatchedCount())
-                            {
-                                mathedObjectsData = mathedCandidateData;
-                                matchedFileName = templateSURFPathFileName;
-                            }
-                        }
-                    } 
+                         //new ImageViewer(DetectObjects.DrawContoursTopThreeBoundingBoxOnImg(topContours, observedImg.Copy())).Show();
+                         int i = 0;
+                         double histMatchRate = 1;
+                         int matchIndex = -1;
+                         foreach (Contour<System.Drawing.Point> c in topContours)
+                         {
+                             if (i == 3)
+                                 break;
+                             //判斷待偵測的輪廓面積是否過小，如果太小就省略
+                             if (c.Area >= (templateSurf.GetImg().Width * templateSurf.GetImg().Height) * 0.3)
+                             {
+                                 DenseHistogram observedRectHist;
+                                 observedContourRectImg = DetectObjects.GetBoundingBoxImage(c, observedImg.Copy());
+                                 double compareRate = DetectObjects.CompareHistogram(hist, observedContourRectImg, out observedRectHist);
+                                 if (compareRate < histMatchRate)
+                                 {
+                                     histMatchRate = compareRate;
+                                     matchIndex = i;
+                                 }
+                             }
+                             i++;
+                         }
+
+                         if (histMatchRate < 0.5)
+                         {
+                             Console.WriteLine("SurfData: fileName =>" + surfFilename);
+                             //影像正規化(如果觀察影像過大的話)
+                             if (observedContourRectImg != null && observedContourRectImg.Height * observedContourRectImg.Width > templateSurf.GetImg().Width * templateSurf.GetImg().Height)
+                                 observedContourRectImg = observedContourRectImg.Resize(templateSurf.GetImg().Width, templateSurf.GetImg().Height, INTER.CV_INTER_LINEAR);
+                             //取出特徵
+                             if (obervedSurfData == null && observedContourRectImg != null)
+                                 obervedSurfData = SURFMatch.CalSURFFeature(observedContourRectImg);
+
+
+                             //匹配特徵並取回匹配到的特徵
+                             SURFMatchedData mathedCandidateData = MatchRecognition.MatchSURFFeatureForVideoObjs(templateSurf, obervedSurfData, null);
+                             //招出最好的特徵
+                             if (mathedCandidateData != null)
+                             {
+                                 if (mathedObjectsData == null)
+                                 {
+                                     mathedObjectsData = mathedCandidateData;
+                                     matchedFileName = templateSURFPathFileName;
+                                 }
+                                 else if (mathedCandidateData.GetMatchedCount() > mathedObjectsData.GetMatchedCount())
+                                 {
+                                     mathedObjectsData = mathedCandidateData;
+                                     matchedFileName = templateSURFPathFileName;
+                                 }
+                             }
+                         }
+
+                         morphologyImg.Dispose();
+                         topContours.Clear();
+
+                         watch.Stop();
+                         Console.WriteLine("File = " + System.IO.Path.GetFileName(matchedFileName) + " Video Analytics time = " + watch.ElapsedMilliseconds);
+                         if (mathedObjectsData != null && obervedSurfData != null)
+                             SURFMatch.ShowSURFMatchForm(mathedObjectsData, obervedSurfData, viewer);
+                    }
+                   
                 }
-                watch.Stop();
-                Console.WriteLine("File = " + System.IO.Path.GetFileName(matchedFileName) + "Video Analytics time = " + watch.ElapsedMilliseconds);
-                if(mathedObjectsData != null)
-                    SURFMatch.ShowSURFMatchForm(mathedObjectsData, SURFMatch.CalSURFFeature(observedImg), viewer);
+                   
+                   
+                    
+                    
+                    
+                   
             }
             
                 
