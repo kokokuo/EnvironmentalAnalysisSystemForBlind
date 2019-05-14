@@ -467,6 +467,8 @@ namespace RecognitionSys.ToolKits
                 IntPtr backProj = CvInvoke.cvCreateImage(CvInvoke.cvGetSize(h_plane), Emgu.CV.CvEnum.IPL_DEPTH.IPL_DEPTH_8U, 1);
                 CvInvoke.cvZero(backProj);
                 CvInvoke.cvCalcBackProject(new IntPtr[] { h_plane }, backProj, templateHist);
+                
+                templateHist.Dispose();
 
                 return EmguFormatConvetor.IplImagePointerToEmgucvImage<Gray, Byte>(backProj);
             }
@@ -505,7 +507,7 @@ namespace RecognitionSys.ToolKits
                 IntPtr backProj = CvInvoke.cvCreateImage(CvInvoke.cvGetSize(observedImg), Emgu.CV.CvEnum.IPL_DEPTH.IPL_DEPTH_8U, 1);
                 CvInvoke.cvZero(backProj);
                 CvInvoke.cvCalcBackProject(observed_planes, backProj, templateHist);
-
+                templateHist.Dispose();
                 return EmguFormatConvetor.IplImagePointerToEmgucvImage<Gray, Byte>(backProj);
 
             }

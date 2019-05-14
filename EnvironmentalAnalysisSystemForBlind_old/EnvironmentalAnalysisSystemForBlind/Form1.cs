@@ -483,7 +483,9 @@ namespace EnvironmentalAnalysisSystemForBlind
                 {
                     DelegateViewer del_MatchViewer = new DelegateViewer(UpdateSURFMatchViewer);
                     this.Invoke(del_MatchViewer, result);
-                    //跨執行緒UI存取，使用委派處理
+                   // matchViewer.Image = result;
+                    //matchViewer.Show();
+                    //跨執行緒UI存取，使用委派處理...
                 }
             }
         }

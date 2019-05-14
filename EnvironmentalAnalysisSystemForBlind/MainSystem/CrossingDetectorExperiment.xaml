@@ -43,7 +43,8 @@
             <Button Content="撥放" HorizontalAlignment="Left" Margin="20,342,0,0" VerticalAlignment="Top" Width="75" x:Name="playButton" Click="playButton_Click"/>
             <Button Content="停止" HorizontalAlignment="Left" Margin="265,343,0,0" VerticalAlignment="Top" Width="75" x:Name="stopButton" Click="stopButton_Click"/>
         </Grid>
-       
-        
+        <TextBlock Name="showIsCrossingTextBlock"  Grid.Column="1" HorizontalAlignment="Left" Margin="18,420,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" FontSize="48"/>
+
+
     </Grid>
 </UserControl>

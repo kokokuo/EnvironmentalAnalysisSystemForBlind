@@ -16,6 +16,7 @@ using RecognitionSys.ToolKits;
 using RecognitionSys.ToolKits.SURFMethod;
 //stopWatch計算時間用
 using System.Diagnostics;
+using SpeechLib;
 namespace MainSystem
 {
     public class VideoObjectsRecognition
@@ -29,9 +30,12 @@ namespace MainSystem
         DirectoryInfo dir;
         Dictionary<string, string> objectsData = new Dictionary<string, string>();
         SURFFeatureData obervedSurfData;
+        SpVoice voice;
         public VideoObjectsRecognition(Image<Bgr, Byte> observedSrcImg)
         {
             viewer = new ImageViewer();
+            viewer.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            viewer.Location = new Point(860,200);
             SetUpSignBoardSURFFeatureData();
             observedImg = observedSrcImg.Copy();
             obervedSurfData = null;
@@ -50,6 +54,9 @@ namespace MainSystem
 
             surfDatas = new Dictionary<string, SURFFeatureData>();
             histDatas = new Dictionary<string, DenseHistogram>();
+
+            voice = new SpVoice();
+            voice.Voice = voice.GetVoices(string.Empty, string.Empty).Item(0);//Item(0)中文女聲
         }
 
         private void LoadHistogramDataFiles(string projectPath)
@@ -57,9 +64,9 @@ namespace MainSystem
             //讀取Histogram檔案的目錄下所有檔案名稱
             Console.WriteLine("\nPath=>" + projectPath + "\n");
             //隨著此類別存放的位置不同,要重新設定檔案路徑
-            if (Directory.Exists(projectPath + @"\SigbBoardHistData-bin16-8"))
+            if (Directory.Exists(projectPath + @"\SigbBoardHistData-bin50"))
             {
-                histFiles = Directory.GetFiles(projectPath + @"\SigbBoardHistData-bin16-8").ToList();
+                histFiles = Directory.GetFiles(projectPath + @"\SigbBoardHistData-bin50").ToList();
             }
         }
 
@@ -236,7 +243,7 @@ namespace MainSystem
                              if (i == 3)
                                  break;
                              //判斷待偵測的輪廓面積是否過小，如果太小就省略
-                             if (c.Area >= (templateSurf.GetImg().Width * templateSurf.GetImg().Height) * 0.3)
+                             if (c.Area >= (templateSurf.GetImg().Width * templateSurf.GetImg().Height) * 0.4)
                              {
                                  DenseHistogram observedRectHist;
                                  observedContourRectImg = DetectObjects.GetBoundingBoxImage(c, observedImg.Copy());
@@ -246,55 +253,54 @@ namespace MainSystem
                                      histMatchRate = compareRate;
                                      matchIndex = i;
                                  }
+                                 observedRectHist.Dispose();
                              }
                              i++;
                          }
 
                          if (histMatchRate < 0.5)
                          {
-                             Console.WriteLine("SurfData: fileName =>" + surfFilename);
                              //影像正規化(如果觀察影像過大的話)
-                             if (observedContourRectImg != null && observedContourRectImg.Height * observedContourRectImg.Width > templateSurf.GetImg().Width * templateSurf.GetImg().Height)
-                                 observedContourRectImg = observedContourRectImg.Resize(templateSurf.GetImg().Width, templateSurf.GetImg().Height, INTER.CV_INTER_LINEAR);
+                            // if (observedContourRectImg != null && observedContourRectImg.Height * observedContourRectImg.Width > templateSurf.GetImg().Width * templateSurf.GetImg().Height)
+                                 //observedContourRectImg = observedContourRectImg.Resize(templateSurf.GetImg().Width, templateSurf.GetImg().Height, INTER.CV_INTER_LINEAR);
                              //取出特徵
                              if (obervedSurfData == null && observedContourRectImg != null)
+                             {
                                  obervedSurfData = SURFMatch.CalSURFFeature(observedContourRectImg);
-
-
+                                 observedContourRectImg.Dispose();
+                             }
                              //匹配特徵並取回匹配到的特徵
                              SURFMatchedData mathedCandidateData = MatchRecognition.MatchSURFFeatureForVideoObjs(templateSurf, obervedSurfData, null);
                              //招出最好的特徵
-                             if (mathedCandidateData != null)
+                             if (mathedCandidateData != null && mathedCandidateData.GetHomography() != null)
                              {
-                                 if (mathedObjectsData == null)
+                                 if (mathedObjectsData == null )
                                  {
                                      mathedObjectsData = mathedCandidateData;
                                      matchedFileName = templateSURFPathFileName;
                                  }
-                                 else if (mathedCandidateData.GetMatchedCount() > mathedObjectsData.GetMatchedCount())
+                                 else if (mathedCandidateData.GetMatchedCount() > mathedObjectsData.GetMatchedCount() && mathedCandidateData.GetHomography() !=null)
                                  {
                                      mathedObjectsData = mathedCandidateData;
                                      matchedFileName = templateSURFPathFileName;
                                  }
                              }
                          }
-
+                         
                          morphologyImg.Dispose();
-                         topContours.Clear();
 
-                         watch.Stop();
-                         Console.WriteLine("File = " + System.IO.Path.GetFileName(matchedFileName) + " Video Analytics time = " + watch.ElapsedMilliseconds);
+                         topContours.Clear();
                          if (mathedObjectsData != null && obervedSurfData != null)
                              SURFMatch.ShowSURFMatchForm(mathedObjectsData, obervedSurfData, viewer);
                     }
-                   
                 }
-                   
-                   
-                    
-                    
-                    
-                   
+                watch.Stop();
+                Console.WriteLine("File = " + System.IO.Path.GetFileName(matchedFileName) + " Video Analytics time = " + watch.ElapsedMilliseconds);
+                //if (matchedFileName != null)
+                //{
+                //    string[] split = System.IO.Path.GetFileName(matchedFileName).Split('b');
+                //    //voice.Speak("前方有" + split[0], SpeechVoiceSpeakFlags.SVSFlagsAsync);
+                //}
             }
             
                 

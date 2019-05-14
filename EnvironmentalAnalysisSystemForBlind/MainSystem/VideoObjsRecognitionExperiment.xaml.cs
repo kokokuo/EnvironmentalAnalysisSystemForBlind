@@ -143,7 +143,7 @@ namespace MainSystem
                 //設定刻度
                 videoTrackBar.Minimum = 0;
                 videoTrackBar.Maximum = videoTotalFrame;
-
+                Console.WriteLine("Total Frame:" + videoTotalFrame);
                 //設定播放用的Timer
                 testVideoTimer.Tick += testVideoTimer_Tick;
                 testVideoTimer.Interval = 1000 / FPS;
@@ -337,7 +337,7 @@ namespace MainSystem
         #endregion
 
         #region 載入圖片的部分－實驗
-
+        
         private void loadTestImgButton_Click(object sender, RoutedEventArgs e)
         {
             string filename = OpenImgFile();
@@ -462,7 +462,7 @@ namespace MainSystem
              
             }
         }
-
+       
         #endregion
 
        

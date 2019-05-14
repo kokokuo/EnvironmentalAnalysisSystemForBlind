@@ -25,6 +25,7 @@ using System.IO;
 using System.Windows.Forms;
 //stopWatch計算時間用
 using System.Diagnostics;
+using SpeechLib;
 namespace MainSystem
 {
     /// <summary>
@@ -57,7 +58,7 @@ namespace MainSystem
         Image<Bgr, byte> showFinishedRepairedHoughLineImg;
 
         List<LineSegment2D> repairedHoughLine; //紀錄修復後的所有線段
-
+        bool isVideoZebra;
         Dictionary<CrossingDetector.LineQuantification, LinkedList<LineEquation>> linesHistogram; //統計不同角度的線段並歸類(過濾非主流限段)
         int mainDirectionLineGroupId = 0; //紀錄主要線段的群組ID
 
@@ -69,7 +70,10 @@ namespace MainSystem
         int videoTotalFrame;
         bool isPlay, isStop;
         Image<Bgr, byte> queryFrame;
+        SpVoice voice;
+        int count = 0;
 
+ 
         public CrossingDetectorExperiment()
         {
             InitializeComponent();
@@ -78,7 +82,10 @@ namespace MainSystem
             houghLineViewer = new ImageViewer();
             houghLineViewer.FormClosing += houghLineViewer_FormClosing;
 
-
+            voice = new SpVoice();
+            voice.Voice = voice.GetVoices(string.Empty, string.Empty).Item(0);//Item(0)中文女聲
+          
+            
             //ScanLine的各線段
             crossingConnectionlines = new List<LineSegment2DF>();
             candidateZebraCrossingsByHoughLine = new List<LineSegment2D>();
@@ -111,7 +118,7 @@ namespace MainSystem
             testVideoTimer = new Timer();
             videoTotalFrame = 0;
             isPlay = isStop = false;
-
+            isVideoZebra = false;
         }
         void searchRepairHoughLineStepViewer_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -138,6 +145,7 @@ namespace MainSystem
         }
 
         #region 圖片－實驗
+      
         /////////////////////////////////////////////////////////////////////////////////////
         private void loadImgButton_Click(object sender, RoutedEventArgs e)
         {
@@ -330,6 +338,7 @@ namespace MainSystem
                 System.Windows.MessageBox.Show("前方有斑馬線");
         }
         /////////////////////////////////////////////////////////////////////////////////////
+       
         #endregion
 
 
@@ -393,7 +402,7 @@ namespace MainSystem
             {
                 testVideoCapture = new Capture(filename);
                 videoTotalFrame = (int)testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_COUNT); //Get total frame number
-
+                Console.WriteLine("Total Frame:" + videoTotalFrame);
                 //第一張做影片的封面
                 QueryFrameAndShow();
 
@@ -427,19 +436,23 @@ namespace MainSystem
             //如果有影片
             if (testVideoCapture != null)
             {
+
                 if (isPlay)
                 {
                     lock (this)
                     {
-
+                        int currentFrameIndex = (int)testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES);
                         //如果Frame的index沒有差過影片的最大index
-                        if (testVideoCapture.GetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_POS_FRAMES) < videoTotalFrame)
+                        if (currentFrameIndex < videoTotalFrame)
                         {
                             Image<Bgr, byte> currentFrame = QueryFrameAndShow();
-
+                            bool isZebra ;
                             //處理辨識===========================================================
-                            if (currentFrame != null)
+                            if (currentFrame != null  && ( (!isVideoZebra) || (isVideoZebra && (currentFrameIndex % 60 == 0)) ) )
                             {
+                               if((isVideoZebra && (currentFrameIndex % 5 == 0)))
+                                    isVideoZebra = false;
+
                                 candidateHoughLineEquations.Clear();
                                 Stopwatch watch = Stopwatch.StartNew(); 
                                 oriImg = ZebraCrossingDetector.ToCrop(currentFrame);
@@ -448,24 +461,38 @@ namespace MainSystem
                                 processingImg = ZebraCrossingDetector.PepperFilter(processingImg);
                                 candidateHoughLineEquations = ZebraCrossingDetector.DetectHoughLine(processingImg);
                                 candidateHoughLineEquations = ZebraCrossingDetector.RepairedLines(candidateHoughLineEquations, oriImg);
-                                linesHistogram = ZebraCrossingDetector.MainGroupLineFilter(candidateHoughLineEquations, ref mainDirectionLineGroupId);
+                                if (candidateHoughLineEquations.Count != 0)
+                                {
+                                    linesHistogram = ZebraCrossingDetector.MainGroupLineFilter(candidateHoughLineEquations, ref mainDirectionLineGroupId);
 
-                                Image<Bgr, byte> stasticDst = new Image<Bgr, byte>(640, 480, new Bgr(System.Drawing.Color.White));
-                                Image<Bgr, byte> drawScanLineImg = oriImg.Clone();
-                                bool isZebra = ZebraCrossingDetector.AnalyzeZebraCrossingTexture(mainDirectionLineGroupId, linesHistogram, processingImg, oriImg, stasticDst, drawScanLineImg);
-
+                                    Image<Bgr, byte> stasticDst = new Image<Bgr, byte>(640, 480, new Bgr(System.Drawing.Color.White));
+                                    Image<Bgr, byte> drawScanLineImg = oriImg.Clone();
+                                    isZebra = ZebraCrossingDetector.AnalyzeZebraCrossingTexture(mainDirectionLineGroupId, linesHistogram, processingImg, oriImg, stasticDst, drawScanLineImg);
+                                }
+                                else
+                                   isZebra = false;
                                 watch.Stop();
                                 Console.WriteLine("Crossing Analytics time = " + watch.ElapsedMilliseconds);
 
-                                if (isZebra)
+                                if (isVideoZebra != isZebra && isZebra)
+                                {
                                     Console.WriteLine("前方有斑馬線");
-                                //System.Windows.MessageBox.Show("前方有斑馬線");
+                                    //voice.Speak("前方有斑馬線", SpeechVoiceSpeakFlags.SVSFlagsAsync);
+                                    isVideoZebra = true;
+                                    showIsCrossingTextBlock.Text = "前方有斑馬線";
+                                    count++;
+                                }
+                                else {
+                                    showIsCrossingTextBlock.Text = "";
+                                }
                             }
 
 
                         }
                         else
                         {
+                            Console.WriteLine("偵測次數" + count);
+                            count = 0;
                             ResetVideo();
                         }
                     }

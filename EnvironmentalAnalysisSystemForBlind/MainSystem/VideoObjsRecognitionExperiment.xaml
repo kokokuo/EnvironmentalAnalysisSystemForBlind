@@ -7,21 +7,24 @@
              mc:Ignorable="d" 
              d:DesignHeight="760" d:DesignWidth="1200">
     <Grid Background="White">
+ 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+
         <Grid Grid.Column="1">
             <Button Content="載入影片" HorizontalAlignment="Left" Margin="28,36,0,0" VerticalAlignment="Top" Width="75" Name="loadTestVideoButton" Click="loadTestVideoButton_Click"/>
-            <WindowsFormsHost Width="320" Height="240" Margin="28,72,52,448" >
+            <WindowsFormsHost Width="320" Height="240" Margin="28,83,852,437" >
                 <emui:ImageBox x:Name="videoFrameBox"/>
             </WindowsFormsHost>
-            <ScrollBar HorizontalAlignment="Left" Margin="28,328,0,0" VerticalAlignment="Top" Width="320" Height="22"  Minimum="1" Maximum="100" Name="videoTrackBar" Orientation="Horizontal" Scroll="videoTrackBar_Scroll"/>
-            <Button Content="撥放" HorizontalAlignment="Left" Margin="28,388,0,0" VerticalAlignment="Top" Width="75" x:Name="playButton" Click="playButton_Click"/>
-            <Button Content="暫停" HorizontalAlignment="Left" Margin="142,388,0,0" VerticalAlignment="Top" Width="75" x:Name="suspendButton" Click="suspendButton_Click"/>
-            <Button Content="停止" HorizontalAlignment="Left" Margin="273,388,0,0" VerticalAlignment="Top" Width="75" x:Name="stopButton" Click="stopButton_Click"/>
+            <ScrollBar HorizontalAlignment="Left" Margin="28,643,0,0" VerticalAlignment="Top" Width="320" Height="22"  Minimum="1" Maximum="100" Name="videoTrackBar" Orientation="Horizontal" Scroll="videoTrackBar_Scroll"/>
+            <Button Content="撥放" HorizontalAlignment="Left" Margin="28,703,0,0" VerticalAlignment="Top" Width="75" x:Name="playButton" Click="playButton_Click"/>
+            <Button Content="暫停" HorizontalAlignment="Left" Margin="142,703,0,0" VerticalAlignment="Top" Width="75" x:Name="suspendButton" Click="suspendButton_Click"/>
+            <Button Content="停止" HorizontalAlignment="Left" Margin="273,703,0,0" VerticalAlignment="Top" Width="75" x:Name="stopButton" Click="stopButton_Click"/>
 
         </Grid>
+   
         <Border BorderBrush="Gray" BorderThickness="0,0,2,0">
             <Grid Grid.Column="0">
                 <Button Content="載入圖片" HorizontalAlignment="Left" Margin="28,36,0,0" VerticalAlignment="Top" Width="75" x:Name="loadTestImgButton" Click="loadTestImgButton_Click"/>
@@ -53,5 +56,6 @@
 
             </Grid>
         </Border>
+
     </Grid>
 </UserControl>

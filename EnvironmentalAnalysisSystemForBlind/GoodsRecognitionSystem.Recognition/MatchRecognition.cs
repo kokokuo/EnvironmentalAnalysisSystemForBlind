@@ -157,7 +157,7 @@ namespace RecognitionSys
             //observedImg = observedImg.Resize(3, INTER.CV_INTER_LINEAR);
 
           
-            Console.WriteLine("### One-by-One Mathed Start.....\n============================");
+            //Console.WriteLine("### One-by-One Mathed Start.....\n============================");
             if (obervedSurfData.GetDescriptors() != null)
             {
                 matchedData = SURFMatch.MatchSURFFeatureByFLANNForObjs(templateSURFData, obervedSurfData);
