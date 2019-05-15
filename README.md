@@ -7,6 +7,15 @@ With the evolution of society, Socially vulnerable groups getting attention grad
 
 And although there are many assistive devices can assist visually impaired people to live, but there are still many problems can not be solved, such as the use of guide cane can not sense obstacles upper body when walking or unable to understand the environment and other problems, resulting in danger.
 
+<p align="center">
+  <img src="../master/Img-SystemArchitecture.png?raw=true">
+</p>
+
+
+![RecognitionModule](../master/Img-RecognitionModule.png?raw=true)
+
+![LearningSubSystem](../master/Img-LearningSubSystem.png?raw=true)
+
 Therefore, the contribution of this paper is to propose an innovative Assistive technology devices conception, through a combination of hardware and software wearable device, design a vest for the visually impaired person can wear and combine with the system which can do image recognition technology to identify surrounding environments.
 
 This paper focuses on visually impaired people when walking issue. Design an environment recognition system and to detect intersection zebra, avoid straying into dangerous lane systems and billboards when they’re walking. For billboards system, through the color histogram filter object by color feature, and do object recognition by SURF feature; crossing detection system, looking straight through Hough Line, then repairing and filtering line, and analysis zebra crossing texture to judge finally.
