@@ -7,7 +7,9 @@ With the evolution of society, Socially vulnerable groups getting attention grad
 
 And although there are many assistive devices can assist visually impaired people to live, but there are still many problems can not be solved, such as the use of guide cane can not sense obstacles upper body when walking or unable to understand the environment and other problems, resulting in danger.
 
-<iframe src="https://www.slideshare.net/slideshow/embed_code/key/jApGLxeH9HebtD" width="427" height="356" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="https://www.slideshare.net/secret/jApGLxeH9HebtD" title="DLT 2015 - The Design of an Assistant System by Specific Environment Analysis For Visually Impaired" target="_blank">DLT 2015 - The Design of an Assistant System by Specific Environment Analysis For Visually Impaired</a> </strong> from <strong><a href="https://www.slideshare.net/YiChengKuo1" target="_blank">Eason Kuo</a></strong> </div>
+<p align="center">
+  <img src="../master/Img-SystemArchitecture.png?raw=true">
+</p>
 
 Therefore, the contribution of this paper is to propose an innovative Assistive technology devices conception, through a combination of hardware and software wearable device, design a vest for the visually impaired person can wear and combine with the system which can do image recognition technology to identify surrounding environments.
 
